@@ -34,8 +34,8 @@ static const unsigned char bad_maps[] = {
 	103, // Searchlight Seek! (very easy) // Note: Broken with switch kong
 	104, // Beaver Bother! (easy) // Note: Broken with switch kong
 	106, // Creepy Castle: Minecart
-	//107, // Kong Battle: Battle Arena  // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
-	//109, // Kong Battle: Arena 1  // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
+	//107, // Kong Battle: Battle Arena // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
+	//109, // Kong Battle: Arena 1 // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
 	110, // Frantic Factory: Barrel Blast
 	111, // Gloomy Galleon: Puftoss
 	115, // Kremling Kosh! (easy)
@@ -218,6 +218,14 @@ static const unsigned short speedrun_mode_temporary_flags[] = {
 	102, // Aztec: Beetle FT Long Intro
 };
 
+static const unsigned short kong_unlocked_flags[] = {
+	385, // Kong Unlocked: DK
+	6, // Kong Unlocked: Diddy
+	70, // Kong Unlocked: Lanky
+	66, // Kong Unlocked: Tiny
+	117, // Kong Unlocked: Chunky
+};
+
 static int inBadMapCache = 0;
 
 int inBadMap(void) {
@@ -240,9 +248,11 @@ int inBadMovementState(void) {
 
 void tagAnywhere(void) {
 	int _dest_character;
+	int tagDirection;
 
 	// Unlock Mystery Menu
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
+	*(unsigned short *)(0x807ED55C) = 0xFFFF;
 
 	// Map is loading
 	if (LZFadeoutProgress > 0) {
@@ -349,37 +359,55 @@ void tagAnywhere(void) {
 		return;
 	}
 
-  	if ((NewlyPressedControllerInput.Buttons & D_Right)) {
-		_dest_character = Character + 1;
-  	} else if ((NewlyPressedControllerInput.Buttons & D_Left)) {
-		_dest_character = Character - 1;
-  	} else {
+	if (NewlyPressedControllerInput.Buttons & D_Right || NewlyPressedControllerInput.Buttons & L_Button) {
+		tagDirection = 1;
+	} else if (NewlyPressedControllerInput.Buttons & D_Left) {
+		tagDirection = -1;
+	} else {
 		return;
 	}
 
-	if (_dest_character < 0) {
-		_dest_character = 4;
+	_dest_character = Character + tagDirection;
+	while (7) {
+		if (_dest_character < 0) {
+			_dest_character = 4;
+		}
+		if (_dest_character > 4) {
+			_dest_character = 0;
+		}
+		if (StorySkip) {
+			break;
+		}
+		if (_dest_character == 0) {
+			break;
+		}
+		if (checkFlag(kong_unlocked_flags[_dest_character], 0)) {
+			break;
+		}
+		_dest_character += tagDirection;
 	}
-  	if (_dest_character > 4) {
-    	_dest_character = 0;
-  	}
-  	if (Player) {
-    	if (((MovesBase[_dest_character].weapon_bitfield & 1) == 0) || (Player->was_gun_out == 0)) {
-      		Player->hand_state = 1;
-      		Player->was_gun_out = 0;
-      		if (_dest_character == 1) {
-        		Player->hand_state = 0;
-      		}
-    	} else {
-      		Player->hand_state = 2;
-      		Player->was_gun_out = 1;
-      		if (_dest_character == 1) {
-        		Player->hand_state = 3;
-      		}
-    	};
-    	Player->new_kong = (_dest_character + 2);
-    	if (SwapObject) {
-      		SwapObject->action_type = 0x3B;
-    	}
-  	}
+
+	if (_dest_character == Character) {
+		return;
+	}
+
+	if (Player) {
+		if (((MovesBase[_dest_character].weapon_bitfield & 1) == 0) || (Player->was_gun_out == 0)) {
+			Player->hand_state = 1;
+			Player->was_gun_out = 0;
+			if (_dest_character == 1) {
+				Player->hand_state = 0;
+			}
+		} else {
+			Player->hand_state = 2;
+			Player->was_gun_out = 1;
+			if (_dest_character == 1) {
+				Player->hand_state = 3;
+			}
+		};
+		Player->new_kong = (_dest_character + 2);
+		if (SwapObject) {
+			SwapObject->action_type = 0x3B;
+		}
+	}
 }
