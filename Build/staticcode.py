@@ -1,7 +1,5 @@
-import subprocess
 import os
 import shutil
-import gzip
 from compressFile import compressGZipFile
 
 StaticCodeFile = "StaticCode_Copy.bin"

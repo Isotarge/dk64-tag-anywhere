@@ -1,10 +1,6 @@
-import subprocess
 import os
 import shutil
-import binascii
 import gzip
-import sys
-from compressFile import compressGZipFile
 
 file_dict = {
 	"files": [
