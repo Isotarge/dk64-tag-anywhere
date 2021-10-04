@@ -54,7 +54,6 @@
 .definelabel FrameLag, 0x8076AF10
 .definelabel FrameReal, 0x80767CC4
 .definelabel RNG, 0x80746A40 // u32
-.definelabel BetaNinRWSkip, 0x80755324 // u8
 .definelabel LogosDestMap, 0x807132BF // u8
 .definelabel LogosDestMode, 0x807132CB // u8
 .definelabel Gamemode, 0x80755314 // u8
@@ -129,9 +128,6 @@
 .definelabel ISGTimer, 0x807FFFE0 // u32
 .definelabel StoredLag, 0x807FFFDC // u16
 .definelabel DisableTagAnywhere, 0x807FFFD9 // u8
-.definelabel InputDisplayOpen, 0x807FFFD8 // u8
-.definelabel InputDisplayQuadrant, 0x807FFFD7 // u8
-.definelabel InputSpritesSpawned, 0x807FFFD6 // u8
 .definelabel TransformAutoRestockOff, 0x807FFFD5 // u8
 .definelabel AutoPhaseStateOn, 0x807FFDF8 // u8
 .definelabel GiantKoshaTimerAddress, 0x807FFDF4 // u32

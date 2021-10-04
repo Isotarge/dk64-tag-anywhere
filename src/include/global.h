@@ -1,9 +1,6 @@
 #include "vars.h"
 
-extern void spawnMenu(int screenIndex);
-extern void changeMenu(int newScreenIndex);
 extern void moveSlot(void);
-extern void initWarpMenu(void);
 extern void playSFX(short sfxIndex);
 extern void setPermFlag(short flagIndex);
 extern void openStateMenu(void);
@@ -15,67 +12,16 @@ extern void handleMapWarping(int map, int levelIndex);
 extern int convertIDToIndex(short obj_index);
 extern void* findActorWithType(int search_actor_type);
 
-extern void destroyWatch(int slot);
-extern void spawnWatch(int slot);
-extern void colorWatch(char _red, char _green, char _blue, int slot);
-extern void openWatchSnagMenu(void);
-
-extern void warpToMap(void);
-extern void openJapesMenu(void);
-extern void openAztecMenu(void);
-extern void openFactoryMenu(void);
-extern void openGalleonMenu(void);
-extern void openFungiMenu(void);
-extern void openCavesMenu(void);
-extern void openCastleMenu(void);
-extern void openHelmRoolMenu(void);
-extern void openIslesMenu(void);
-extern void openOtherMapsMenu(void);
-
-extern void openFlagsMainMenu(void);
-extern void openFlagsKongMenu(void);
-extern void openFlagsKeysinMenu(void);
-extern void openFlagsKeyshaveMenu(void);
-extern void openFlagsLevelintrosMenu(void);
-extern void openFlagsLeveltnsMenu(void);
-extern void openFlagsLevelbossMenu(void);
-extern void openFlagsCutsceneMenu(void);
-extern void openFlagsModifierMenu(void);
-extern void openFlagsFTTMenu(void);
-extern void openFlagsMiscMenu(void);
-extern void openFlagsCustomMenu(void);
-extern void openFlagsTBarrelMenu(void);
-
 extern void openCheatsMenu(void);
 extern void alterSkewAngle(void);
 extern void cancelCutscene(void);
 extern void gainControl(void);
 extern void corruptGame(void);
 extern void endMinigame(void);
-extern void openGamemodeMenu(void);
-extern void openTransformMenu(void);
-extern void openMovesetInventoryMenu(void);
-extern void openCrankyMenu(void);
-extern void openFunkyMenu(void);
-extern void openCandyMenu(void);
-extern void openTogglesMenu(void);
 extern void toggleSandstorm(void);
 extern void toggleSpawnPrevention(void);
 extern void toggleTBVoid(void);
 extern void openSnagMenu(void);
-extern void killBoss(void);
-extern void toggleVisify(void);
-
-extern void openSettingsMainMenu(void);
-extern void openKongColorsMenu(void);
-extern void openInputQuadrantMenu(void);
-extern void openDPadLRMenu(void);
-extern void openDPadDMenu(void);
-extern void openVanillaVarsMenu(void);
-extern void openHackVarsMenu(void);
-
-extern void openActorMenu(void);
-extern void openDebugMenu(void);
 
 extern void openWatchMenu(void);
 extern void endClose(void);
