@@ -1,4 +1,4 @@
-//functions
+// Functions
 extern void setFlag(int flagIndex, int value, char flagType);
 extern int checkFlag(int flagIndex, char flagType);
 extern void* dk_malloc(int size);
@@ -43,7 +43,7 @@ extern void copyFromROM(int rom_start, void* write_Location, void* file_size_loc
 extern int getActorSpawnerID(void* actor);
 extern void textOverlayCode(void);
 
-//vanilla data
+// Vanilla data
 extern float TransitionSpeed;
 extern char CutsceneWillPlay;
 extern char KRoolRound;
@@ -129,35 +129,18 @@ extern int* bbbandit_array[4];
 extern char StoredDamage;
 extern void* ActorSpawnerPointer;
 
-//hack data
-extern int TestVariable;
-extern savedSettings StoredSettings;
-
-extern TextOverlay* ActiveTools_Error;
-extern TextOverlay* ActiveToolsMenu[];
-extern char WatchIndex[4];
-extern char SniperOn;
+// Hack data
 extern char SlamLevel;
 extern float AverageLag;
 extern int ISGTimer;
 extern char LagDocumentationIndex;
 extern short StoredLag;
-extern TimerInfo TimerData;
-extern char StoredRound;
-extern char DisablePositionButtons;
 extern char DisableTagAnywhere;
 extern int FrameAdvanceStart;
-extern char DisableStartupSkip;
-extern char DisableForcedStorySkip;
-extern int* SandstormAddress;
 extern char AutoPhaseStateOn;
 extern GiantKoshaData* GiantKoshaTimerAddress;
 extern short GiantKoshaTimerValue;
-extern char MenuShortcutButtonsOff;
-extern char FrameAdvancing;
 extern char ArtificialPauseOn;
-extern char InfiniteHealthCheatOn;
-extern char LToLevitateOn;
 extern ActiveMenuData ActiveMenu;
 extern int NewMenu_ErrorStart;
 extern char FocusedSavestate;
@@ -189,7 +172,6 @@ extern int* graphicalOverlaySpace[32][3];
 extern char Precision;
 extern char LoadedHooks;
 extern char PreviousLagArray[16];
-extern char RAMDisplayOpen;
 extern char LoadVarsOnMapLoad;
 extern char ShowSavePrompts;
 extern unsigned char SavePromptTimer;

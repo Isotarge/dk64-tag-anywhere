@@ -122,28 +122,19 @@
 
 //hack data
 .definelabel ViewedSnagWatches, 0x807FFF18 // u8 array (size = 4)
-.definelabel ActiveTools_Error, 0x807FFF1C // 0x4
-.definelabel ActiveToolsMenu, 0x807FFF20 // 0x60
-.definelabel StoredSettings, 0x807ED5A0 // Follows savedSettings struct
 
-.definelabel TimerData, 0x807FFE90 // 0x14 bytes
-
-.definelabel RAMDisplayOpen, 0x807FFFF4 // u8
 .definelabel LoadVarsOnMapLoad, 0x807FFFF3 // u8 - For savestates
 .definelabel ShowSavePrompts, 0x807FFFF2 // u8
 .definelabel SavePromptTimer, 0x807FFFF1 // u8
 .definelabel SavePromptIsSaving, 0x807FFFF0 // u8
 .definelabel LoadedHooks, 0x807FFFEF // u8
 .definelabel Precision, 0x807FFFEE // u8
-.definelabel SniperOn, 0x807FFFED // u8
 .definelabel SlamLevel, 0x807FFFEC // u8
 .definelabel AverageLag, 0x807FFFE8 // f32
 .definelabel SavePromptActor, 0x807FFFE4 // u32
 .definelabel ISGTimer, 0x807FFFE0 // u32
 .definelabel LagDocumentationIndex, 0x807FFFDE // u8
 .definelabel StoredLag, 0x807FFFDC // u16
-.definelabel StoredRound, 0x807FFFDB // u8
-.definelabel DisablePositionButtons, 0x807FFFDA // u8
 .definelabel DisableTagAnywhere, 0x807FFFD9 // u8
 .definelabel InputDisplayOpen, 0x807FFFD8 // u8
 .definelabel InputDisplayQuadrant, 0x807FFFD7 // u8
@@ -154,19 +145,12 @@
 .definelabel InputStickMax, 0x807FFFD2 // u8
 .definelabel ActorNamesTable, 0x807FFFCC // u32 ptr
 .definelabel FrameAdvanceStart, 0x807FFFC8 // u32
-.definelabel DisableStartupSkip, 0x807FFFC7 // u8
-.definelabel DisableForcedStorySkip, 0x807FFFC6 // u8
 .definelabel SnagNamesTable, 0x807FFFC0 // u32 ptr
-.definelabel SandstormAddress, 0x807FFDFC // u32
 .definelabel AutoPhaseStateOn, 0x807FFDF8 // u8
 .definelabel GiantKoshaTimerAddress, 0x807FFDF4 // u32
 .definelabel GiantKoshaTimerValue, 0x807FFDF2 // u16
 .definelabel FocusedActorViewPointer, 0x807FFDE8 // u32
-.definelabel MenuShortcutButtonsOff, 0x807FFDDB // u8
-.definelabel FrameAdvancing, 0x807FFDDA // u8
 .definelabel ArtificialPauseOn, 0x807FFDD9 // u8
-.definelabel InfiniteHealthCheatOn, 0x807FFDD8 // u8
-.definelabel LToLevitateOn, 0x807FFDD7 // u8
 .definelabel ActiveMenu, 0x807FFDC4 // 0x3
 .definelabel NewMenu_ErrorStart, 0x807FFDC0 // u32
 .definelabel FocusedSavestate, 0x807FFDBF // u8

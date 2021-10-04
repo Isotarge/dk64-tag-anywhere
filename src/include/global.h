@@ -118,7 +118,6 @@ extern void forceStorySkip(void);
 extern void setKRoolRound(void);
 extern void handleAutophase(void);
 extern void handleAutomoonkick(void);
-extern void getSandstormAddress(void);
 extern void handleSpawnPrevention(void);
 extern void handleLToTBV(void);
 extern void infiniteHealth(void);
