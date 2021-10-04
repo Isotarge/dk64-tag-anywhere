@@ -137,9 +137,7 @@
 .definelabel EnemySpawnOff, 0x807FFDBD // u8
 
 .definelabel PhaseChecker, 0x807FFDB7 // 0x1
-.definelabel CustomFlag, 0x807FFF80 // follows customflagdata struct
 
-.definelabel ISGStage, 0x807FFF85 // u8
 .definelabel PreviousFrameButtons, 0x807FFF88 // u16
 .definelabel UndoFlag, 0x807FFF8A // u16
 .definelabel LastLoadStateAction, 0x807FFF8F // u8

@@ -213,10 +213,6 @@ typedef struct AutowalkData {
 	/* 0x016 */ short zPos;
 } AutowalkData;
 
-typedef struct PhaseCheckerData {
-	/* 0x000 */ char previousMagnitude;
-} PhaseCheckerData;
-
 typedef struct RGB {
 	/* 0x000 */ unsigned char red;
 	/* 0x001 */ unsigned char green;
@@ -297,13 +293,6 @@ typedef struct flagMenuData {
 	/* 0x00C */ char screenIndex;
 	/* 0x00D */ char flagCount;
 } flagMenuData;
-
-typedef struct customFlagData {
-	/* 0x000 */ short byte;
-	/* 0x002 */ char bit;
-	/* 0x003 */ char type;
-	/* 0x004 */ char set;
-} customFlagData;
 
 typedef struct cutsceneInfo {
 	/* 0x000 */ char csdata[0xC];
@@ -445,10 +434,6 @@ typedef struct loadedActorArr {
 	/* 0x004 */ int unk_04;
 } loadedActorArr;
 
-typedef struct actorNames {
-	/* 0x000 */ char actor_name[344][0x10];
-} actorNames;
-
 typedef struct actorSpawnerData {
 	/* 0x000 */ char unk_00[4];
 	/* 0x004 */ floatPos positions;
@@ -460,21 +445,3 @@ typedef struct actorSpawnerData {
 	/* 0x064 */ void* previous_spawner;
 	/* 0x068 */ void* next_spawner;
 } actorSpawnerData;
-
-typedef union snagTableInfo {
-    int data;
-    struct {
-        /* 0x000 */ short map;
-        /* 0x002 */ short om2_id;
-    };
-} snagTableInfo;
-
-typedef union encodedSnagState {
-	unsigned int data;
-	struct {
-		/* 0x000 */ char state;
-		/* 0x001 */ char check;
-		/* 0x002 */ char reset;
-		/* 0x003 */ char spawned;
-	};
-} encodedSnagState;
