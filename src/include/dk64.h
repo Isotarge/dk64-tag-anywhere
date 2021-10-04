@@ -121,4 +121,3 @@ extern char StoredDamage;
 extern void* ActorSpawnerPointer;
 
 // Hack data
-extern char DisableTagAnywhere;

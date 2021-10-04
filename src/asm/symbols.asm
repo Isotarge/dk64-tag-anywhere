@@ -120,4 +120,3 @@
 .definelabel ActorSpawnerPointer, 0x807FC400 // u32 ptr
 
 // Hack data
-.definelabel DisableTagAnywhere, 0x807FFFD9 // u8

@@ -16,51 +16,32 @@
 #define C_Left 0x0002
 #define C_Right 0x0001
 
-// Colors
-#define SelectedRGB 0xFFD700 // CSS Gold
-#define ReturnRGB 0xFF4500 // CSS OrangeRed
-#define KoshaRGB_Frozen 0x008B8B // CSS DarkCyan
-#define KoshaRGB_CancelRange 0xFFD700 // CSS Gold
-#define KoshaRGB_Music 0xD2691E // CSS Chocolate
-#define KoshaRGB_Tantrum 0x8B0000 // CSS DarkRed
-#define ISGRGB_FadeoutPending 0xFF4500 // CSS OrangeRed
-#define ISGRGB_Fading 0xFF0000 // CSS Red
-#define AngleRGB_PhaseState 0xFF4500 // CSS OrangeRed
-#define HeldObject_ObjectExists 0xFF4500 // CSS OrangeRed
-
 // SFX Index
-#define Banana 0x2A0
-#define Okay 0x23C
-#define UhOh 0x150
-#define Bell 0x1F
-#define KLumsy 0x31C
-#define Wrong 0x98
-#define Potion 0x214
-#define AmmoPickup 0x157
-#define Coin 0x1D1
-#define BeepHigh 116
-#define BeepLow 117
-#define FeedMe 601
-#define Bounce 458
-#define TimerTock 143
-#define ChunkyFallTooFar 197
-#define Fire 234
-#define MatchingSound 171
-#define CameraPull 441
-#define Quack 170
-#define TagWarp 612
-#define TakeWarp 230
-#define Splat 22
-#define Burp 530
+#define SFX_Banana 0x2A0
+#define SFX_Okay 0x23C
+#define SFX_UhOh 0x150
+#define SFX_Bell 0x1F
+#define SFX_KLumsy 0x31C
+#define SFX_Wrong 0x98
+#define SFX_Potion 0x214
+#define SFX_AmmoPickup 0x157
+#define SFX_Coin 0x1D1
+#define SFX_BeepHigh 116
+#define SFX_BeepLow 117
+#define SFX_FeedMe 601
+#define SFX_Bounce 458
+#define SFX_TimerTock 143
+#define SFX_ChunkyFallTooFar 197
+#define SFX_Fire 234
+#define SFX_MatchingSound 171
+#define SFX_CameraPull 441
+#define SFX_Quack 170
+#define SFX_TagWarp 612
+#define SFX_TakeWarp 230
+#define SFX_Splat 22
+#define SFX_Burp 530
 
 // Other
 #define MysteryWriteOffset 0x29C
 #define CurrentCharacter 0x36C
 #define MovesBaseSize 0x1D8
-#define MaxMenuItems 20 // 32 (practice rom cap) - 8 (normal cap) - 4 (watch)
-#define ErrorLength 180
-#define WarpScreens 29
-#define WatchCount 4
-#define FileStatesROMStart 0x2002000
-#define FileStateSize 0x340
-#define flagMenuScreenCount 11
