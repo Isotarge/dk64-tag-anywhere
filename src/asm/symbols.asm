@@ -45,6 +45,7 @@
 .definelabel CurrentMap, 0x8076A0A8
 .definelabel DestMap, 0x807444E4
 .definelabel DestExit, 0x807444E8
+.definelabel ParentMap, 0x8076A172 // u16
 .definelabel StorySkip, 0x8074452C
 .definelabel HelmTimerShown, 0x80755350 // u8
 .definelabel TempFlagBlock, 0x807FDD90
@@ -62,6 +63,7 @@
 .definelabel ObjectModel2Count, 0x807F6004
 .definelabel ObjectModel2Count_Dupe, 0x80747D70
 .definelabel CutsceneIndex, 0x807476F4
+.definelabel CutsceneTimer, 0x807476F0 // u16
 .definelabel CutsceneActive, 0x807444EC
 .definelabel CutsceneTypePointer, 0x807476FC
 .definelabel PreviousCameraState, 0x807F5CF0
@@ -79,6 +81,7 @@
 .definelabel LoadedActorCount, 0x807FBB35
 .definelabel LoadedActorArray, 0x807FB930
 .definelabel SpawnerMasterData, 0x807FDC88
+.definelabel ActorSpawnerArrayPointer, 0x807FDC8C
 .definelabel MenuSkyTopRGB, 0x80754F4C
 .definelabel MenuSkyRGB, 0x80754F4F
 .definelabel ActorArray, 0x807FBFF0

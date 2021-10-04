@@ -227,6 +227,7 @@ static const unsigned short kong_unlocked_flags[] = {
 };
 
 static int inBadMapCache = 0;
+static unsigned short parentMapCache = 0;
 
 int inBadMap(void) {
 	for (int i = 0; i < sizeof(bad_maps); i++) {
@@ -249,6 +250,7 @@ int inBadMovementState(void) {
 void tagAnywhere(void) {
 	int _dest_character;
 	int tagDirection;
+	int* Snide;
 
 	// Unlock Mystery Menu
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
@@ -301,6 +303,33 @@ void tagAnywhere(void) {
 		*(char *)(0x8071455B) = 0;
 
 		// TODO: Snide's cutscene compression
+		if (CurrentMap == 15) {
+			// The cutscene the game chooses is based on the parent map (the method used to detect which Snide's H.Q. you're in)
+			// The shortest contraption cutscene is chosen with parent map 0
+			// So we swap out the original parent map with 0 at the right moment to get short cutscenes
+			// Then swap the original value back in at the right moment so that the player isn't taken back to test map when exiting Snide's H.Q.
+			if (CutsceneIndex == 5) {
+				if (CutsceneTimer == 199) {
+					// Make a backup copy of the current parent map to restore later
+					parentMapCache = ParentMap;
+				} else if (CutsceneTimer == 200) {
+					ParentMap = 0;
+				}
+			} else if (CutsceneIndex == 2) {
+				// Restore the backup copy of the parent map
+				ParentMap = parentMapCache;
+			}
+
+			// Snide Turn In Compression
+			Snide = findActorWithType(184);
+			if (Snide) {
+				// Read the turn count (Snide + 0x232)
+				if (Snide[0x8C] != 0) {
+					Snide[0x8C] = 1;
+				}
+			}
+		}
+
 		// TODO: K. Lumsy cutscene compression
 	} else {
 		// Start the player in Training Grounds
