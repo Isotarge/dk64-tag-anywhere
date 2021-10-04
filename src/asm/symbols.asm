@@ -121,35 +121,21 @@
 .definelabel ActorSpawnerPointer, 0x807FC400 // u32 ptr
 
 //hack data
-.definelabel ViewedSnagWatches, 0x807FFF18 // u8 array (size = 4)
-
-.definelabel LoadVarsOnMapLoad, 0x807FFFF3 // u8 - For savestates
-.definelabel ShowSavePrompts, 0x807FFFF2 // u8
 .definelabel SavePromptTimer, 0x807FFFF1 // u8
 .definelabel SavePromptIsSaving, 0x807FFFF0 // u8
 .definelabel LoadedHooks, 0x807FFFEF // u8
 .definelabel Precision, 0x807FFFEE // u8
-.definelabel SlamLevel, 0x807FFFEC // u8
-.definelabel AverageLag, 0x807FFFE8 // f32
 .definelabel SavePromptActor, 0x807FFFE4 // u32
 .definelabel ISGTimer, 0x807FFFE0 // u32
-.definelabel LagDocumentationIndex, 0x807FFFDE // u8
 .definelabel StoredLag, 0x807FFFDC // u16
 .definelabel DisableTagAnywhere, 0x807FFFD9 // u8
 .definelabel InputDisplayOpen, 0x807FFFD8 // u8
 .definelabel InputDisplayQuadrant, 0x807FFFD7 // u8
 .definelabel InputSpritesSpawned, 0x807FFFD6 // u8
 .definelabel TransformAutoRestockOff, 0x807FFFD5 // u8
-.definelabel KRoolRoundSetting, 0x807FFFD4 // u8
-.definelabel FileInitQOLOff, 0x807FFFD3 // u8
-.definelabel InputStickMax, 0x807FFFD2 // u8
-.definelabel ActorNamesTable, 0x807FFFCC // u32 ptr
-.definelabel FrameAdvanceStart, 0x807FFFC8 // u32
-.definelabel SnagNamesTable, 0x807FFFC0 // u32 ptr
 .definelabel AutoPhaseStateOn, 0x807FFDF8 // u8
 .definelabel GiantKoshaTimerAddress, 0x807FFDF4 // u32
 .definelabel GiantKoshaTimerValue, 0x807FFDF2 // u16
-.definelabel FocusedActorViewPointer, 0x807FFDE8 // u32
 .definelabel ArtificialPauseOn, 0x807FFDD9 // u8
 .definelabel ActiveMenu, 0x807FFDC4 // 0x3
 .definelabel EnemySpawnOff, 0x807FFDBD // u8
@@ -163,7 +149,6 @@
 .definelabel LastLoadStateAction, 0x807FFF8F // u8
 .definelabel PauseMenuMusicSetting, 0x807FFF90 // u8
 .definelabel ClosingMenu, 0x807FFF91 // u8
-.definelabel HasNeutralStickInput, 0x807FFF92 // u8
 .definelabel IsSuperspeedOn, 0x807FFF94 // u8
 .definelabel TempTimestampStorageMajor, 0x807FFF98 // u32
 .definelabel TempTimestampStorageMinor, 0x807FFF9C // u32
@@ -175,4 +160,3 @@
 
 .definelabel graphicalOverlaySpace, 0x807FFA00 // 0x180
 .definelabel WatchActor, 0x807FFB80 // u32 x 4
-.definelabel WatchTextSpace, 0x807FFB90 // 0x30 x 4
