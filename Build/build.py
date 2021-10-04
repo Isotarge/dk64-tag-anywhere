@@ -38,7 +38,7 @@ import modules
 newROMName = "dk64-tag-anywhere.z64"
 if os.path.exists(newROMName):
     os.remove(newROMName)
-shutil.copyfile(ROMName, newROMName);
+shutil.copyfile(ROMName, newROMName)
 
 with open(newROMName, "r+b") as fh:
 	print("[2 / 2] - Writing modified compressed files to ROM")
@@ -72,7 +72,7 @@ with open(newROMName, "r+b") as fh:
     fh.write(bytearray([0, 0, 0, 0]))
 
 if os.path.exists("dk64-tag-anywhere.z64"):
-	shutil.copyfile("dk64-tag-anywhere.z64", "./../src/rom/dk64-tag-anywhere-python.z64");
+	shutil.copyfile("dk64-tag-anywhere.z64", "./../src/rom/dk64-tag-anywhere-python.z64")
 	os.remove("dk64-tag-anywhere.z64")
 
 exit()

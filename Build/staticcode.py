@@ -7,7 +7,7 @@ StaticCodeFile = "StaticCode_Copy.bin"
 if os.path.exists(StaticCodeFile):
   os.remove(StaticCodeFile)
 
-shutil.copyfile("StaticCode.bin", StaticCodeFile);
+shutil.copyfile("StaticCode.bin", StaticCodeFile)
 
 with open(StaticCodeFile, "r+b") as fh:
 	# RDRAM Address - 0x5FB300 = ROM address
@@ -20,4 +20,4 @@ with open(StaticCodeFile, "r+b") as fh:
 	fh.seek(0x11925B)
 	fh.write(bytearray([0x0])) # File Start Exit
 
-compressGZipFile("StaticCode_Copy.bin","StaticCode_Copy.bin.gz",False)
+compressGZipFile("StaticCode_Copy.bin", "StaticCode_Copy.bin.gz", False)

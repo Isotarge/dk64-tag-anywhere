@@ -122,7 +122,6 @@
 //hack data
 .definelabel SavePromptIsSaving, 0x807FFFF0 // u8
 .definelabel Precision, 0x807FFFEE // u8
-.definelabel StoredLag, 0x807FFFDC // u16
 .definelabel DisableTagAnywhere, 0x807FFFD9 // u8
 .definelabel GiantKoshaTimerAddress, 0x807FFDF4 // u32
 .definelabel ArtificialPauseOn, 0x807FFDD9 // u8
