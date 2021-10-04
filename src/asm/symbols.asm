@@ -152,27 +152,19 @@
 .definelabel FocusedActorViewPointer, 0x807FFDE8 // u32
 .definelabel ArtificialPauseOn, 0x807FFDD9 // u8
 .definelabel ActiveMenu, 0x807FFDC4 // 0x3
-.definelabel NewMenu_ErrorStart, 0x807FFDC0 // u32
-.definelabel FocusedSavestate, 0x807FFDBF // u8
-.definelabel AutoMoonkickOn, 0x807FFDBE // u8
 .definelabel EnemySpawnOff, 0x807FFDBD // u8
 
 .definelabel PhaseChecker, 0x807FFDB7 // 0x1
 .definelabel CustomFlag, 0x807FFF80 // follows customflagdata struct
 
 .definelabel ISGStage, 0x807FFF85 // u8
-.definelabel IsPauseMenuOpen, 0x807FFF86 // u8
 .definelabel PreviousFrameButtons, 0x807FFF88 // u16
 .definelabel UndoFlag, 0x807FFF8A // u16
 .definelabel LastLoadStateAction, 0x807FFF8F // u8
 .definelabel PauseMenuMusicSetting, 0x807FFF90 // u8
 .definelabel ClosingMenu, 0x807FFF91 // u8
 .definelabel HasNeutralStickInput, 0x807FFF92 // u8
-.definelabel TouchingGB, 0x807FFF93 // u8
 .definelabel IsSuperspeedOn, 0x807FFF94 // u8
-.definelabel LToCancelCSOn, 0x807FFF95 // u8
-.definelabel LToToggleTBOn, 0x807FFF96 // u8
-.definelabel LToEndGameOn, 0x807FFF97 // u8
 .definelabel TempTimestampStorageMajor, 0x807FFF98 // u32
 .definelabel TempTimestampStorageMinor, 0x807FFF9C // u32
 .definelabel HackTitle, 0x807FFFA0 // u32
