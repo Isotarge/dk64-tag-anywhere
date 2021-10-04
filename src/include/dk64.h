@@ -120,5 +120,6 @@ extern int* bbbandit_array[4];
 extern char StoredDamage;
 extern void* ActorSpawnerPointer;
 extern float LZFadeoutProgress;
+extern HUDDisplay* HUD;
 
 // Hack data

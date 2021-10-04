@@ -275,6 +275,8 @@ void tagAnywhere(void) {
 				MovesBase[i].weapon_bitfield = 7;
 				MovesBase[i].instrument_bitfield = 15;
 			}
+
+			// TODO: Start the player in DK Isles instead of training grounds
 		} else {
 			// Don't skip GB dances
 			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Cancel Movement Write
@@ -299,6 +301,41 @@ void tagAnywhere(void) {
 	}
 	if (inBadMapCache) {
 		return;
+	}
+	// Don't allow tagging when HUD is open
+	if (HUD) {
+		// Coloured Banana
+		if (HUD[0].hud_state) {
+			return;
+		}
+		// Banana Coin
+		if (HUD[1].hud_state) {
+			return;
+		}
+		// Crystal Coconut
+		if (HUD[5].hud_state) {
+			return;
+		}
+		// GB Count (Character) // Note: We can't add the bottom counter because it's always shown in lobbies
+		if (HUD[8].hud_state) {
+			return;
+		}
+		// Banana Medal
+		if (HUD[10].hud_state) {
+			return;
+		}
+		// Blueprint
+		if (HUD[12].hud_state) {
+			return;
+		}
+		// Coloured Banana?
+		if (HUD[13].hud_state) {
+			return;
+		}
+		// Banana Coin?
+		if (HUD[14].hud_state) {
+			return;
+		}
 	}
 	if (inBadMovementState()) {
 		return;

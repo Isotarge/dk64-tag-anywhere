@@ -439,3 +439,27 @@ typedef struct actorSpawnerData {
 	/* 0x064 */ void* previous_spawner;
 	/* 0x068 */ void* next_spawner;
 } actorSpawnerData;
+
+/*
+// TODO: This needs to be a char, not an int
+enum HUDState {
+	Invisible,
+	Appearing,
+	Visible,
+	Disappearing,
+};
+*/
+
+typedef struct HUDDisplay {
+	/* 0x000 */ void* actual_count_pointer;
+	/* 0x004 */	short hud_count;
+	/* 0x006 */	char freeze_timer;
+	/* 0x007 */	char counter_timer;
+	/* 0x008 */	unsigned int screen_x;
+	/* 0x00C */	unsigned int screen_y;
+	/* 0x010 */ char unk_10[0x20-0x10];
+	/* 0x020 */ unsigned int hud_state;
+	/* 0x024 */ int unk_24;
+	/* 0x028 */	void* counter_pointer;
+	/* 0x02C */ int unk_2c;
+} HUDDisplay;
