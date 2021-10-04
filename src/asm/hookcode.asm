@@ -53,7 +53,6 @@ START_HOOK:
 			NOP
 
 	kongCode:
-		//JAL 	handleAutophase
 		NOP
 		LW 		ra, -0x4C (sp)
 		J 		0x806F3758

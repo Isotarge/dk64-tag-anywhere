@@ -131,34 +131,6 @@ typedef struct TextOverlay {
 	/* 0x178 */ char* string;
 } TextOverlay;
 
-typedef struct Savestate {
-	/* 0x000 */ char InventoryBase[0xC];
-	/* 0x00C */ unsigned short facing_angle;
-	/* 0x00E */ char HelmTimerOn;
-	/* 0x00F */ char ISGOn;
-	/* 0x010 */ float xPos;
-	/* 0x014 */ float yPos;
-	/* 0x018 */ float zPos;
-	/* 0x01C */ unsigned char Map;
-	/* 0x01D */ unsigned char Exit;
-	/* 0x01E */ char Character;
-	/* 0x01F */ char HasData;
-	/* 0x020 */ char TempFlagBlock[0x10];
-	/* 0x030 */ char KongBase[0x1E0];
-	/* 0x210 */ char PermanentFlagBlock[0x13C];
-	/* 0x34C */ short HelmStart;
-	/* 0x34E */ char ISGPrevFade;
-	/* 0x34F */ unsigned char camera_angle;
-	/* 0x350 */ int HelmTimerDifferenceMajor;
-	/* 0x354 */ int HelmTimerDifferenceMinor;
-	/* 0x358 */ int ISGTimerDifferenceMajor;
-	/* 0x35C */ int ISGTimerDifferenceMinor;
-	/* 0x360 */ short skew_angle;
-	/* 0x362 */ char unused_362[0x2];
-	/* 0x364 */ int createdTime;
-	/* 0x365 */ char stored_damage;
-} Savestate;
-
 typedef struct Screen {
 	/* 0x000 */ int* TextArray;
 	/* 0x004 */ const int* FunctionArray;
@@ -318,24 +290,6 @@ typedef struct WarpInfo {
 	/* 0x009 */ char spawn_at_origin;
 } WarpInfo;
 
-typedef struct savedSettings {
-	/* 0x000 */ char hasSavedData;
-	/* 0x001 */ char kongColors[5];
-	/* 0x006 */ char quickStartup;
-	/* 0x007 */ char forcedStorySkip;
-	/* 0x008 */ char pauseVolume;
-	/* 0x009 */ char navigateMenuMode;
-	/* 0x00A */ char DPadLRFunction;
-	/* 0x00B */ char DPadDFunction;
-	/* 0x00C */ char displaySavePrompt;
-	/* 0x00D */ char precision;
-	/* 0x00E */ char input_quadrant;
-	/* 0x00F */ char transform_autostock;
-	/* 0x010 */ char krool_round_setting;
-	/* 0x011 */ char file_init_qol;
-	/* 0x012 */ char input_max;
-} savedSettings;
-
 typedef struct flagMenuData {
 	/* 0x000 */ const short* flagArray;
 	/* 0x004 */ const char* flagTypeArray;
@@ -478,13 +432,6 @@ typedef struct SpawnerMasterInfo {
 	/* 0x002 */ char unk_02[2];
 	/* 0x004 */ SpawnerArray* array;
 } SpawnerMasterInfo;
-
-typedef struct undoFlagData {
-	/* 0x000 */ short encoded_flag;
-	/* 0x002 */ char output;
-	/* 0x003 */ char flag_type;
-	/* 0x004 */ char flag_stored;
-} undoFlagData;
 
 typedef struct filestateInfo {
 	/* 0x000 */ char perm_flags[0x140];

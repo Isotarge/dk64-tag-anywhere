@@ -143,7 +143,6 @@ extern PhaseCheckerData PhaseChecker;
 extern customFlagData CustomFlag;
 extern char ISGStage;
 extern short PreviousFrameButtons;
-extern undoFlagData UndoFlag;
 extern char LastLoadStateAction;
 extern char PauseMenuMusicSetting;
 extern char ClosingMenu;
