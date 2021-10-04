@@ -1,4 +1,4 @@
-//functions
+// Functions
 .definelabel setFlag, 0x8073129C
 .definelabel checkFlag, 0x8073110C
 .definelabel dk_malloc, 0x80610FE8
@@ -34,7 +34,7 @@
 .definelabel getActorSpawnerIDFromTiedActor, 0x80688E68
 .definelabel textOverlayCode, 0x8069DA54
 
-//vanilla data
+// Vanilla data
 .definelabel TransitionSpeed, 0x807FD88C
 .definelabel CutsceneWillPlay, 0x8075533B
 .definelabel KRoolRound, 0x80750AD4
@@ -119,18 +119,5 @@
 .definelabel StoredDamage, 0x807FCC4D // s8
 .definelabel ActorSpawnerPointer, 0x807FC400 // u32 ptr
 
-//hack data
-.definelabel SavePromptIsSaving, 0x807FFFF0 // u8
-.definelabel Precision, 0x807FFFEE // u8
+// Hack data
 .definelabel DisableTagAnywhere, 0x807FFFD9 // u8
-.definelabel GiantKoshaTimerAddress, 0x807FFDF4 // u32
-.definelabel ArtificialPauseOn, 0x807FFDD9 // u8
-.definelabel ActiveMenu, 0x807FFDC4 // 0x3
-
-.definelabel UndoFlag, 0x807FFF8A // u16
-.definelabel PauseMenuMusicSetting, 0x807FFF90 // u8
-.definelabel ClosingMenu, 0x807FFF91 // u8
-.definelabel IsSuperspeedOn, 0x807FFF94 // u8
-.definelabel TempTimestampStorageMajor, 0x807FFF98 // u32
-.definelabel TempTimestampStorageMinor, 0x807FFF9C // u32
-.definelabel SpriteAddress, 0x807FFFAC // u32

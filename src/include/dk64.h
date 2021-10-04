@@ -122,13 +122,3 @@ extern void* ActorSpawnerPointer;
 
 // Hack data
 extern char DisableTagAnywhere;
-extern GiantKoshaData* GiantKoshaTimerAddress;
-extern char ArtificialPauseOn;
-extern ActiveMenuData ActiveMenu;
-extern char PauseMenuMusicSetting;
-extern char ClosingMenu;
-extern char IsSuperspeedOn;
-extern unsigned int TempTimestampStorageMajor;
-extern unsigned int TempTimestampStorageMinor;
-extern char Precision;
-extern int* SpriteAddress;

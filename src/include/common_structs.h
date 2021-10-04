@@ -200,12 +200,6 @@ typedef struct TimerInfo {
 	/* 0x010 */ unsigned int TimerPostReduction;
 } TimerInfo;
 
-typedef struct ActiveMenuData {
-	/* 0x000 */ unsigned char screenIndex;
-	/* 0x001 */ unsigned char positionIndex;
-	/* 0x002 */ char isOpen;
-} ActiveMenuData;
-
 typedef struct AutowalkData {
 	/* 0x000 */ char unk_00[0x12];
 	/* 0x012 */ short xPos;
