@@ -250,7 +250,7 @@ int inBadMovementState(void) {
 void tagAnywhere(void) {
 	int _dest_character;
 	int tagDirection;
-	int* Snide;
+	char* Snide;
 
 	// Unlock Mystery Menu
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
@@ -302,7 +302,7 @@ void tagAnywhere(void) {
 		*(char *)(0x80714547) = 34;
 		*(char *)(0x8071455B) = 0;
 
-		// TODO: Snide's cutscene compression
+		// Snide's cutscene compression
 		if (CurrentMap == 15) {
 			// The cutscene the game chooses is based on the parent map (the method used to detect which Snide's H.Q. you're in)
 			// The shortest contraption cutscene is chosen with parent map 0
@@ -324,17 +324,21 @@ void tagAnywhere(void) {
 			Snide = findActorWithType(184);
 			if (Snide) {
 				// Read the turn count (Snide + 0x232)
-				if (Snide[0x8C] != 0) {
-					Snide[0x8C] = 1;
+				if (Snide[0x232] != 0) {
+					Snide[0x232] = 1;
 				}
 			}
 		}
 
-		// TODO: K. Lumsy cutscene compression
+		// Enable K. Lumsy cutscene compression
+		*(unsigned int *)(0x806BDC98) = 0;
 	} else {
 		// Start the player in Training Grounds
 		*(char *)(0x80714547) = 176;
 		*(char *)(0x8071455B) = 1;
+
+		// Disable K. Lumsy cutscene compression
+		*(unsigned int *)(0x806BDC98) = 0x14610012;
 	}
 
 	if (TBVoidByte & 2) {
