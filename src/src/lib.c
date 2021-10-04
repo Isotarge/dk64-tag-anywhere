@@ -8,6 +8,10 @@ void setPermFlag(short flagIndex) {
 	setFlag(flagIndex, 1, 0);
 }
 
+void setTempFlag(short flagIndex) {
+	setFlag(flagIndex, 1, 2);
+}
+
 void* findActorWithType(int search_actor_type) {
 	for (int i = 0; i < ActorCount; i++) {
 		actorData* _actor_ = (actorData*)ActorArray[i];

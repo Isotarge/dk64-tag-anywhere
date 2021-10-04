@@ -2,6 +2,7 @@
 
 extern void playSFX(short sfxIndex);
 extern void setPermFlag(short flagIndex);
+extern void setTempFlag(short flagIndex);
 extern void* findActorWithType(int search_actor_type);
 
 extern int inBadMap(void);

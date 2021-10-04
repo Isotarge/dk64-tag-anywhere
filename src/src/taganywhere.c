@@ -157,6 +157,67 @@ static const unsigned char bad_movement_states[] = {
 	0x88, // Exiting Portal
 };
 
+static const unsigned short speedrun_mode_permanent_flags[] = {
+	367, // Diddy FTT
+	368, // Lanky FTT
+	385, // Kong Unlocked: DK
+	6, // Kong Unlocked: Diddy
+	70, // Kong Unlocked: Lanky
+	66, // Kong Unlocked: Tiny
+	117, // Kong Unlocked: Chunky
+	369, // Tiny FTT
+	370, // Chunky FTT
+	42, // Japes: Cutscene by far W1 played // Diddy's help me cutscene
+	93, // Aztec: Lanky's help me cutscene
+	94, // Aztec: Tiny's help me cutscene
+	140, // Factory: Chunky's help me cutscene
+	//375, // Cranky's Lab Simian Slam Tutorial
+	384, // Cranky's Lab Simian Slam Tutorial
+	27, // Japes: Cutscene at the start played
+	95, // Aztec: FT Cutscene
+	92, // Aztec: Llama Cutscene
+	194, // Galleon: First Time Cutscene
+	257, // Fungi: First Time Cutscene
+	282, // Caves: First Time Cutscene
+	299, // Caves: Giant Kosha Cutscene
+	349, // Castle: First Time Cutscene
+	355, // Bananaporter FTT
+	356, // Japes: Baboon Blast Cranky CS
+	358, // Crown Pad FTT
+	359, // T&S FTT (1)
+	360, // Mini Monkey FTT
+	361, // Hunky Chunky FTT
+	362, // Orangstand Sprint FTT
+	363, // Strong Kong FTT
+	364, // Rainbow Coin FTT
+	365, // Rambi FTT
+	366, // Enguarde FTT
+	372, // Snide's FTT
+	376, // Wrinkly FTT
+	377, // Camera/Shockwave
+	378, // Training Grounds: Treehouse Squawks Cutscene
+	382, // B. Locker FTT
+	383, // Training Grounds: Barrels Spawned
+	386, // Training Grounds: Dive Barrel Completed
+	387, // Training Grounds: Vine Barrel Completed
+	388, // Training Grounds: Orange Barrel Completed
+	389, // Training Grounds: Barrel Barrel Completed
+	390, // Isles: Escape Cutscene
+	391, // Training Grounds: All Training Barrels Complete CS
+};
+
+static const unsigned short speedrun_mode_temporary_flags[] = {
+	104, // Japes: Army Dillo Long Intro
+	103, // Aztec: Dogadon Long Intro
+	106, // Factory: Mad Jack Long Intro
+	107, // Galleon: Puftoss Long Intro
+	105, // Fungi: Dogadon Long Intro
+	109, // Caves: Army Dillo Long Intro
+	108, // Castle: Kut Out Long Intro
+	101, // Caves: Beetle FT Long Intro
+	102, // Aztec: Beetle FT Long Intro
+};
+
 int inBadMap(void) {
 	for (int i = 0; i < sizeof(bad_maps); i++) {
 		if (CurrentMap == bad_maps[i]) {
@@ -179,8 +240,42 @@ void tagAnywhere(void) {
 	int _dest_character;
 	char _weapon_bitfield;
 
+	// Map is loading
+	if (LZFadeoutProgress > 0) {
+		// Unlock Mystery Menu
+		*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
+
+		if (StorySkip) {
+			// Skip GB dances
+			*(unsigned int *)(0x806EFB9C) = 0; // Cancel Movement Write
+			*(unsigned int *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
+			*(unsigned int *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
+			*(unsigned int *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
+			*(unsigned int *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
+
+			// Set temporary flags
+			for (int i = 0; i < sizeof(speedrun_mode_temporary_flags) / sizeof(speedrun_mode_temporary_flags[0]); i++) {
+				setFlag(speedrun_mode_temporary_flags[i], 1 , 2);
+			}
+			// Set permanent flags
+			for (int i = 0; i < sizeof(speedrun_mode_permanent_flags) / sizeof(speedrun_mode_permanent_flags[0]); i++) {
+				setFlag(speedrun_mode_permanent_flags[i], 1, 0);
+			}
+			
+			// TODO: Unlock moves
+		} else {
+			// Don't skip GB dances
+			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Cancel Movement Write
+			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Cancel CS Play Function Call
+			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Cancel Animation Write Function Call
+			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Cancel Change Rotation Write
+			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Cancel Control State Progress Zeroing
+		}
+	}
+
 	if (StorySkip) {
-		// TODO: Speed mode implementation
+		// TODO: Snide's cutscene compression
+		// TODO: K. Lumsy cutscene compression
 	}
 
 	if (TBVoidByte & 2) {

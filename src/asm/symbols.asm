@@ -118,5 +118,6 @@
 .definelabel bbbandit_array, 0x8002DB80
 .definelabel StoredDamage, 0x807FCC4D // s8
 .definelabel ActorSpawnerPointer, 0x807FC400 // u32 ptr
+.defineLabel LZFadeoutProgress, 0x807FD888 // f32
 
 // Hack data
