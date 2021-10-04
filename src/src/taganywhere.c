@@ -218,6 +218,8 @@ static const unsigned short speedrun_mode_temporary_flags[] = {
 	102, // Aztec: Beetle FT Long Intro
 };
 
+static int inBadMapCache = 0;
+
 int inBadMap(void) {
 	for (int i = 0; i < sizeof(bad_maps); i++) {
 		if (CurrentMap == bad_maps[i]) {
@@ -240,10 +242,13 @@ void tagAnywhere(void) {
 	int _dest_character;
 	char _weapon_bitfield;
 
+	// Unlock Mystery Menu
+	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
+
 	// Map is loading
 	if (LZFadeoutProgress > 0) {
-		// Unlock Mystery Menu
-		*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
+		// Cache this, it's slow
+		inBadMapCache = inBadMap();
 
 		if (StorySkip) {
 			// Skip GB dances
@@ -262,7 +267,14 @@ void tagAnywhere(void) {
 				setFlag(speedrun_mode_permanent_flags[i], 1, 0);
 			}
 			
-			// TODO: Unlock moves
+			// Unlock moves
+			for (int i = 0; i < 5; i++) {
+				MovesBase[i].special_moves = 3;
+				MovesBase[i].simian_slam = 3;
+				MovesBase[i].ammo_belt = 3;
+				MovesBase[i].weapon_bitfield = 7;
+				MovesBase[i].instrument_bitfield = 15;
+			}
 		} else {
 			// Don't skip GB dances
 			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Cancel Movement Write
@@ -271,6 +283,7 @@ void tagAnywhere(void) {
 			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Cancel Change Rotation Write
 			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Cancel Control State Progress Zeroing
 		}
+		return;
 	}
 
 	if (StorySkip) {
@@ -284,7 +297,7 @@ void tagAnywhere(void) {
 	if (CutsceneActive) {
 		return;
 	}
-	if (inBadMap()) {
+	if (inBadMapCache) {
 		return;
 	}
 	if (inBadMovementState()) {
