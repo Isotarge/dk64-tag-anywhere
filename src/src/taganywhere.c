@@ -240,7 +240,6 @@ int inBadMovementState(void) {
 
 void tagAnywhere(void) {
 	int _dest_character;
-	char _weapon_bitfield;
 
 	// Unlock Mystery Menu
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
@@ -275,22 +274,28 @@ void tagAnywhere(void) {
 				MovesBase[i].weapon_bitfield = 7;
 				MovesBase[i].instrument_bitfield = 15;
 			}
-
-			// TODO: Start the player in DK Isles instead of training grounds
 		} else {
 			// Don't skip GB dances
-			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Cancel Movement Write
-			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Cancel CS Play Function Call
-			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Cancel Animation Write Function Call
-			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Cancel Change Rotation Write
-			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Cancel Control State Progress Zeroing
+			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enabvle Movement Write
+			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Enabvle CS Play Function Call
+			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enabvle Animation Write Function Call
+			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enabvle Change Rotation Write
+			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enabvle Control State Progress Zeroing
 		}
 		return;
 	}
 
 	if (StorySkip) {
+		// Start the player in DK Isles instead of Training Grounds
+		*(char *)(0x80714547) = 34;
+		*(char *)(0x8071455B) = 0;
+
 		// TODO: Snide's cutscene compression
 		// TODO: K. Lumsy cutscene compression
+	} else {
+		// Start the player in Training Grounds
+		*(char *)(0x80714547) = 176;
+		*(char *)(0x8071455B) = 1;
 	}
 
 	if (TBVoidByte & 2) {
@@ -359,8 +364,7 @@ void tagAnywhere(void) {
     	_dest_character = 0;
   	}
   	if (Player) {
-    	_weapon_bitfield = MovesBase[_dest_character].weapon_bitfield;
-    	if (((_weapon_bitfield & 1) == 0) || (Player->was_gun_out == 0)) {
+    	if (((MovesBase[_dest_character].weapon_bitfield & 1) == 0) || (Player->was_gun_out == 0)) {
       		Player->hand_state = 1;
       		Player->was_gun_out = 0;
       		if (_dest_character == 1) {
