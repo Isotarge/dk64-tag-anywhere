@@ -120,37 +120,18 @@
 .definelabel ActorSpawnerPointer, 0x807FC400 // u32 ptr
 
 //hack data
-.definelabel SavePromptTimer, 0x807FFFF1 // u8
 .definelabel SavePromptIsSaving, 0x807FFFF0 // u8
-.definelabel LoadedHooks, 0x807FFFEF // u8
 .definelabel Precision, 0x807FFFEE // u8
-.definelabel SavePromptActor, 0x807FFFE4 // u32
-.definelabel ISGTimer, 0x807FFFE0 // u32
 .definelabel StoredLag, 0x807FFFDC // u16
 .definelabel DisableTagAnywhere, 0x807FFFD9 // u8
-.definelabel TransformAutoRestockOff, 0x807FFFD5 // u8
-.definelabel AutoPhaseStateOn, 0x807FFDF8 // u8
 .definelabel GiantKoshaTimerAddress, 0x807FFDF4 // u32
-.definelabel GiantKoshaTimerValue, 0x807FFDF2 // u16
 .definelabel ArtificialPauseOn, 0x807FFDD9 // u8
 .definelabel ActiveMenu, 0x807FFDC4 // 0x3
-.definelabel EnemySpawnOff, 0x807FFDBD // u8
 
-.definelabel PhaseChecker, 0x807FFDB7 // 0x1
-
-.definelabel PreviousFrameButtons, 0x807FFF88 // u16
 .definelabel UndoFlag, 0x807FFF8A // u16
-.definelabel LastLoadStateAction, 0x807FFF8F // u8
 .definelabel PauseMenuMusicSetting, 0x807FFF90 // u8
 .definelabel ClosingMenu, 0x807FFF91 // u8
 .definelabel IsSuperspeedOn, 0x807FFF94 // u8
 .definelabel TempTimestampStorageMajor, 0x807FFF98 // u32
 .definelabel TempTimestampStorageMinor, 0x807FFF9C // u32
-.definelabel HackTitle, 0x807FFFA0 // u32
-.definelabel HackVersion, 0x807FFFA4 // u32
-.definelabel AddedCorruptionActorCount, 0x807FFFA8 // u8
 .definelabel SpriteAddress, 0x807FFFAC // u32
-.definelabel PreviousLagArray, 0x807FFFB0; // u8 array
-
-.definelabel graphicalOverlaySpace, 0x807FFA00 // 0x180
-.definelabel WatchActor, 0x807FFB80 // u32 x 4
