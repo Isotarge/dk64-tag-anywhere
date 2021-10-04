@@ -11,7 +11,8 @@ cd "..\Build\"
 python build.py
 cd "..\src\"
 armips asm/main.asm
-python cleanup.py
+del ".\rom\dk64-tag-anywhere-python.z64"
+del ".\rom\dk64-tag-anywhere-temp.z64"
 n64crc "rom/dk64-tag-anywhere-dev.z64"
 echo Completed: %date% %time%
 pause
