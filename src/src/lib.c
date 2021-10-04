@@ -49,34 +49,24 @@ static const unsigned char bad_maps[] = {
 };
 
 void playSFX(short sfxIndex) {
-	playSound(sfxIndex,0x7FFF,0x427C0000,0x3F800000,0,0);
+	playSound(sfxIndex, 0x7FFF, 0x427C0000, 0x3F800000, 0, 0);
 }
 
 void setPermFlag(short flagIndex) {
-	setFlag(flagIndex,1,0);
+	setFlag(flagIndex, 1, 0);
 }
 
-void isPaused(void) {
-	IsPauseMenuOpen = 0;
-	for (int i = 0; i < ActorCount; i++) {
-		actorData* _actor = (actorData*)ActorArray[i];
-		if ((_actor->actorType == 95) || (_actor->actorType == 343) || (_actor->actorType == 342)) {
-			IsPauseMenuOpen = 1;
-		}
-	}
-}
-
-void checkMapType(void) {
-	InBadMap = 0;
+int inBadMap(void) {
 	if ((CurrentMap >= 0x73) && (CurrentMap <= 0x96)) {
-		InBadMap = 1;
+		return 1;
 	} else {
 		for (int i = 0; i < 44; i++) {
 			if (CurrentMap == bad_maps[i]) {
-				InBadMap = 1;
+				return 1;
 			}
 		}
 	}
+	return 0;
 }
 
 void* findActorWithType(int search_actor_type) {

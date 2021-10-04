@@ -128,12 +128,6 @@
 
 .definelabel TimerData, 0x807FFE90 // 0x14 bytes
 
-.definelabel TestVariable, 0x807FFFFC
-
-.definelabel WatchIndex, 0x807FFFF8 // u8 array (size 4)
-.definelabel InBadMap, 0x807FFFF7 // u8 - Bool
-.definelabel MenuSavestateAction, 0x807FFFF6 // u8 - 0 = Save, 1 = Load
-.definelabel InputDisplayIndex, 0x807FFFF5 // u8
 .definelabel RAMDisplayOpen, 0x807FFFF4 // u8
 .definelabel LoadVarsOnMapLoad, 0x807FFFF3 // u8 - For savestates
 .definelabel ShowSavePrompts, 0x807FFFF2 // u8

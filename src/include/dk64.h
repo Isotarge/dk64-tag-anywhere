@@ -135,8 +135,6 @@ extern savedSettings StoredSettings;
 
 extern TextOverlay* ActiveTools_Error;
 extern TextOverlay* ActiveToolsMenu[];
-extern char InBadMap;
-extern char MenuSavestateAction;
 extern char WatchIndex[4];
 extern char SniperOn;
 extern char SlamLevel;
@@ -191,7 +189,6 @@ extern int* graphicalOverlaySpace[32][3];
 extern char Precision;
 extern char LoadedHooks;
 extern char PreviousLagArray[16];
-extern char InputDisplayIndex;
 extern char RAMDisplayOpen;
 extern char LoadVarsOnMapLoad;
 extern char ShowSavePrompts;
