@@ -226,23 +226,36 @@ static const unsigned short kong_unlocked_flags[] = {
 	117, // Kong Unlocked: Chunky
 };
 
+static int inBadMapIndex = 0;
 static int inBadMapCache = 0;
 static unsigned short parentMapCache = 0;
 
 int inBadMap(void) {
-	for (int i = 0; i < sizeof(bad_maps); i++) {
+	if (inBadMapIndex == CurrentMap) {
+		return inBadMapCache;
+	}
+	inBadMapCache = 0;
+	inBadMapIndex = CurrentMap;
+	for (int i = 0; i < sizeof(bad_maps) / sizeof(bad_maps[0]); i++) {
 		if (CurrentMap == bad_maps[i]) {
-			return 1;
+			inBadMapCache = 1;
+			break;
 		}
 	}
-	return 0;
+	return inBadMapCache;
 }
 
 int inBadMovementState(void) {
-	for (int i = 0; i < sizeof(bad_movement_states); i++) {
-		if (Player->control_state == bad_movement_states[i]) {
-			return 1;
+	if (Player) {
+		for (int i = 0; i < sizeof(bad_movement_states) / sizeof(bad_movement_states[0]); i++) {
+			if (Player->control_state == bad_movement_states[i]) {
+				return 1;
+			}
 		}
+		// Check for gorilla gone in effect bitfield
+		if (Player->strong_kong_ostand_bitfield & 0x40) {
+			return 1;
+		}	
 	}
 	return 0;
 }
@@ -252,15 +265,16 @@ void tagAnywhere(void) {
 	int tagDirection;
 	char* Snide;
 
+	// Enable stack trace upon crash
+	*(char *)(0x807563B4) = 1;
+	*(int *)(0x80731F78) = 0;
+
 	// Unlock Mystery Menu
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
 	*(unsigned short *)(0x807ED55C) = 0xFFFF;
 
 	// Map is loading
 	if (LZFadeoutProgress > 0) {
-		// Cache this, it's slow
-		inBadMapCache = inBadMap();
-
 		if (StorySkip) {
 			// Skip GB dances
 			*(unsigned int *)(0x806EFB9C) = 0; // Cancel Movement Write
@@ -268,6 +282,12 @@ void tagAnywhere(void) {
 			*(unsigned int *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
 			*(unsigned int *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
 			*(unsigned int *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
+
+			// Make T&S feeding faster
+			*(unsigned int *)(0x806BE3E0) = 0;
+
+			// Enable K. Lumsy cutscene compression
+			*(unsigned int *)(0x806BDC98) = 0;
 
 			// Set temporary flags
 			for (int i = 0; i < sizeof(speedrun_mode_temporary_flags) / sizeof(speedrun_mode_temporary_flags[0]); i++) {
@@ -277,7 +297,7 @@ void tagAnywhere(void) {
 			for (int i = 0; i < sizeof(speedrun_mode_permanent_flags) / sizeof(speedrun_mode_permanent_flags[0]); i++) {
 				setFlag(speedrun_mode_permanent_flags[i], 1, 0);
 			}
-			
+
 			// Unlock moves
 			for (int i = 0; i < 5; i++) {
 				MovesBase[i].special_moves = 3;
@@ -285,7 +305,15 @@ void tagAnywhere(void) {
 				MovesBase[i].ammo_belt = 3;
 				MovesBase[i].weapon_bitfield = 7;
 				MovesBase[i].instrument_bitfield = 15;
+				MovesBase[i].instrument_energy = 20;
 			}
+
+			// Refill consumables
+			CollectableBase.Melons = 3;
+			CollectableBase.Health = 12;
+			CollectableBase.Oranges = 20;
+			CollectableBase.Film = 20;
+			CollectableBase.StandardAmmo = 300;
 		} else {
 			// Don't skip GB dances
 			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enabvle Movement Write
@@ -293,6 +321,12 @@ void tagAnywhere(void) {
 			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enabvle Animation Write Function Call
 			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enabvle Change Rotation Write
 			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enabvle Control State Progress Zeroing
+
+			// Don't make T&S feeding faster
+			*(unsigned int *)(0x806BE3E0) = 0x15600099;
+
+			// Disable K. Lumsy cutscene compression
+			*(unsigned int *)(0x806BDC98) = 0x14610012;
 		}
 		return;
 	}
@@ -329,16 +363,10 @@ void tagAnywhere(void) {
 				}
 			}
 		}
-
-		// Enable K. Lumsy cutscene compression
-		*(unsigned int *)(0x806BDC98) = 0;
 	} else {
 		// Start the player in Training Grounds
 		*(char *)(0x80714547) = 176;
 		*(char *)(0x8071455B) = 1;
-
-		// Disable K. Lumsy cutscene compression
-		*(unsigned int *)(0x806BDC98) = 0x14610012;
 	}
 
 	if (TBVoidByte & 2) {
@@ -347,7 +375,7 @@ void tagAnywhere(void) {
 	if (CutsceneActive) {
 		return;
 	}
-	if (inBadMapCache) {
+	if (inBadMap()) {
 		return;
 	}
 	// Don't allow tagging when HUD is open
