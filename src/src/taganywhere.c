@@ -305,10 +305,12 @@ void tagAnywhere(void) {
 				MovesBase[i].ammo_belt = 3;
 				MovesBase[i].weapon_bitfield = 7;
 				MovesBase[i].instrument_bitfield = 15;
+				// TODO: Don't do this every LZ
 				MovesBase[i].instrument_energy = 20;
 			}
 
 			// Refill consumables
+			// TODO: Don't do this every LZ
 			CollectableBase.Melons = 3;
 			CollectableBase.Health = 12;
 			CollectableBase.Oranges = 20;
@@ -392,7 +394,8 @@ void tagAnywhere(void) {
 		if (HUD[5].hud_state) {
 			return;
 		}
-		// GB Count (Character) // Note: We can't add the bottom counter because it's always shown in lobbies
+		// GB Count (Character)
+		// Note: We can't add the bottom counter because it's always shown in lobbies
 		if (HUD[8].hud_state) {
 			return;
 		}
@@ -430,43 +433,52 @@ void tagAnywhere(void) {
 
 	_dest_character = Character + tagDirection;
 	while (7) {
+		// Wrap from DK to Chunky
 		if (_dest_character < 0) {
 			_dest_character = 4;
 		}
+		// Wrap from Chunky to DK
 		if (_dest_character > 4) {
 			_dest_character = 0;
 		}
+		// Any kong can be tagged in speed mode
 		if (StorySkip) {
 			break;
 		}
+		// DK can always be tagged
 		if (_dest_character == 0) {
 			break;
 		}
+		// Check whether kong has been unlocked before allowing tag to them
 		if (checkFlag(kong_unlocked_flags[_dest_character], 0)) {
 			break;
 		}
 		_dest_character += tagDirection;
 	}
 
+	// Without this, a choppy animation occurs if you tag DK -> DK
 	if (_dest_character == Character) {
 		return;
 	}
 
 	if (Player) {
+		// If the destination kong hasn't bought their gun, or if the current kong does not have their gun out
 		if (((MovesBase[_dest_character].weapon_bitfield & 1) == 0) || (Player->was_gun_out == 0)) {
 			Player->hand_state = 1;
 			Player->was_gun_out = 0;
+			// Without this, tags to and from Diddy mess up
 			if (_dest_character == 1) {
 				Player->hand_state = 0;
 			}
 		} else {
 			Player->hand_state = 2;
 			Player->was_gun_out = 1;
+			// Without this, tags to and from Diddy mess up
 			if (_dest_character == 1) {
 				Player->hand_state = 3;
 			}
 		};
-		Player->new_kong = (_dest_character + 2);
+		Player->new_kong = _dest_character + 2;
 		if (SwapObject) {
 			SwapObject->action_type = 0x3B;
 		}
