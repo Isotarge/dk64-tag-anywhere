@@ -30,7 +30,9 @@ It takes a village to free a kong.
 ## Features
 The mystery menu options are unlocked without capturing banana fairies for your convenience.
 
-This hack includes two modes, toggled by the Story Skip option in the options menu.
+This patch includes two modes, toggled by the Story Skip option in the options menu.
+
+The Story Skip setting will be remembered through resets.
 
 ### Story Skip Off
 - [x] Only DK unlocked from start, but you can tag anywhere once other kongs are unlocked
@@ -51,24 +53,26 @@ This hack includes two modes, toggled by the Story Skip option in the options me
 
 ### Stretch goals
 - [x] Set Arcade high scores to max to skip high score entry during 101 run
+- [x] Remember whether you have story skip on between resets
 - [ ] Fix origin warp when tagging just before grabbing a tree
 - [ ] K. Lumsy compression is working great, but it would be greater if all keys that you have could be turned in at once
-- [ ] It would be nice if it remembers whether you have story skip on between resets (use unused global block?)
 
 ### Tom's feedback
-- [ ] If speedrun mode on, autocancel some cutscenes (Practice ROM has a cutscene cancel code. If the game were to check the cutscene index + map + cutscene type, and if it's a certain combination, cancel that cutscene). For example, skipping the free Diddy cutscenes
-- [x] Set melon count to 2 or 3 with speedrun mode to align itself with the moves being unlocked
-- [x] If speedrun mode, inventory isn't stocked with items upon entering file for the first time. Makes getting oranges annoying as you can't take a fairy photo either since you don't have film and the fairy queen can't give it to you either.
+- [x] Set melon count to 3 with speedrun mode to align itself with the moves being unlocked
+- [x] If speedrun mode on, inventory isn't stocked with items upon entering file for the first time. Makes getting oranges annoying as you can't take a fairy photo either since you don't have film and the fairy queen can't give it to you either.
 - [x] Enable crash stack trace byte
+- [ ] If speedrun mode on, autocancel some cutscenes (Practice ROM has a cutscene cancel code. If the game were to check the cutscene index + map + cutscene type, and if it's a certain combination, cancel that cutscene). For example, skipping the free Diddy cutscenes
 
 ## A note on emulation
-This hack will work on both real N64 hardware and modern emulators. For the bext experience, it is recommended that you play on real N64 hardware with an EverDrive64 v3 or later.
+This patch will work on both real N64 hardware and modern emulators. For the bext experience, it is recommended that you play on real N64 hardware with an EverDrive64 v3 or later.
 
 If you do not have access to real N64 hardware, modern emulators like [m64p](https://github.com/loganmc10/m64p), [Project64](https://www.pj64-emu.com/) (v3 or later), or [mupen64plus-next](https://github.com/libretro/mupen64plus-libretro-nx) will provide a reasonable experience.
 
 You may need to configure your emulator to use the EEPROM 16K save type for saves to persist between resets. If this option is not available, you will need to ask your emulator author to add it. In the mean time, you can use the savestate feature of your emulator to save your progress.
 
-Please do not bug me about this, I have no control over the direction of the various emulation projects and cannot fix it by modifying how this hack works.
+![Project64 EEPROM Configuration](Build/pj64-eeprom-config.png)
+
+Please do not bug me about this, I have no control over the direction of the various emulation projects and I cannot fix it by modifying how this patch works.
 
 ## Building Pre-requisites
 ```

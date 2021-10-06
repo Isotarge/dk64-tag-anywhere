@@ -4,11 +4,15 @@ void playSFX(short sfxIndex) {
 	playSound(sfxIndex, 0x7FFF, 0x427C0000, 0x3F800000, 0, 0);
 }
 
-void setPermFlag(short flagIndex) {
+void setPermanentFlag(short flagIndex) {
 	setFlag(flagIndex, 1, 0);
 }
 
-void setTempFlag(short flagIndex) {
+void setGlobalFlag(short flagIndex) {
+	setFlag(flagIndex, 1, 1);
+}
+
+void setTemporaryFlag(short flagIndex) {
 	setFlag(flagIndex, 1, 2);
 }
 

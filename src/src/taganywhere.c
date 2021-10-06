@@ -229,6 +229,7 @@ static const unsigned short kong_unlocked_flags[] = {
 static int inBadMapIndex = 0;
 static int inBadMapCache = 0;
 static unsigned short parentMapCache = 0;
+static int storySkipLoaded = 0;
 
 int inBadMap(void) {
 	if (inBadMapIndex == CurrentMap) {
@@ -270,15 +271,28 @@ void tagAnywhere(void) {
 	*(int *)(0x80731F78) = 0;
 
 	// Unlock Mystery Menu
-	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
-	*(unsigned short *)(0x807ED55C) = 0xFFFF;
+	if (!checkFlag(0, 1)) {
+		for (int i = 0; i < 35; i++) {
+			setFlag(i, 1, 1);
+		}
+	}
 
-	// Set Arcade High Scores
-	*(unsigned int *)(0x807467EC) = 999950;
-	*(unsigned int *)(0x807467F0) = 999950;
-	*(unsigned int *)(0x807467F4) = 999950;
-	*(unsigned int *)(0x807467F8) = 999950;
-	*(unsigned int *)(0x807467FC) = 999950;
+	if (CurrentMap == 80) {
+		// Remember Story Skip option through resets
+		if (!storySkipLoaded) {
+			StorySkip = checkFlag(35, 1);
+			storySkipLoaded = 1;
+		} else {
+			setFlag(35, StorySkip, 1);
+		}
+
+		// Set Arcade High Scores
+		*(unsigned int *)(0x807467EC) = 999950;
+		*(unsigned int *)(0x807467F0) = 999950;
+		*(unsigned int *)(0x807467F4) = 999950;
+		*(unsigned int *)(0x807467F8) = 999950;
+		*(unsigned int *)(0x807467FC) = 999950;
+	}	
 
 	if (StorySkip) {
 		// Snide's cutscene compression
