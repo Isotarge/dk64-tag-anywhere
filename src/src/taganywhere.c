@@ -273,71 +273,7 @@ void tagAnywhere(void) {
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
 	*(unsigned short *)(0x807ED55C) = 0xFFFF;
 
-	// Map is loading
-	if (LZFadeoutProgress > 0) {
-		if (StorySkip) {
-			// Skip GB dances
-			*(unsigned int *)(0x806EFB9C) = 0; // Cancel Movement Write
-			*(unsigned int *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
-			*(unsigned int *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
-			*(unsigned int *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
-			*(unsigned int *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
-
-			// Make T&S feeding faster
-			*(unsigned int *)(0x806BE3E0) = 0;
-
-			// Enable K. Lumsy cutscene compression
-			*(unsigned int *)(0x806BDC98) = 0;
-
-			// Set temporary flags
-			for (int i = 0; i < sizeof(speedrun_mode_temporary_flags) / sizeof(speedrun_mode_temporary_flags[0]); i++) {
-				setFlag(speedrun_mode_temporary_flags[i], 1 , 2);
-			}
-			// Set permanent flags
-			for (int i = 0; i < sizeof(speedrun_mode_permanent_flags) / sizeof(speedrun_mode_permanent_flags[0]); i++) {
-				setFlag(speedrun_mode_permanent_flags[i], 1, 0);
-			}
-
-			// Unlock moves
-			for (int i = 0; i < 5; i++) {
-				MovesBase[i].special_moves = 3;
-				MovesBase[i].simian_slam = 3;
-				MovesBase[i].ammo_belt = 3;
-				MovesBase[i].weapon_bitfield = 7;
-				MovesBase[i].instrument_bitfield = 15;
-				// TODO: Don't do this every LZ
-				MovesBase[i].instrument_energy = 20;
-			}
-
-			// Refill consumables
-			// TODO: Don't do this every LZ
-			CollectableBase.Melons = 3;
-			CollectableBase.Health = 12;
-			CollectableBase.Oranges = 20;
-			CollectableBase.Film = 20;
-			CollectableBase.StandardAmmo = 300;
-		} else {
-			// Don't skip GB dances
-			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enabvle Movement Write
-			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Enabvle CS Play Function Call
-			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enabvle Animation Write Function Call
-			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enabvle Change Rotation Write
-			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enabvle Control State Progress Zeroing
-
-			// Don't make T&S feeding faster
-			*(unsigned int *)(0x806BE3E0) = 0x15600099;
-
-			// Disable K. Lumsy cutscene compression
-			*(unsigned int *)(0x806BDC98) = 0x14610012;
-		}
-		return;
-	}
-
 	if (StorySkip) {
-		// Start the player in DK Isles instead of Training Grounds
-		*(char *)(0x80714547) = 34;
-		*(char *)(0x8071455B) = 0;
-
 		// Snide's cutscene compression
 		if (CurrentMap == 15) {
 			// The cutscene the game chooses is based on the parent map (the method used to detect which Snide's H.Q. you're in)
@@ -364,13 +300,76 @@ void tagAnywhere(void) {
 					Snide[0x232] = 1;
 				}
 			}
+		} else if (CurrentMap == 80) {
+			// Start the player in DK Isles instead of Training Grounds
+			*(char *)(0x80714547) = 34;
+			*(char *)(0x8071455B) = 0;
+
+			// Skip GB dances
+			*(unsigned int *)(0x806EFB9C) = 0; // Cancel Movement Write
+			*(unsigned int *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
+			*(unsigned int *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
+			*(unsigned int *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
+			*(unsigned int *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
+
+			// Make T&S feeding faster
+			*(unsigned int *)(0x806BE3E0) = 0;
+
+			// Enable K. Lumsy cutscene compression
+			*(unsigned int *)(0x806BDC98) = 0;
+
+			// Set temporary flags
+			for (int i = 0; i < sizeof(speedrun_mode_temporary_flags) / sizeof(speedrun_mode_temporary_flags[0]); i++) {
+				setFlag(speedrun_mode_temporary_flags[i], 1 , 2);
+			}
+			// Set permanent flags
+			for (int i = 0; i < sizeof(speedrun_mode_permanent_flags) / sizeof(speedrun_mode_permanent_flags[0]); i++) {
+				setFlag(speedrun_mode_permanent_flags[i], 1, 0);
+			}
+
+			// Unlock moves
+			for (int i = 0; i < 5; i++) {
+				MovesBase[i].special_moves = 3;
+				MovesBase[i].simian_slam = 3;
+				MovesBase[i].ammo_belt = 2;
+				MovesBase[i].weapon_bitfield = 7;
+				MovesBase[i].instrument_bitfield = 15;
+				MovesBase[i].instrument_energy = 20;
+			}
+
+			// Refill consumables
+			CollectableBase.Melons = 3;
+			CollectableBase.Health = 12;
+			CollectableBase.Oranges = 20;
+			CollectableBase.Film = 10;
+			CollectableBase.StandardAmmo = 200;
+			CollectableBase.Crystals = 20;
 		}
 	} else {
-		// Start the player in Training Grounds
-		*(char *)(0x80714547) = 176;
-		*(char *)(0x8071455B) = 1;
+		if (CurrentMap == 80) {
+			// Start the player in Training Grounds
+			*(char *)(0x80714547) = 176;
+			*(char *)(0x8071455B) = 1;
+
+			// Don't skip GB dances
+			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enabvle Movement Write
+			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Enabvle CS Play Function Call
+			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enabvle Animation Write Function Call
+			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enabvle Change Rotation Write
+			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enabvle Control State Progress Zeroing
+
+			// Don't make T&S feeding faster
+			*(unsigned int *)(0x806BE3E0) = 0x15600099;
+
+			// Disable K. Lumsy cutscene compression
+			*(unsigned int *)(0x806BDC98) = 0x14610012;
+		}
 	}
 
+	// Map is loading
+	if (LZFadeoutProgress > 0) {
+		return;
+	}
 	if (TBVoidByte & 2) {
 		return;
 	}
