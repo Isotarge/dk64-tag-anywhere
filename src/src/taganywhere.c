@@ -34,8 +34,8 @@ static const unsigned char bad_maps[] = {
 	103, // Searchlight Seek! (very easy) // Note: Broken with switch kong
 	104, // Beaver Bother! (easy) // Note: Broken with switch kong
 	106, // Creepy Castle: Minecart
-	//107, // Kong Battle: Battle Arena // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
-	//109, // Kong Battle: Arena 1 // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
+	107, // Kong Battle: Battle Arena // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
+	109, // Kong Battle: Arena 1 // TODO: Would be really cool to get multiplayer working, currently just voids you out when activated
 	110, // Frantic Factory: Barrel Blast
 	111, // Gloomy Galleon: Puftoss
 	115, // Kremling Kosh! (easy)
@@ -343,7 +343,7 @@ void tagAnywhere(void) {
 			CollectableBase.Oranges = 20;
 			CollectableBase.Film = 10;
 			CollectableBase.StandardAmmo = 200;
-			CollectableBase.Crystals = 20;
+			CollectableBase.Crystals = 20 * 150; // 150 ticks per crystal
 		}
 	} else {
 		if (CurrentMap == 80) {

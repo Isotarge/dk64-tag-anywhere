@@ -30,7 +30,7 @@ It takes a village to free a kong.
 ## Features
 The mystery menu options are unlocked without capturing banana fairies for your convenience.
 
-This hack includes two modes, toggled by the story skip in the options menu.
+This hack includes two modes, toggled by the Story Skip option in the options menu.
 
 ### Story Skip Off
 - [x] Only DK unlocked from start, but you can tag anywhere once other kongs are unlocked
