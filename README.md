@@ -50,8 +50,8 @@ This hack includes two modes, toggled by the Story Skip option in the options me
 - [x] Faster Troff 'n' Scoff feeding
 
 ### Stretch goals
+- [x] Set Arcade high scores to max to skip high score entry during 101 run
 - [ ] Fix origin warp when tagging just before grabbing a tree
-- [ ] Set Arcade high scores to max to skip high score entry during 101 run
 - [ ] K. Lumsy compression is working great, but it would be greater if all keys that you have could be turned in at once
 - [ ] It would be nice if it remembers whether you have story skip on between resets (use unused global block?)
 

@@ -273,6 +273,13 @@ void tagAnywhere(void) {
 	*(unsigned int *)(0x807ED558) = 0xFFFFFFFF;
 	*(unsigned short *)(0x807ED55C) = 0xFFFF;
 
+	// Set Arcade High Scores
+	*(unsigned int *)(0x807467EC) = 999950;
+	*(unsigned int *)(0x807467F0) = 999950;
+	*(unsigned int *)(0x807467F4) = 999950;
+	*(unsigned int *)(0x807467F8) = 999950;
+	*(unsigned int *)(0x807467FC) = 999950;
+
 	if (StorySkip) {
 		// Snide's cutscene compression
 		if (CurrentMap == 15) {
