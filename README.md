@@ -42,9 +42,12 @@ This hack includes two modes, toggled by the story skip in the options menu.
 - [x] All moves, guns, camera, unlocked from the start
 - [x] Training barrels completed
 - [x] File starts in in DK Isles rather than Training Grounds
-- [x] K. Lumsy cutscenes compressed (all keys behave like 3 and 8)
-- [x] Snide's cutscenes compressed (shortest contraption animation, all blueprints turn at once)
-- [x] Faster Troff n Scoff feeding
+- [x] K. Lumsy cutscenes compressed
+  - [x] All keys behave like 3 and 8
+- [x] Snide's cutscenes compressed
+  - [x] Shortest contraption animation at all Snide's HQ locations
+  - [x] Single golden banana animation when turning in multiple blueprints
+- [x] Faster Troff 'n' Scoff feeding
 
 ### Stretch goals
 - [ ] Fix origin warp when tagging just before grabbing a tree
