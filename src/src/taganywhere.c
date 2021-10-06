@@ -63,10 +63,10 @@ static const unsigned char bad_maps[] = {
 	148, // Big Bug Bash! (easy)
 	149, // Big Bug Bash! (normal)
 	150, // Big Bug Bash! (hard)
-	//152, // Hideout Helm (Intro Story) // Note: Handled by cutscene check
-	//153, // DK Isles (DK Theatre) // Note: Handled by cutscene check
+	152, // Hideout Helm (Intro Story) // Note: Handled by cutscene check
+	153, // DK Isles (DK Theatre) // Note: Handled by cutscene check
 	165, // K. Rool Barrel: Diddy's Kremling Game
-	//172, // Rock (Intro Story) // Note: Handled by cutscene check
+	172, // Rock (Intro Story) // Note: Handled by cutscene check
 	185, // Enguarde Arena // Note: Handled by character check
 	186, // Creepy Castle: Car Race
 	187, // Crystal Caves: Barrel Blast
@@ -277,6 +277,7 @@ void tagAnywhere(void) {
 		}
 	}
 
+	// Main Menu
 	if (CurrentMap == 80) {
 		// Remember Story Skip option through resets
 		if (!storySkipLoaded) {
@@ -292,36 +293,8 @@ void tagAnywhere(void) {
 		*(unsigned int *)(0x807467F4) = 999950;
 		*(unsigned int *)(0x807467F8) = 999950;
 		*(unsigned int *)(0x807467FC) = 999950;
-	}	
 
-	if (StorySkip) {
-		// Snide's cutscene compression
-		if (CurrentMap == 15) {
-			// The cutscene the game chooses is based on the parent map (the method used to detect which Snide's H.Q. you're in)
-			// The shortest contraption cutscene is chosen with parent map 0
-			// So we swap out the original parent map with 0 at the right moment to get short cutscenes
-			// Then swap the original value back in at the right moment so that the player isn't taken back to test map when exiting Snide's H.Q.
-			if (CutsceneIndex == 5) {
-				if (CutsceneTimer == 199) {
-					// Make a backup copy of the current parent map to restore later
-					parentMapCache = ParentMap;
-				} else if (CutsceneTimer == 200) {
-					ParentMap = 0;
-				}
-			} else if (CutsceneIndex == 2) {
-				// Restore the backup copy of the parent map
-				ParentMap = parentMapCache;
-			}
-
-			// Snide Turn In Compression
-			Snide = findActorWithType(184);
-			if (Snide) {
-				// Read the turn count (Snide + 0x232)
-				if (Snide[0x232] != 0) {
-					Snide[0x232] = 1;
-				}
-			}
-		} else if (CurrentMap == 80) {
+		if (StorySkip) {
 			// Start the player in DK Isles instead of Training Grounds
 			*(char *)(0x80714547) = 34;
 			*(char *)(0x8071455B) = 0;
@@ -365,9 +338,7 @@ void tagAnywhere(void) {
 			CollectableBase.Film = 10;
 			CollectableBase.StandardAmmo = 200;
 			CollectableBase.Crystals = 20 * 150; // 150 ticks per crystal
-		}
-	} else {
-		if (CurrentMap == 80) {
+		} else {
 			// Start the player in Training Grounds
 			*(char *)(0x80714547) = 176;
 			*(char *)(0x8071455B) = 1;
@@ -387,10 +358,42 @@ void tagAnywhere(void) {
 		}
 	}
 
+	// Snide's HQ
+	if (CurrentMap == 15) {
+		if (StorySkip) {
+			// Snide's cutscene compression
+			// The cutscene the game chooses is based on the parent map (the method used to detect which Snide's H.Q. you're in)
+			// The shortest contraption cutscene is chosen with parent map 0
+			// So we swap out the original parent map with 0 at the right moment to get short cutscenes
+			// Then swap the original value back in at the right moment so that the player isn't taken back to test map when exiting Snide's H.Q.
+			if (CutsceneIndex == 5) {
+				if (CutsceneTimer == 199) {
+					// Make a backup copy of the current parent map to restore later
+					parentMapCache = ParentMap;
+				} else if (CutsceneTimer == 200) {
+					ParentMap = 0;
+				}
+			} else if (CutsceneIndex == 2) {
+				// Restore the backup copy of the parent map
+				ParentMap = parentMapCache;
+			}
+
+			// Snide turn in compression
+			Snide = findActorWithType(184);
+			if (Snide) {
+				// Read the turn count (Snide + 0x232)
+				if (Snide[0x232] != 0) {
+					Snide[0x232] = 1;
+				}
+			}
+		}
+	}
+
 	// Map is loading
 	if (LZFadeoutProgress > 0) {
 		return;
 	}
+	// In tag barrel
 	if (TBVoidByte & 2) {
 		return;
 	}
