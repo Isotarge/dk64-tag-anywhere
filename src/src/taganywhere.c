@@ -261,6 +261,16 @@ int inBadMovementState(void) {
 	return 0;
 }
 
+void tagDenied() {
+	if (NewlyPressedControllerInput.Buttons & D_Right || NewlyPressedControllerInput.Buttons & L_Button) {
+		playSound(152, 0x2FFF, 63.0f, 1.0f, 0, 0);
+	} else if (NewlyPressedControllerInput.Buttons & D_Left) {
+		playSound(152, 0x2FFF, 63.0f, 1.0f, 0, 0);
+	} else {
+		return;
+	}
+}
+
 void tagAnywhere(void) {
 	int _dest_character;
 	int tagDirection;
@@ -391,58 +401,72 @@ void tagAnywhere(void) {
 
 	// Map is loading
 	if (LZFadeoutProgress > 0) {
+		tagDenied();
 		return;
 	}
-	// In tag barrel
+	// In tag barrel / paused
 	if (TBVoidByte & 2) {
+		tagDenied();
 		return;
 	}
 	if (CutsceneActive) {
+		tagDenied();
 		return;
 	}
 	if (inBadMap()) {
+		tagDenied();
 		return;
 	}
 	// Don't allow tagging when HUD is open
 	if (HUD) {
 		// Coloured Banana
 		if (HUD[0].hud_state) {
+			tagDenied();
 			return;
 		}
 		// Banana Coin
 		if (HUD[1].hud_state) {
+			tagDenied();
 			return;
 		}
 		// Crystal Coconut
 		if (HUD[5].hud_state) {
+			tagDenied();
 			return;
 		}
 		// GB Count (Character)
 		// Note: We can't add the bottom counter because it's always shown in lobbies
 		if (HUD[8].hud_state) {
+			tagDenied();
 			return;
 		}
 		// Banana Medal
 		if (HUD[10].hud_state) {
+			tagDenied();
 			return;
 		}
 		// Blueprint
 		if (HUD[12].hud_state) {
+			tagDenied();
 			return;
 		}
 		// Coloured Banana?
 		if (HUD[13].hud_state) {
+			tagDenied();
 			return;
 		}
 		// Banana Coin?
 		if (HUD[14].hud_state) {
+			tagDenied();
 			return;
 		}
 	}
 	if (inBadMovementState()) {
+		tagDenied();
 		return;
 	}
 	if (Character > 4) {
+		tagDenied();
 		return;
 	}
 
@@ -481,6 +505,7 @@ void tagAnywhere(void) {
 
 	// Without this, a choppy animation occurs if you tag DK -> DK
 	if (_dest_character == Character) {
+		tagDenied();
 		return;
 	}
 
@@ -504,6 +529,18 @@ void tagAnywhere(void) {
 		Player->new_kong = _dest_character + 2;
 		if (SwapObject) {
 			SwapObject->action_type = 0x3B;
+		}
+		// Play successful tag SFX
+		if (_dest_character == 0) {
+			playSound(560, 0x4FFF, 63.0f, 1.0f, 0, 0);
+		} else if (_dest_character == 1) {
+			playSound(103, 0x4FFF, 63.0f, 1.0f, 0, 0);
+		} else if (_dest_character == 2) {
+			playSound(218, 0x4FFF, 63.0f, 1.0f, 0, 0);
+		} else if (_dest_character == 3) {
+			playSound(182, 0x4FFF, 63.0f, 1.0f, 0, 0);
+		} else if (_dest_character == 4) {
+			playSound(198, 0x4FFF, 63.0f, 1.0f, 0, 0);
 		}
 	}
 }

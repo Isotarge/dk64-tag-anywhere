@@ -3,7 +3,7 @@ extern void setFlag(int flagIndex, int value, char flagType);
 extern int checkFlag(int flagIndex, char flagType);
 extern void* dk_malloc(int size);
 extern void dk_free(void* mallocPtr);
-extern void playSound(short soundIndex, int unk0, int unk1, int unk2, int unk3, int unk4);
+extern void playSound(short soundIndex, int volume, float unk1, float pitch, int unk3, int unk4);
 extern void initiateTransition(int map, int exit);
 extern int* getFlagBlockAddress(char flagType);
 extern int isAddressActor(void* address);
