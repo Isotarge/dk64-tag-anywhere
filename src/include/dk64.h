@@ -85,7 +85,7 @@ extern SpawnerMasterInfo SpawnerMasterData;
 extern void* ActorSpawnerArrayPointer;
 extern RGB MenuSkyTopRGB;
 extern RGB MenuSkyRGB;
-extern int* ActorArray[];
+extern int* ActorArray[]; // TODO: Actor*
 extern short ActorCount;
 extern short ButtonsEnabledBitfield;
 extern char JoystickEnabledX;
@@ -98,10 +98,10 @@ extern SwapObjectData* SwapObject;
 extern char Character;
 extern cameraData* Camera;
 extern char ISGActive;
-extern unsigned int ISGTimestampMajor;
+extern unsigned int ISGTimestampMajor; // TODO: Does our compiler support unsigned long?
 extern unsigned int ISGTimestampMinor;
 extern char ISGPreviousFadeout;
-extern unsigned int CurrentTimestampMajor;
+extern unsigned int CurrentTimestampMajor; // TODO: Does our compiler support unsigned long?
 extern unsigned int CurrentTimestampMinor;
 extern ISGFadeoutData ISGFadeoutArray[];
 extern InventoryBase CollectableBase;
@@ -109,9 +109,9 @@ extern char ModelTwoTouchCount;
 extern short ModelTwoTouchArray[4];
 extern char TransitionProgress;
 extern Controller BackgroundHeldInput;
-extern unsigned int PauseTimestampMajor;
+extern unsigned int PauseTimestampMajor; // TODO: Does our compiler support unsigned long?
 extern unsigned int PauseTimestampMinor;
-extern unsigned int HelmStartTimestampMajor;
+extern unsigned int HelmStartTimestampMajor; // TODO: Does our compiler support unsigned long?
 extern unsigned int HelmStartTimestampMinor;
 extern int HelmStartTime;
 extern short p1PressedButtons;

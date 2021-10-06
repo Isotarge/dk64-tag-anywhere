@@ -280,6 +280,13 @@ void tagAnywhere(void) {
 	*(char *)(0x807563B4) = 1;
 	*(int *)(0x80731F78) = 0;
 
+	// Set Arcade High Scores
+	*(unsigned int *)(0x807467EC) = 999950;
+	*(unsigned int *)(0x807467F0) = 999950;
+	*(unsigned int *)(0x807467F4) = 999950;
+	*(unsigned int *)(0x807467F8) = 999950;
+	*(unsigned int *)(0x807467FC) = 999950;
+
 	// Unlock Mystery Menu
 	if (!checkFlag(0, 1)) {
 		for (int i = 0; i < 35; i++) {
@@ -296,13 +303,6 @@ void tagAnywhere(void) {
 		} else {
 			setFlag(35, StorySkip, 1);
 		}
-
-		// Set Arcade High Scores
-		*(unsigned int *)(0x807467EC) = 999950;
-		*(unsigned int *)(0x807467F0) = 999950;
-		*(unsigned int *)(0x807467F4) = 999950;
-		*(unsigned int *)(0x807467F8) = 999950;
-		*(unsigned int *)(0x807467FC) = 999950;
 
 		if (StorySkip) {
 			// Start the player in DK Isles instead of Training Grounds
@@ -406,6 +406,10 @@ void tagAnywhere(void) {
 	}
 	// In tag barrel / paused
 	if (TBVoidByte & 2) {
+		tagDenied();
+		return;
+	}
+	if (IsAutowalking) {
 		tagDenied();
 		return;
 	}
