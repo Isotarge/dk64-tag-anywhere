@@ -1,6 +1,6 @@
 # Donkey Kong 64 - Tag Anywhere V5
 
-Made with love by Isotarge
+Made with ❤️ by Isotarge
 
 With help from:
 - Tom Ballaam
@@ -24,24 +24,29 @@ With help from:
 It takes a village to free a kong.
 
 ## Controls
-- D-Pad Left to tag backwards
-- D-Pad Right or L Button to tag forwards
+- D-Pad Left to tag backwards through the kong rotation
+- D-Pad Right or L Button to tag forwards through the kong rotation
+
+DK -> Diddy -> Lanky -> Tiny -> Chunky
+
+We have put significant time and effort into ensuring that you can not tag in situations that would cause softlocks or crashes. If you hear a "denied" sound when attempting to tag, it means tagging has been temporarily disabled for that reason.
 
 ## Features
-The mystery menu options are unlocked without capturing banana fairies for your convenience.
-
-This patch includes two modes, toggled by the Story Skip option in the options menu.
-
-The Story Skip setting will be remembered through resets.
+- Mystery menu options are unlocked without capturing banana fairies for your convenience.
+- This patch includes two modes, toggled by the Story Skip option in the options menu.
+  - Story Skip off is intended for casual players.
+  - Story Skip on is intended for speedrunners to set new personal bests on [this leaderboard](https://www.speedrun.com/dk64ce#Tag_Anywhere).
+- The Story Skip setting will be remembered through resets.
 
 ### Story Skip Off
 - [x] Only DK unlocked from start, but you can tag anywhere once other kongs are unlocked
+- [x] No other changes to gameplay
 
 ### Story Skip On
-- [x] All kongs unlocked from beginning
+- [x] All kongs are unlocked from beginning and can immediately be tagged anywhere
+- [x] All moves, guns, simian slam, shockwave, and camera unlocked from the start
 - [x] Golden Banana dances skipped
 - [x] All first time text skipped from beginning
-- [x] All moves, guns, camera, unlocked from the start
 - [x] Training barrels completed
 - [x] File starts in in DK Isles rather than Training Grounds
 - [x] K. Lumsy cutscenes compressed
@@ -51,17 +56,21 @@ The Story Skip setting will be remembered through resets.
   - [x] Single golden banana animation when turning in multiple blueprints
 - [x] Faster Troff 'n' Scoff feeding
 
-### Stretch goals
-- [x] Set Arcade high scores to max to skip high score entry during 101 run
-- [x] Remember whether you have story skip on between resets
-- [ ] Fix origin warp when tagging just before grabbing a tree
-- [ ] K. Lumsy compression is working great, but it would be greater if all keys that you have could be turned in at once
-
-### Tom's feedback
-- [x] Set melon count to 3 with speedrun mode to align itself with the moves being unlocked
-- [x] If speedrun mode on, inventory isn't stocked with items upon entering file for the first time. Makes getting oranges annoying as you can't take a fairy photo either since you don't have film and the fairy queen can't give it to you either.
-- [x] Enable crash stack trace byte
-- [ ] If speedrun mode on, autocancel some cutscenes (Practice ROM has a cutscene cancel code. If the game were to check the cutscene index + map + cutscene type, and if it's a certain combination, cancel that cutscene). For example, skipping the free Diddy cutscenes
+## Known Issues
+- Save is broken on older EverDrives
+  - Nothing I can do about this unfortunately
+- Save is broken on some emulators out of the box
+  - Set the emulator configuration to use the "EEPROM 16K" save type
+    - This might require modifying a gameDB or ini file
+    - Get in touch with your emulator's author for help
+  - Alternatively, use your emulator's savestate feature to save your progress between play sessions
+- Save is broken and bone displacement is present on BizHawk
+  - Need updated mupen64plus core in BizHawk to fix this
+- Tagging immediately before hitting a tree causes you to warp to the map origin
+  - Haven't thought of a good way to fix this yet
+- 101% runners should enter Arcade from the mystery menu and hit "delete highscores"
+  - This fills the high score table with 999950 and skips entering initials during the run
+  - Probably only needs to be done once
 
 ## A note on emulation
 This patch will work on both real N64 hardware and modern emulators. For the bext experience, it is recommended that you play on real N64 hardware with an EverDrive64 v3 or later.
