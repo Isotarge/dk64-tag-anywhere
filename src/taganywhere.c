@@ -354,11 +354,11 @@ void tagAnywhere(void) {
 			*(char *)(0x8071455B) = 1;
 
 			// Don't skip GB dances
-			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enabvle Movement Write
-			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Enabvle CS Play Function Call
-			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enabvle Animation Write Function Call
-			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enabvle Change Rotation Write
-			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enabvle Control State Progress Zeroing
+			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enable Movement Write
+			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Enable CS Play Function Call
+			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enable Animation Write Function Call
+			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enable Change Rotation Write
+			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enable Control State Progress Zeroing
 
 			// Don't make T&S feeding faster
 			*(unsigned int *)(0x806BE3E0) = 0x15600099;
