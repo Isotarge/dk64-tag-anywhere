@@ -86,7 +86,7 @@ Please do not bug me about this, I have no control over the direction of the var
 ## Building Pre-requisites
 ```
 1. Python 3
-2. n64chain + n64crc in your path
+2. n64chain in your path
 ```
 
 ## Build Setup
