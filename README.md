@@ -79,7 +79,7 @@ If you do not have access to real N64 hardware, modern emulators like [m64p](htt
 
 You may need to configure your emulator to use the EEPROM 16K save type for saves to persist between resets. If this option is not available, you will need to ask your emulator author to add it. In the mean time, you can use the savestate feature of your emulator to save your progress.
 
-![Project64 EEPROM Configuration](Build/pj64-eeprom-config.png)
+![Project64 EEPROM Configuration](build/pj64-eeprom-config.png)
 
 Please do not bug me about this, I have no control over the direction of the various emulation projects and I cannot fix it by modifying how this patch works.
 
