@@ -26,7 +26,6 @@ file_dict = {
 			"start": 0x1118420,
 			"compressed_size": 0x37A,
 			"source_file": "bin/Menu.bin",
-			"output_file": "bin/Menu.bin",
 			"name": "Menu Text",
 		},
 	]
@@ -38,6 +37,8 @@ print("[0 / 2] - Analyzing ROM")
 with open(ROMName, "r+b") as fh:
 	print("[1 / 2] - Unzipping files from ROM")
 	for x in file_dict["files"]:
+		if not "output_file" in x:
+			x["output_file"] = x["source_file"]
 		if not ("do_not_extract" in x and x['do_not_extract']):
 			fh.seek(x["start"])
 			byte_read = fh.read(x["compressed_size"])
@@ -48,8 +49,6 @@ with open(ROMName, "r+b") as fh:
 			with open(x["source_file"], "wb") as fg:
 				dec = gzip.decompress(byte_read)
 				fg.write(dec)
-		else:
-			x["output_file"] = x["source_file"]
 
 import modules
 
