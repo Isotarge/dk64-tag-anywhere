@@ -1,5 +1,3 @@
-import os
-import shutil
 from compressFile import compressGZipFile
 
 StaticCodeFile = "StaticCode.bin"
