@@ -22,6 +22,13 @@ file_dict = {
 			"source_file": "bin/Thumb.bin",
 			"do_not_extract": True
 		},
+		{
+			"start": 0x1118420,
+			"compressed_size": 0x37A,
+			"source_file": "bin/Menu.bin",
+			"output_file": "bin/Menu.bin",
+			"name": "Menu Text",
+		},
 	]
 }
 
@@ -70,11 +77,12 @@ with open(newROMName, "r+b") as fh:
 			print(x["output_file"] + " does not exist")
 
 for x in file_dict["files"]:
-	if not ("do_not_extract" in x and x["do_not_extract"]):
-		if os.path.exists(x["output_file"]):
-			os.remove(x["output_file"])
-		if os.path.exists(x["source_file"]):
-			os.remove(x["source_file"])
+	if not ("do_not_delete" in x and x["do_not_delete"]):
+		if not ("do_not_extract" in x and x["do_not_extract"]):
+			if os.path.exists(x["output_file"]):
+				os.remove(x["output_file"])
+			if os.path.exists(x["source_file"]):
+				os.remove(x["source_file"])
 
 # crc patch
 with open(newROMName, "r+b") as fh:
