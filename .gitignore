@@ -2,5 +2,4 @@
 *.pyc
 *.o
 *.bak
-
-/*.bps
+*.bps

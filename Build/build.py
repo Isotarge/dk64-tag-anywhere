@@ -16,7 +16,7 @@ file_dict = {
 
 print("Tag Anywhere Extractor")
 print("[0 / 2] - Analyzing ROM")
-ROMName = "./../src/rom/dk64.z64"
+ROMName = "./rom/dk64.z64"
 with open(ROMName, "r+b") as fh:
 	print("[1 / 2] - Unzipping files from ROM")
 	for x in file_dict["files"]:
@@ -25,7 +25,7 @@ with open(ROMName, "r+b") as fh:
 		binName = x["source_file"]
 
 		if os.path.exists(binName):
-		    os.remove(binName)
+			os.remove(binName)
 
 		with open(binName, "wb") as fg:
 			dec = gzip.decompress(byte_read)
@@ -37,7 +37,7 @@ with open(ROMName, "r+b") as fh:
 import modules
 newROMName = "dk64-tag-anywhere.z64"
 if os.path.exists(newROMName):
-    os.remove(newROMName)
+	os.remove(newROMName)
 shutil.copyfile(ROMName, newROMName)
 
 with open(newROMName, "r+b") as fh:
@@ -68,11 +68,11 @@ for x in file_dict["files"]:
 
 # crc patch
 with open(newROMName, "r+b") as fh:
-    fh.seek(0x3154)
-    fh.write(bytearray([0, 0, 0, 0]))
+	fh.seek(0x3154)
+	fh.write(bytearray([0, 0, 0, 0]))
 
 if os.path.exists("dk64-tag-anywhere.z64"):
-	shutil.copyfile("dk64-tag-anywhere.z64", "./../src/rom/dk64-tag-anywhere-python.z64")
+	shutil.copyfile("dk64-tag-anywhere.z64", "./rom/dk64-tag-anywhere-python.z64")
 	os.remove("dk64-tag-anywhere.z64")
 
 exit()

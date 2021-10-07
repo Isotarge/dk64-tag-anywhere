@@ -1,4 +1,3 @@
-import shutil
 import os
 import subprocess
 
@@ -24,7 +23,7 @@ def compressGZipFile(inputFile, outputFile, byteFlipCompressed):
 				bytes_to_write = file_bytes[:compressedSize]
 				tempOutputFile.write(bytes_to_write)
 			tempBuffer = []
-			result = subprocess.check_output(["gzip.exe", "-f", "-q", "-9", "tempgh9.bin"])
+			result = subprocess.check_output(["./build/gzip.exe", "-f", "-q", "-9", "tempgh9.bin"])
 			if os.path.exists("tempgh9.bin.gz"):
 				with open("tempgh9.bin.gz","rb") as inputFileName:
 					sizeNew = len(inputFileName.read())
@@ -53,8 +52,8 @@ def compressGZipFile(inputFile, outputFile, byteFlipCompressed):
 						tempBufferNew[start + 9] = 0x03
 						if byteFlipCompressed:
 							if (sizeNew % 2) == 1:
-								 tempBufferNew[sizeNew - 0x8] = 0;
-								 sizeNew = sizeNew + 1;
+								tempBufferNew[sizeNew - 0x8] = 0
+								sizeNew = sizeNew + 1
 							for x in range(sizeNew / 2):
 								tempSpot = tempBufferNew[x * 2]
 								tempBufferNew[x * 2] = tempBufferNew[(x * 2) + 1]

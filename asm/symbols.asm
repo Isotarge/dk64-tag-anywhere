@@ -38,7 +38,7 @@
 .definelabel TransitionSpeed, 0x807FD88C
 .definelabel CutsceneWillPlay, 0x8075533B
 .definelabel KRoolRound, 0x80750AD4
-.definelabel MovesBase,  0x807FC950 // End: 0x807FCB28
+.definelabel MovesBase, 0x807FC950 // End: 0x807FCB28
 .definelabel PlayerOneColor, 0x807552F4
 .definelabel Mode, 0x80755318
 .definelabel TBVoidByte, 0x807FBB63

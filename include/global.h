@@ -1,6 +1,5 @@
 #include "vars.h"
 
-extern void playSFX(short sfxIndex);
 extern void setPermanentFlag(short flagIndex);
 extern void setGlobalFlag(short flagIndex);
 extern void setTemporaryFlag(short flagIndex);
