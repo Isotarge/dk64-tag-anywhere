@@ -84,13 +84,11 @@ You may need to configure your emulator to use the EEPROM 16K save type for save
 Please do not bug me about this, I have no control over the direction of the various emulation projects and I cannot fix it by modifying how this patch works.
 
 ## Building Pre-requisites
-```
-1. Python 3
-2. n64chain in your path
-```
+- Python 3
+- [n64chain](https://github.com/tj90241/n64chain/releases/tag/9.1.0)
 
 ## Build Setup
 ```
-1. Copy dk64.z64 into /src/rom
-2. Run src/build.bat
+1. Copy dk64.z64 into /rom
+2. Run build.bat
 ```
