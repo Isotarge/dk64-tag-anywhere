@@ -18,7 +18,6 @@ extern void dk_multiply(double val1, double val2, int unk1, int unk2);
 extern double convertTimestamp(double unk0, double unk1, unsigned int unk2, unsigned int unk3);
 extern void resetMap();
 extern void prepKongColoring();
-extern void patchHook(unsigned int hook_rdram_location, int offset_in_hook_list, char hook_byte_size);
 extern void* dk_memcpy(void* _dest, void* _src, int size);
 extern void SaveToGlobal();
 extern int DetectGameOver();
