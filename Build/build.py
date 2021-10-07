@@ -8,7 +8,7 @@ file_dict = {
 			"start": 0x113F0,
 			"compressed_size": 0xF064C, # GEDECOMPRESS - B15DC, PYTHON - B17A8, FINALISE ROM - B15E0
 			"source_file": "StaticCode.bin",
-			"output_file": "StaticCode_Copy.bin.gz",
+			"output_file": "StaticCode.bin.gz",
 			"name": "Static ASM Code"
 		},
 	]
@@ -63,8 +63,6 @@ for x in file_dict["files"]:
 		os.remove(x["output_file"])
 	if os.path.exists(x["source_file"]):
 		os.remove(x["source_file"])
-	if os.path.exists("StaticCode_Copy.bin"):
-		os.remove("StaticCode_Copy.bin")
 
 # crc patch
 with open(newROMName, "r+b") as fh:
