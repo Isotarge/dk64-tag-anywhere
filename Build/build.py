@@ -73,4 +73,6 @@ if os.path.exists("dk64-tag-anywhere.z64"):
 	shutil.copyfile("dk64-tag-anywhere.z64", "./rom/dk64-tag-anywhere-python.z64")
 	os.remove("dk64-tag-anywhere.z64")
 
+import generate_watch_file
+
 exit()
