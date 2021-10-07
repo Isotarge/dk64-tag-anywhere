@@ -46,7 +46,7 @@ with open(newROMName, "r+b") as fh:
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
 				byte_read = fg.read()
-				if "output_file_is_compressed" in x:
+				if "output_file_is_compressed" in x and x["output_file_is_compressed"]:
 					compress = byte_read
 				else:
 					compress = gzip.compress(byte_read, compresslevel=9)
