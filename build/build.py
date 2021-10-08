@@ -1,9 +1,14 @@
 import os
 import shutil
 import gzip
+import subprocess
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
+
+if os.path.exists(newROMName):
+	os.remove(newROMName)
+shutil.copyfile(ROMName, newROMName)
 
 file_dict = {
 	"files": [
@@ -19,8 +24,8 @@ file_dict = {
 			"name": "Nintendo Logo",
 			"start": 0x1156AC4,
 			"compressed_size": 0xA0C,
-			"source_file": "bin/Thumb.bin",
-			"do_not_extract": True
+			"source_file": "bin/Thumb.png",
+			"texture_format": "rgba5551",
 		},
 		{
 			"start": 0x1118420,
@@ -36,8 +41,14 @@ print("DK64 Extractor")
 with open(ROMName, "r+b") as fh:
 	print("[1 / 2] - Unzipping files from ROM")
 	for x in file_dict["files"]:
+		if "texture_format" in x:
+			x["do_not_extract"] = True
+			x["do_not_delete_source"] = True
+			x["output_file"] = x["source_file"].replace(".png", ".rgba5551")
+
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
+		
 		if not ("do_not_extract" in x and x['do_not_extract']):
 			fh.seek(x["start"])
 			byte_read = fh.read(x["compressed_size"])
@@ -51,13 +62,15 @@ with open(ROMName, "r+b") as fh:
 
 import modules
 
-if os.path.exists(newROMName):
-	os.remove(newROMName)
-shutil.copyfile(ROMName, newROMName)
-
 with open(newROMName, "r+b") as fh:
 	print("[2 / 2] - Writing modified compressed files to ROM")
 	for x in file_dict["files"]:
+		if "texture_format" in x:
+			if x["texture_format"] == "rgba5551":
+				result = subprocess.check_output(["./build/n64tex.exe", x["source_file"]])
+				print(result)
+			else:
+				print(" - ERROR: Unsupported texture format " + x["texture_format"])
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
 				byte_read = fg.read()
@@ -71,19 +84,21 @@ with open(newROMName, "r+b") as fh:
 					print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 					fh.seek(x["start"])
 					fh.write(compress)
-					# Zero out timestamp in gzip header to make builds more deterministic
+					# Zero out timestamp in gzip header to make builds deterministic
 					fh.seek(x["start"] + 4)
 					fh.write(bytearray([0, 0, 0, 0]))
 		else:
 			print(x["output_file"] + " does not exist")
 
-for x in file_dict["files"]:
-	if not ("do_not_delete" in x and x["do_not_delete"]):
-		if not ("do_not_extract" in x and x["do_not_extract"]):
-			if os.path.exists(x["output_file"]):
-				os.remove(x["output_file"])
-			if os.path.exists(x["source_file"]):
-				os.remove(x["source_file"])
+		# Cleanup temporary files
+		if not ("do_not_delete" in x and x["do_not_delete"]):
+			if not ("do_not_extract" in x and x["do_not_extract"]):
+				if not ("do_not_delete_output" in x and x["do_not_delete_output"]):
+					if os.path.exists(x["output_file"]):
+						os.remove(x["output_file"])
+				if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
+					if os.path.exists(x["source_file"]):
+						os.remove(x["source_file"])
 
 import generate_watch_file
 
