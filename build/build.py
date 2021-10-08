@@ -3,7 +3,7 @@ import shutil
 import gzip
 
 ROMName = "./rom/dk64.z64"
-newROMName = "dk64-tag-anywhere.z64"
+newROMName = "./rom/dk64-tag-anywhere.z64"
 
 file_dict = {
 	"files": [
@@ -31,11 +31,10 @@ file_dict = {
 	]
 }
 
-print("Tag Anywhere Extractor")
-print("[0 / 2] - Analyzing ROM")
+print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
-	print("[1 / 2] - Unzipping files from ROM")
+	print("[1 / 3] - Unzipping files from ROM")
 	for x in file_dict["files"]:
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
@@ -57,7 +56,11 @@ if os.path.exists(newROMName):
 shutil.copyfile(ROMName, newROMName)
 
 with open(newROMName, "r+b") as fh:
-	print("[2 / 2] - Writing modified compressed files to ROM")
+	print("[2 / 3] - Applying CRC patch")
+	fh.seek(0x3154)
+	fh.write(bytearray([0, 0, 0, 0]))
+
+	print("[3 / 3] - Writing modified compressed files to ROM")
 	for x in file_dict["files"]:
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
@@ -67,11 +70,14 @@ with open(newROMName, "r+b") as fh:
 				else:
 					compress = gzip.compress(byte_read, compresslevel=9)
 				if "compressed_size" in x and len(compress) > x["compressed_size"]:
-					print("ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
+					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
 				else:
-					print("Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
+					print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 					fh.seek(x["start"])
 					fh.write(compress)
+					# Zero out timestamp in gzip header to make builds more deterministic
+					fh.seek(x["start"] + 4)
+					fh.write(bytearray([0, 0, 0, 0]))
 		else:
 			print(x["output_file"] + " does not exist")
 
@@ -82,15 +88,6 @@ for x in file_dict["files"]:
 				os.remove(x["output_file"])
 			if os.path.exists(x["source_file"]):
 				os.remove(x["source_file"])
-
-# crc patch
-with open(newROMName, "r+b") as fh:
-	fh.seek(0x3154)
-	fh.write(bytearray([0, 0, 0, 0]))
-
-if os.path.exists(newROMName):
-	shutil.copyfile(newROMName, "./rom/dk64-tag-anywhere-python.z64")
-	os.remove(newROMName)
 
 import generate_watch_file
 

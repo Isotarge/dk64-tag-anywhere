@@ -1,5 +1,5 @@
 .n64 // Let armips know we're coding for the N64 architecture
-.open "rom/dk64-tag-anywhere-python.z64", "rom/dk64-tag-anywhere-dev.z64", 0 // Open the ROM file
+.open "rom/dk64-tag-anywhere.z64", "rom/dk64-tag-anywhere-dev.z64", 0 // Open the ROM file
 .include "asm/symbols.asm" // Tell armips' linker where to find the game's function(s)
 
 // Patch boot routine to DMA our code from ROM
@@ -46,7 +46,7 @@ START:
 		NOP
 
 	mainASMFunctionJump:
-		J mainASMFunction //instruction copied and used as a hook
+		J mainASMFunction // Instruction copied and used as a hook
 		NOP
 
 .align 0x10
