@@ -5,23 +5,23 @@
 ; Patch boot routine to DMA our code from ROM to RAM and run it
 .definelabel bootStart, 0x01FED020
 
-.headersize 0x7FFFF400
-.org 0x80000764
+.orga 0x1364 ; ROM
+.org 0x80000764 ; RDRAM
 
-LUI a0, hi(bootStart) ; Start of ROM copy
-LUI a1, hi(bootStart + 0x11FE0)
-ADDIU a1, a1, lo(bootStart + 0x11FE0)
-ADDIU a0, a0, lo(bootStart)
-LUI a2, 0x805D
-JAL dmaFileTransfer
-ORI a2, a2, 0xAE00 ; RAM location to copy to
-J displacedBootCode
-NOP
+modifiedBootCode:
+	LI a0, bootStart ; Start of ROM copy
+	LI a1, (bootStart + 0x11FE0) ; End of ROM copy
+	LUI a2, 0x805D
+	JAL dmaFileTransfer
+	ORI a2, a2, 0xAE00 ; RAM location to copy to
+	J displacedVanillaBootCode
+	NOP
+resumeVanillaBootCode:
 
-.headersize 0x7E5EDDE0
-.org 0x805DAE00
+.orga bootStart ; ROM
+.org 0x805DAE00 ; RDRAM
 
-displacedBootCode:
+displacedVanillaBootCode:
 	LUI v0, 0x8001
 	ADDIU v0, v0, 0xDCC4
 	; Write per frame hook
@@ -29,15 +29,13 @@ displacedBootCode:
 	LW t3, lo(mainASMFunctionJump) (t3)
 	LUI t4, 0x8060
 	SW t3, 0xC164 (t4) ; Store per frame hook
-	J 0x80000784
+	J resumeVanillaBootCode
 	LUI t6, 0x000D
-	; End of boot code
 
 mainASMFunction:
 	JAL	0x805FC2B0
 	NOP
 	JAL cFuncLoop
-	NOP
 	NOP
 	J 0x805FC16C
 	NOP
