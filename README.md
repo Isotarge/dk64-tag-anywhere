@@ -33,16 +33,17 @@ We have put significant time and effort into ensuring that you can not tag in si
 
 ## Features
 - Mystery menu options are unlocked without capturing banana fairies for your convenience.
-- This patch includes two modes, toggled by the Story Skip option in the options menu.
-  - Story Skip off is intended for casual players.
-  - Story Skip on is intended for speedrunners to set new personal bests on [this leaderboard](https://www.speedrun.com/dk64ce#Tag_Anywhere).
-- The Story Skip setting will be remembered through resets.
+- This patch includes two modes, toggled by the Speed Mode option in the options menu.
+  - Speed Mode off is intended for casual players.
+  - Speed Mode on is intended for speedrunners to set new personal bests on [this leaderboard](https://www.speedrun.com/dk64ce#Tag_Anywhere).
+- The Speed Mode setting will be remembered through resets.
 
-### Story Skip Off
+### Speed Mode Off
 - [x] Only DK unlocked from start, but you can tag anywhere once other kongs are unlocked
 - [x] No other changes to gameplay
 
-### Story Skip On
+### Speed Mode On
+- [x] Intro story and level intros skipped (called Story Skip in the vanilla game)
 - [x] All kongs are unlocked from beginning and can immediately be tagged anywhere
 - [x] All moves, guns, simian slam, shockwave, and camera unlocked from the start
 - [x] Golden Banana dances skipped
@@ -65,7 +66,12 @@ We have put significant time and effort into ensuring that you can not tag in si
     - Get in touch with your emulator's author for help
   - Alternatively, use your emulator's savestate feature to save your progress between play sessions
 - Save is broken and bone displacement is present on BizHawk
-  - Need updated mupen64plus core in BizHawk to fix this
+  - Set N64 -> Use Expansion Slot to true
+  - EEPROM 16K setting for this ROM needed in BizHawk's gamedb_n64.txt
+    - Copy the settings line for Donkey Kong 64 (USA) but replace the vanilla ROM's SHA1 hash with the SHA1 hash of the Tag Anywhere ROM
+  - Use these gameshark codes to fix bone displacement:
+    - 8161963C 0000
+    - 8161963E 0000
 - Tagging immediately before hitting a tree causes you to warp to the map origin
   - Haven't thought of a good way to fix this yet
 - 101% runners should enter Arcade from the mystery menu and hit "delete highscores"
