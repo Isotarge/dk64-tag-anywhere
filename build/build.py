@@ -93,11 +93,9 @@ with open(newROMName, "r+b") as fh:
 		if not ("do_not_delete" in x and x["do_not_delete"]):
 			if not ("do_not_delete_output" in x and x["do_not_delete_output"]):
 				if os.path.exists(x["output_file"]):
-					print(" - REMOVING " + x["output_file"])
 					os.remove(x["output_file"])
 			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
 				if os.path.exists(x["source_file"]):
-					print(" - REMOVING " + x["source_file"])
 					os.remove(x["source_file"])
 
 import generate_watch_file
