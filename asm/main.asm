@@ -6,6 +6,7 @@
 .definelabel bootStart, 0x01FED020
 
 .orga 0x3154 ; ROM
+.org 0x80002554 ; RDRAM
 NOP ; CRC Patch
 
 .orga 0x1364 ; ROM
