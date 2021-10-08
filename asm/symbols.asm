@@ -1,4 +1,4 @@
-// Functions
+; Functions
 .definelabel setFlag, 0x8073129C
 .definelabel checkFlag, 0x8073110C
 .definelabel dk_malloc, 0x80610FE8
@@ -34,36 +34,36 @@
 .definelabel getActorSpawnerIDFromTiedActor, 0x80688E68
 .definelabel textOverlayCode, 0x8069DA54
 
-// Vanilla data
+; Vanilla data
 .definelabel TransitionSpeed, 0x807FD88C
 .definelabel CutsceneWillPlay, 0x8075533B
 .definelabel KRoolRound, 0x80750AD4
-.definelabel MovesBase, 0x807FC950 // End: 0x807FCB28
+.definelabel MovesBase, 0x807FC950 ; End: 0x807FCB28
 .definelabel PlayerOneColor, 0x807552F4
 .definelabel Mode, 0x80755318
 .definelabel TBVoidByte, 0x807FBB63
 .definelabel CurrentMap, 0x8076A0A8
 .definelabel DestMap, 0x807444E4
 .definelabel DestExit, 0x807444E8
-.definelabel ParentMap, 0x8076A172 // u16
+.definelabel ParentMap, 0x8076A172 ; u16
 .definelabel StorySkip, 0x8074452C
-.definelabel HelmTimerShown, 0x80755350 // u8
+.definelabel HelmTimerShown, 0x80755350 ; u8
 .definelabel TempFlagBlock, 0x807FDD90
 .definelabel SubmapData, 0x8076A160
-.definelabel HelmTimerPaused, 0x80713C9B // u8
-.definelabel LagBoost, 0x80744478 // u32
+.definelabel HelmTimerPaused, 0x80713C9B ; u8
+.definelabel LagBoost, 0x80744478 ; u32
 .definelabel FrameLag, 0x8076AF10
 .definelabel FrameReal, 0x80767CC4
-.definelabel RNG, 0x80746A40 // u32
-.definelabel LogosDestMap, 0x807132BF // u8
-.definelabel LogosDestMode, 0x807132CB // u8
-.definelabel Gamemode, 0x80755314 // u8
+.definelabel RNG, 0x80746A40 ; u32
+.definelabel LogosDestMap, 0x807132BF ; u8
+.definelabel LogosDestMode, 0x807132CB ; u8
+.definelabel Gamemode, 0x80755314 ; u8
 .definelabel ObjectModel2Pointer, 0x807F6000
 .definelabel ObjectModel2Timer, 0x8076A064
 .definelabel ObjectModel2Count, 0x807F6004
 .definelabel ObjectModel2Count_Dupe, 0x80747D70
 .definelabel CutsceneIndex, 0x807476F4
-.definelabel CutsceneTimer, 0x807476F0 // u16
+.definelabel CutsceneTimer, 0x807476F0 ; u16
 .definelabel CutsceneActive, 0x807444EC
 .definelabel CutsceneTypePointer, 0x807476FC
 .definelabel PreviousCameraState, 0x807F5CF0
@@ -71,10 +71,10 @@
 .definelabel CameraStateChangeTimer, 0x807F5CEC
 .definelabel AutowalkPointer, 0x807FD70C
 .definelabel IsAutowalking, 0x807463B8
-.definelabel PositionWarpInfo, 0x807FC918 // WarpInfo Struct
+.definelabel PositionWarpInfo, 0x807FC918 ; WarpInfo Struct
 .definelabel PositionWarpBitfield, 0x8076AEE2
-.definelabel PositionFloatWarps, 0x8076AEE4 // f32 x 3
-.definelabel PositionFacingAngle, 0x8076AEF0 // u16
+.definelabel PositionFloatWarps, 0x8076AEE4 ; f32 x 3
+.definelabel PositionFacingAngle, 0x8076AEF0 ; u16
 .definelabel ChimpyCam, 0x80744530
 .definelabel ScreenRatio, 0x807444C0
 .definelabel CurrentActorPointer, 0x807FBB44
@@ -104,24 +104,24 @@
 .definelabel CurrentTimestampMinor, 0x80014FE4
 .definelabel ISGFadeoutArray, 0x80747708
 .definelabel CollectableBase, 0x807FCC40
-.definelabel ModelTwoTouchCount, 0x807FD798 // u8
-.definelabel ModelTwoTouchArray, 0x807FD790 // u16 array
-.definelabel TransitionProgress, 0x807ECC60 // u8
-.definelabel BackgroundHeldInput, 0x807ECD40 // u32
-.definelabel PauseTimestampMajor, 0x807445C0 // u32
-.definelabel PauseTimestampMinor, 0x807445C4 // u32
-.definelabel HelmStartTimestampMajor, 0x80755340 // u32
-.definelabel HelmStartTimestampMinor, 0x80755344 // u32
-.definelabel HelmStartTime, 0x8075534C // u32
+.definelabel ModelTwoTouchCount, 0x807FD798 ; u8
+.definelabel ModelTwoTouchArray, 0x807FD790 ; u16 array
+.definelabel TransitionProgress, 0x807ECC60 ; u8
+.definelabel BackgroundHeldInput, 0x807ECD40 ; u32
+.definelabel PauseTimestampMajor, 0x807445C0 ; u32
+.definelabel PauseTimestampMinor, 0x807445C4 ; u32
+.definelabel HelmStartTimestampMajor, 0x80755340 ; u32
+.definelabel HelmStartTimestampMinor, 0x80755344 ; u32
+.definelabel HelmStartTime, 0x8075534C ; u32
 .definelabel p1PressedButtons, 0x807ECD48
 .definelabel p1HeldButtons, 0x807ECD58
 .definelabel player_count, 0x807FC928
 .definelabel sprite_table, 0x80755390
 .definelabel sprite_translucency, 0x807FC80F
 .definelabel bbbandit_array, 0x8002DB80
-.definelabel StoredDamage, 0x807FCC4D // s8
-.definelabel ActorSpawnerPointer, 0x807FC400 // u32 ptr
-.defineLabel LZFadeoutProgress, 0x807FD888 // f32
-.defineLabel HUD, 0x80754280 // u32 ptr
+.definelabel StoredDamage, 0x807FCC4D ; s8
+.definelabel ActorSpawnerPointer, 0x807FC400 ; u32 ptr
+.defineLabel LZFadeoutProgress, 0x807FD888 ; f32
+.defineLabel HUD, 0x80754280 ; u32 ptr
 
-// Hack data
+; Hack data
