@@ -10,44 +10,44 @@ if os.path.exists(newROMName):
 	os.remove(newROMName)
 shutil.copyfile(ROMName, newROMName)
 
-file_dict = {
-	"files": [
-		{
-			"name": "Static ASM Code",
-			"start": 0x113F0,
-			"compressed_size": 0xB15E4,
-			"source_file": "StaticCode.bin",
-			"output_file": "StaticCode.bin.gz",
-			"output_file_is_compressed": True
-		},
-		{
-			"name": "Nintendo Logo",
-			"start": 0x1156AC4,
-			"compressed_size": 0xA0C,
-			"source_file": "bin/Thumb.png",
-			"texture_format": "rgba5551",
-		},
-		{
-			"start": 0x1118420,
-			"compressed_size": 0x37A,
-			"source_file": "bin/Menu.bin",
-			"name": "Menu Text",
-		},
-	]
-}
+file_dict = [
+	{
+		"name": "Static ASM Code",
+		"start": 0x113F0,
+		"compressed_size": 0xB15E4,
+		"source_file": "StaticCode.bin",
+		"output_file": "StaticCode.bin.gz",
+		"output_file_is_compressed": True
+	},
+	{
+		"name": "Nintendo Logo",
+		"start": 0x1156AC4,
+		"compressed_size": 0xA0C,
+		"source_file": "bin/Thumb.png",
+		"texture_format": "rgba5551",
+	},
+	{
+		"start": 0x1118420,
+		"compressed_size": 0x37A,
+		"source_file": "bin/Menu.bin",
+		"name": "Menu Text",
+	},
+]
 
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
 	print("[1 / 2] - Unzipping files from ROM")
-	for x in file_dict["files"]:
+	for x in file_dict:
 		if "texture_format" in x:
 			x["do_not_extract"] = True
-			x["do_not_delete_source"] = True
 			x["output_file"] = x["source_file"].replace(".png", ".rgba5551")
 
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
+
+		if "do_not_extract" in x and x["do_not_extract"]:
+			x["do_not_delete_source"] = True
 		
 		if not ("do_not_extract" in x and x['do_not_extract']):
 			fh.seek(x["start"])
@@ -64,11 +64,10 @@ import modules
 
 with open(newROMName, "r+b") as fh:
 	print("[2 / 2] - Writing modified compressed files to ROM")
-	for x in file_dict["files"]:
+	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] == "rgba5551":
 				result = subprocess.check_output(["./build/n64tex.exe", x["source_file"]])
-				print(result)
 			else:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
 		if os.path.exists(x["output_file"]):
@@ -92,13 +91,14 @@ with open(newROMName, "r+b") as fh:
 
 		# Cleanup temporary files
 		if not ("do_not_delete" in x and x["do_not_delete"]):
-			if not ("do_not_extract" in x and x["do_not_extract"]):
-				if not ("do_not_delete_output" in x and x["do_not_delete_output"]):
-					if os.path.exists(x["output_file"]):
-						os.remove(x["output_file"])
-				if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
-					if os.path.exists(x["source_file"]):
-						os.remove(x["source_file"])
+			if not ("do_not_delete_output" in x and x["do_not_delete_output"]):
+				if os.path.exists(x["output_file"]):
+					print(" - REMOVING " + x["output_file"])
+					os.remove(x["output_file"])
+			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
+				if os.path.exists(x["source_file"]):
+					print(" - REMOVING " + x["source_file"])
+					os.remove(x["source_file"])
 
 import generate_watch_file
 
