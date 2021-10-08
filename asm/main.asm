@@ -5,6 +5,9 @@
 ; Patch boot routine to DMA our code from ROM to RAM and run it
 .definelabel bootStart, 0x01FED020
 
+.orga 0x3154 ; ROM
+NOP ; CRC Patch
+
 .orga 0x1364 ; ROM
 .org 0x80000764 ; RDRAM
 
@@ -29,6 +32,11 @@ displacedVanillaBootCode:
 	LW t3, lo(mainASMFunctionJump) (t3)
 	LUI t4, 0x8060
 	SW t3, 0xC164 (t4) ; Store per frame hook
+	LUI t3, 0 ; These make multiplayer not hard crash
+	LUI t4, 1 ; These make multiplayer not hard crash
+	LUI t5, 1 ; These make multiplayer not hard crash
+	LUI t9, 0xD ; These make multiplayer not hard crash
+	LUI t8, 0xD ; These make multiplayer not hard crash
 	J resumeVanillaBootCode
 	LUI t6, 0x000D
 

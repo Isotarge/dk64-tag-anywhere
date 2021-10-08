@@ -34,7 +34,7 @@ file_dict = {
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
-	print("[1 / 3] - Unzipping files from ROM")
+	print("[1 / 2] - Unzipping files from ROM")
 	for x in file_dict["files"]:
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
@@ -56,11 +56,7 @@ if os.path.exists(newROMName):
 shutil.copyfile(ROMName, newROMName)
 
 with open(newROMName, "r+b") as fh:
-	print("[2 / 3] - Applying CRC patch")
-	fh.seek(0x3154)
-	fh.write(bytearray([0, 0, 0, 0]))
-
-	print("[3 / 3] - Writing modified compressed files to ROM")
+	print("[2 / 2] - Writing modified compressed files to ROM")
 	for x in file_dict["files"]:
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
