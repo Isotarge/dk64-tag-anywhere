@@ -2,7 +2,6 @@ import os
 import shutil
 import gzip
 import subprocess
-from compressFile import compressGZipFile
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -75,7 +74,12 @@ with open(newROMName, "r+b") as fh:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
 
 		if "use_external_gzip" in x and x["use_external_gzip"]:
-			compressGZipFile(x["source_file"])
+			if os.path.exists(x["source_file"]):
+				result = subprocess.check_output(["./build/gzip.exe", "-f", "-n", "-q", "-9", x["source_file"]])
+				if os.path.exists(x["output_file"]):
+					with open(x["output_file"],"r+b") as outputFile:
+						# Chop off footer
+						outputFile.truncate(len(outputFile.read()) - 8)
 
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
