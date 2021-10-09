@@ -2,6 +2,7 @@ import os
 import shutil
 import gzip
 import subprocess
+from compressFile import compressGZipFile
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -15,9 +16,8 @@ file_dict = [
 		"name": "Static ASM Code",
 		"start": 0x113F0,
 		"compressed_size": 0xB15E4,
-		"source_file": "StaticCode.bin",
-		"output_file": "StaticCode.bin.gz",
-		"output_file_is_compressed": True
+		"source_file": "bin/StaticCode.bin",
+		"use_external_gzip": True,
 	},
 	{
 		"name": "Nintendo Logo",
@@ -27,10 +27,10 @@ file_dict = [
 		"texture_format": "rgba5551",
 	},
 	{
+		"name": "Menu Text",
 		"start": 0x1118420,
 		"compressed_size": 0x37A,
 		"source_file": "bin/Menu.bin",
-		"name": "Menu Text",
 	},
 ]
 
@@ -42,6 +42,9 @@ with open(ROMName, "r+b") as fh:
 		if "texture_format" in x:
 			x["do_not_extract"] = True
 			x["output_file"] = x["source_file"].replace(".png", ".rgba5551")
+
+		if "use_external_gzip" in x and x["use_external_gzip"]:
+			x["output_file"] = x["source_file"] + ".gz"
 
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
@@ -70,13 +73,18 @@ with open(newROMName, "r+b") as fh:
 				result = subprocess.check_output(["./build/n64tex.exe", x["source_file"]])
 			else:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
+
+		if "use_external_gzip" in x and x["use_external_gzip"]:
+			compressGZipFile(x["source_file"])
+
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
 				byte_read = fg.read()
-				if "output_file_is_compressed" in x and x["output_file_is_compressed"]:
-					compress = byte_read
-				else:
+				if not ("use_external_gzip" in x and x["use_external_gzip"]):
 					compress = gzip.compress(byte_read, compresslevel=9)
+				else:
+					compress = byte_read
+
 				if "compressed_size" in x and len(compress) > x["compressed_size"]:
 					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
 				else:
