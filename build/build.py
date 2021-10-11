@@ -1,6 +1,7 @@
 import os
 import shutil
 import gzip
+import zlib
 import subprocess
 
 ROMName = "./rom/dk64.z64"
@@ -22,8 +23,24 @@ file_dict = [
 		"name": "Nintendo Logo",
 		"start": 0x1156AC4,
 		"compressed_size": 0xA0C,
-		"source_file": "bin/Thumb.png",
+		"source_file": "bin/Nintendo.png",
 		"texture_format": "rgba5551",
+	},
+	#{
+	#	"name": "Dolby Logo",
+	#	"start": 0x116818C,
+	#	"compressed_size": 0x880,
+	#	"source_file": "bin/Dolby.png",
+	#	"texture_format": "i4",
+	#},
+	{
+		"name": "Title Screen",
+		"start": 0x112F54E,
+		"compressed_size": 0x32FE,
+		#"source_file": "bin/112F54E.bin",
+		"source_file": "bin/Title.png",
+		"texture_format": "rgba5551",
+		"use_zlib": True,
 	},
 	{
 		"name": "Menu Text",
@@ -42,11 +59,11 @@ with open(ROMName, "r+b") as fh:
 			x["do_not_extract"] = True
 			x["output_file"] = x["source_file"].replace(".png", ".rgba5551")
 
-		if "use_external_gzip" in x and x["use_external_gzip"]:
-			x["output_file"] = x["source_file"] + ".gz"
-
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
+
+		if "use_external_gzip" in x and x["use_external_gzip"]:
+			x["output_file"] = x["output_file"] + ".gz"
 
 		if "do_not_extract" in x and x["do_not_extract"]:
 			x["do_not_delete_source"] = True
@@ -75,7 +92,7 @@ with open(newROMName, "r+b") as fh:
 
 		if "use_external_gzip" in x and x["use_external_gzip"]:
 			if os.path.exists(x["source_file"]):
-				result = subprocess.check_output(["./build/gzip.exe", "-f", "-n", "-q", "-9", x["source_file"]])
+				result = subprocess.check_output(["./build/gzip.exe", "-f", "-n", "-q", "-9", x["output_file"].replace(".gz", "")])
 				if os.path.exists(x["output_file"]):
 					with open(x["output_file"],"r+b") as outputFile:
 						# Chop off footer
@@ -84,10 +101,14 @@ with open(newROMName, "r+b") as fh:
 		if os.path.exists(x["output_file"]):
 			with open(x["output_file"], "rb") as fg:
 				byte_read = fg.read()
-				if not ("use_external_gzip" in x and x["use_external_gzip"]):
-					compress = gzip.compress(byte_read, compresslevel=9)
-				else:
+				if "use_external_gzip" in x and x["use_external_gzip"]:
 					compress = byte_read
+				elif "use_zlib" in x and x["use_zlib"]:
+					compressor = zlib.compressobj(zlib.Z_BEST_COMPRESSION, zlib.DEFLATED, 25)
+					compress = compressor.compress(byte_read)
+					compress += compressor.flush()
+				else:
+					compress = gzip.compress(byte_read, compresslevel=9)
 
 				if "compressed_size" in x and len(compress) > x["compressed_size"]:
 					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
