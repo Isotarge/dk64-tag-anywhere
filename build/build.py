@@ -26,13 +26,14 @@ file_dict = [
 		"source_file": "bin/Nintendo.png",
 		"texture_format": "rgba5551",
 	},
-	#{
-	#	"name": "Dolby Logo",
-	#	"start": 0x116818C,
-	#	"compressed_size": 0x880,
-	#	"source_file": "bin/Dolby.png",
-	#	"texture_format": "i4",
-	#},
+	{
+		"name": "Dolby Logo",
+		"start": 0x116818C,
+		"compressed_size": 0x880,
+		"source_file": "bin/Dolby.png",
+		"texture_format": "i4",
+		"do_not_delete_output": True,
+	},
 	{
 		"name": "Title Screen",
 		"start": 0x112F54E,
@@ -57,7 +58,7 @@ with open(ROMName, "r+b") as fh:
 	for x in file_dict:
 		if "texture_format" in x:
 			x["do_not_extract"] = True
-			x["output_file"] = x["source_file"].replace(".png", ".rgba5551")
+			x["output_file"] = x["source_file"].replace(".png", "." + x["texture_format"])
 
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
@@ -86,7 +87,9 @@ with open(newROMName, "r+b") as fh:
 	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] == "rgba5551":
-				result = subprocess.check_output(["./build/n64tex.exe", x["source_file"]])
+				result = subprocess.check_output(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
+			elif x["texture_format"] == "i4":
+				result = subprocess.check_output(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
 			else:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
 
