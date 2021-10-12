@@ -32,13 +32,11 @@ file_dict = [
 		"compressed_size": 0x880,
 		"source_file": "bin/Dolby.png",
 		"texture_format": "i4",
-		"do_not_delete_output": True,
 	},
 	{
 		"name": "Title Screen",
 		"start": 0x112F54E,
 		"compressed_size": 0x32FE,
-		#"source_file": "bin/112F54E.bin",
 		"source_file": "bin/Title.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
