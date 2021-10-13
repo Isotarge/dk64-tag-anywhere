@@ -3,6 +3,7 @@ import shutil
 import gzip
 import zlib
 import subprocess
+from recompute_pointer_table import dothething
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -91,6 +92,7 @@ with open(ROMName, "r+b") as fh:
 import modules
 
 with open(newROMName, "r+b") as fh:
+	#dothething(fh)
 	print("[2 / 2] - Writing modified compressed files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
