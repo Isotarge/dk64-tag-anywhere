@@ -11,6 +11,10 @@ if os.path.exists(newROMName):
 	os.remove(newROMName)
 shutil.copyfile(ROMName, newROMName)
 
+# The address of the next available byte of free space in ROM
+# used when appending files to the end of the ROM
+next_available_free_space = 0x1FED020
+
 file_dict = [
 	{
 		"name": "Static ASM Code",
@@ -35,11 +39,17 @@ file_dict = [
 	},
 	{
 		"name": "Title Screen",
-		"start": 0x112F54E,
+		"start": 0x112F54E, # - 0x101C50 = 0x102D8FE
 		"compressed_size": 0x32FE,
 		"source_file": "bin/Title.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
+		"pointers": [
+			{
+				"absolute_address": 0x111FF74,
+				"relative_to": 0x101C50
+			}
+		]
 	},
 	{
 		"name": "Menu Text",
@@ -113,6 +123,26 @@ with open(newROMName, "r+b") as fh:
 
 				if "compressed_size" in x and len(compress) > x["compressed_size"]:
 					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
+					if "pointers" in x and len(x["pointers"]) > 0:
+						print("  - This file will instead be appended to the ROM at address " + hex(next_available_free_space))
+						print("  - The pointers to the file will be adjusted to compensate")
+
+						# Append the compressed file to the ROM at the address of the next available free space
+						fh.seek(next_available_free_space)
+						fh.write(compress)
+						# Zero out timestamp in gzip header to make builds deterministic
+						fh.seek(next_available_free_space + 4)
+						fh.write(bytearray([0, 0, 0, 0]))
+
+						# Adjust the pointers to the file to point to the appended version instead of the original version
+						for pointer in x["pointers"]:
+							fh.seek(pointer["absolute_address"])
+							adjusted_pointer = (next_available_free_space - pointer["relative_to"]).to_bytes(4, "big")
+							fh.write(adjusted_pointer)
+							print("   - Pointer at " + hex(pointer["absolute_address"]) + " has been overwritten with the new value" + str(adjusted_pointer))
+
+						# Move the free space pointer along
+						next_available_free_space += len(compress)
 				else:
 					print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 					fh.seek(x["start"])
