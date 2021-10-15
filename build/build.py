@@ -25,6 +25,8 @@ file_dict = [
 		"start": 0x1156AC4,
 		"compressed_size": 0xA0C,
 		"source_file": "bin/Nintendo.png",
+		#"source_file": "bin/Nintendo_TJ.png",
+		#"source_file": "bin/Nintendo_Adam.png",
 		"texture_format": "rgba5551",
 	},
 	{
@@ -79,13 +81,14 @@ with open(ROMName, "r+b") as fh:
 				dec = gzip.decompress(byte_read)
 				fg.write(dec)
 
+print("[2 / 5] - Modifying extracted files")
 import modules
 
 with open(newROMName, "r+b") as fh:
-	print("[2 / 4] - Parsing Pointer Tables")
+	print("[3 / 5] - Parsing Pointer Tables")
 	parsePointerTables(fh)
 
-	print("[3 / 4] - Writing modified compressed files to ROM")
+	print("[4 / 5] - Writing modified files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] == "rgba5551":
@@ -100,7 +103,7 @@ with open(newROMName, "r+b") as fh:
 				result = subprocess.check_output(["./build/gzip.exe", "-f", "-n", "-q", "-9", x["output_file"].replace(".gz", "")])
 				if os.path.exists(x["output_file"]):
 					with open(x["output_file"],"r+b") as outputFile:
-						# Chop off footer
+						# Chop off gzip footer
 						outputFile.truncate(len(outputFile.read()) - 8)
 
 		if os.path.exists(x["output_file"]):
@@ -146,10 +149,10 @@ with open(newROMName, "r+b") as fh:
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 
-	print("[4 / 4] - Writing modified pointer tables to ROM")
+	print("[5 / 5] - Writing modified pointer tables to ROM")
 	writeModifiedPointerTablesToROM(fh)
 
-	#print("[5 / 4] - Dumping details of all pointer tables")
+	#print("[6 / 5] - Dumping details of all pointer tables")
 	#dumpPointerTableDetails()
 
 import generate_watch_file
