@@ -3,7 +3,7 @@ import shutil
 import gzip
 import zlib
 import subprocess
-from recompute_pointer_table import dothething
+from recompute_pointer_table import dumpPointerTableDetails, replacePointerTableFile, writeModifiedPointerTablesToROM, parsePointerTables
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -11,10 +11,6 @@ newROMName = "./rom/dk64-tag-anywhere.z64"
 if os.path.exists(newROMName):
 	os.remove(newROMName)
 shutil.copyfile(ROMName, newROMName)
-
-# The address of the next available byte of free space in ROM
-# used when appending files to the end of the ROM
-next_available_free_space = 0x1FED020
 
 file_dict = [
 	{
@@ -45,12 +41,6 @@ file_dict = [
 		"source_file": "bin/Title.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
-		"pointers": [
-			{
-				"absolute_address": 0x111FF74,
-				"relative_to": 0x101C50
-			}
-		]
 	},
 	{
 		"name": "Menu Text",
@@ -63,7 +53,7 @@ file_dict = [
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
-	print("[1 / 2] - Unzipping files from ROM")
+	print("[1 / 4] - Unzipping files from ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			x["do_not_extract"] = True
@@ -92,8 +82,10 @@ with open(ROMName, "r+b") as fh:
 import modules
 
 with open(newROMName, "r+b") as fh:
-	#dothething(fh)
-	print("[2 / 2] - Writing modified compressed files to ROM")
+	print("[2 / 4] - Parsing Pointer Tables")
+	parsePointerTables(fh)
+
+	print("[3 / 4] - Writing modified compressed files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] == "rgba5551":
@@ -116,42 +108,32 @@ with open(newROMName, "r+b") as fh:
 				byte_read = fg.read()
 				if "use_external_gzip" in x and x["use_external_gzip"]:
 					compress = byte_read
+					compress = bytearray(compress)
 				elif "use_zlib" in x and x["use_zlib"]:
 					compressor = zlib.compressobj(zlib.Z_BEST_COMPRESSION, zlib.DEFLATED, 25)
 					compress = compressor.compress(byte_read)
 					compress += compressor.flush()
+					compress = bytearray(compress)
+					# Zero out timestamp in gzip header to make builds deterministic
+					compress[4] = 0
+					compress[5] = 0
+					compress[6] = 0
+					compress[7] = 0
 				else:
-					compress = gzip.compress(byte_read, compresslevel=9)
+					compress = bytearray(gzip.compress(byte_read, compresslevel=9))
+					# Zero out timestamp in gzip header to make builds deterministic
+					compress[4] = 0
+					compress[5] = 0
+					compress[6] = 0
+					compress[7] = 0
 
 				if "compressed_size" in x and len(compress) > x["compressed_size"]:
 					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
-					if "pointers" in x and len(x["pointers"]) > 0:
-						print("  - This file will instead be appended to the ROM at address " + hex(next_available_free_space))
-						print("  - The pointers to the file will be adjusted to compensate")
-
-						# Append the compressed file to the ROM at the address of the next available free space
-						fh.seek(next_available_free_space)
-						fh.write(compress)
-						# Zero out timestamp in gzip header to make builds deterministic
-						fh.seek(next_available_free_space + 4)
-						fh.write(bytearray([0, 0, 0, 0]))
-
-						# Adjust the pointers to the file to point to the appended version instead of the original version
-						for pointer in x["pointers"]:
-							fh.seek(pointer["absolute_address"])
-							adjusted_pointer = (next_available_free_space - pointer["relative_to"]).to_bytes(4, "big")
-							fh.write(adjusted_pointer)
-							print("   - Pointer at " + hex(pointer["absolute_address"]) + " has been overwritten with the new value" + str(adjusted_pointer))
-
-						# Move the free space pointer along
-						next_available_free_space += len(compress)
+					replacePointerTableFile(x["absolute_address"], compress)
 				else:
 					print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 					fh.seek(x["start"])
 					fh.write(compress)
-					# Zero out timestamp in gzip header to make builds deterministic
-					fh.seek(x["start"] + 4)
-					fh.write(bytearray([0, 0, 0, 0]))
 		else:
 			print(x["output_file"] + " does not exist")
 
@@ -163,6 +145,12 @@ with open(newROMName, "r+b") as fh:
 			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
+
+	print("[4 / 4] - Writing modified pointer tables to ROM")
+	writeModifiedPointerTablesToROM(fh)
+
+	#print("[5 / 4] - Dumping details of all pointer tables")
+	#dumpPointerTableDetails()
 
 import generate_watch_file
 
