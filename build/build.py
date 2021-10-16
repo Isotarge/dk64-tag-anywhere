@@ -3,7 +3,7 @@ import shutil
 import gzip
 import zlib
 import subprocess
-from recompute_pointer_table import dumpPointerTableDetails, replacePointerTableFile, writeModifiedPointerTablesToROM, parsePointerTables
+from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables
 
 import time
 start = time.process_time()
@@ -138,7 +138,7 @@ with open(newROMName, "r+b") as fh:
 
 			if "compressed_size" in x and len(compress) > x["compressed_size"]:
 				print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
-				#replacePointerTableFile(x["start"], compress)
+				#replaceROMFile(x["start"], compress)
 			else:
 				print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 				fh.seek(x["start"])
@@ -155,7 +155,7 @@ with open(newROMName, "r+b") as fh:
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 
-	#print("[5 / 5] - Writing modified pointer tables to ROM")
+	print("[5 / 5] - Writing modified pointer tables to ROM")
 	#writeModifiedPointerTablesToROM(fh)
 
 	#print("[6 / 5] - Dumping details of all pointer tables")
