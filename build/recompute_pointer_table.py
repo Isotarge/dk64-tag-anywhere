@@ -2,7 +2,8 @@ from typing import BinaryIO
 
 # The address of the next available byte of free space in ROM
 # used when appending files to the end of the ROM
-next_available_free_space = 0x1FED020
+#next_available_free_space = 0x1FED020
+next_available_free_space = 0x2000000
 
 #num_tables = 27
 num_tables = 32
@@ -348,8 +349,8 @@ def replacePointerTableFile(absolute_address : int, data: bytes):
 	global num_tables
 
 	for x in pointer_tables:
-		for y in x:
-			if y["absolute_address"] == absolute_address:
+		for y in x["entries"]:
+			if "absolute_address" in y and y["absolute_address"] == absolute_address:
 				x["has_been_modified"] = True
 				y["data"] = data,
 				y["absolute_size"] = len(data)
@@ -366,28 +367,26 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 	for x in pointer_tables:
 		if x["has_been_modified"]:
 			print(" - Pointer table " + str(x["index"]) + ": " + x["name"] + " has been modified, recomputing offsets and writing a copy to the end of the ROM")
-			for y in x:
-				# Append the file to the ROM at the address of the next available free space
-				fh.seek(next_available_free_space)
-				#fh.write(y["data"])
+			for y in x["entries"]:
+				if "data" in y and len(y["data"]) > 0:
+					# Append the file to the ROM at the address of the next available free space
+					fh.seek(next_available_free_space)
+					fh.write(y["data"])
 
-				# Adjust the pointers to the file to point to the appended version instead of the original version
-				for pointer in x["pointers"]:
-					fh.seek(pointer["absolute_address"])
-					adjusted_pointer = (next_available_free_space - pointer["relative_to"]).to_bytes(4, "big")
-					#fh.write(adjusted_pointer)
-					print("   - Pointer at " + hex(pointer["absolute_address"]) + " has been overwritten with the new value" + str(adjusted_pointer))
+					# Adjust the pointers to the file to point to the appended version instead of the original version
+					for pointer in y["pointers"]:
+						fh.seek(pointer["absolute_address"])
+						adjusted_pointer = (next_available_free_space - pointer["relative_to"])
+						if y["bit_set"]:
+							adjusted_pointer |= 0x80000000
+						fh.write(adjusted_pointer.to_bytes(4, "big"))
+						print("   - Pointer at " + hex(pointer["absolute_address"]) + " has been overwritten with the new value " + hex(adjusted_pointer) + " data size " + hex(len(y["data"])))
 
-				# Move the free space pointer along
-				next_available_free_space += len(y["data"])
+					# Move the free space pointer along
+					next_available_free_space += len(y["data"])
 
 def dumpPointerTableDetails():
-	global next_available_free_space
 	global pointer_tables
-	global main_pointer_table_offset
-	global pointer_table_names
-	global maps
-	global num_tables
 
 	for x in pointer_tables:
 		if x["num_entries"] == 221:

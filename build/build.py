@@ -41,6 +41,7 @@ file_dict = [
 		"start": 0x112F54E, # - 0x101C50 = 0x102D8FE
 		"compressed_size": 0x32FE,
 		"source_file": "bin/Title.png",
+		#"source_file": "bin/Title_Bigger.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
 	},
@@ -132,7 +133,7 @@ with open(newROMName, "r+b") as fh:
 
 				if "compressed_size" in x and len(compress) > x["compressed_size"]:
 					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
-					replacePointerTableFile(x["absolute_address"], compress)
+					replacePointerTableFile(x["start"], compress)
 				else:
 					print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 					fh.seek(x["start"])
