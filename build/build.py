@@ -5,6 +5,9 @@ import zlib
 import subprocess
 from recompute_pointer_table import dumpPointerTableDetails, replacePointerTableFile, writeModifiedPointerTablesToROM, parsePointerTables
 
+import time
+start = time.process_time()
+
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
 
@@ -87,7 +90,7 @@ import modules
 
 with open(newROMName, "r+b") as fh:
 	print("[3 / 5] - Parsing Pointer Tables")
-	parsePointerTables(fh)
+	#parsePointerTables(fh)
 
 	print("[4 / 5] - Writing modified files to ROM")
 	for x in file_dict:
@@ -108,36 +111,38 @@ with open(newROMName, "r+b") as fh:
 						outputFile.truncate(len(outputFile.read()) - 8)
 
 		if os.path.exists(x["output_file"]):
+			byte_read = bytes()
 			with open(x["output_file"], "rb") as fg:
 				byte_read = fg.read()
-				if "use_external_gzip" in x and x["use_external_gzip"]:
-					compress = byte_read
-					compress = bytearray(compress)
-				elif "use_zlib" in x and x["use_zlib"]:
-					compressor = zlib.compressobj(zlib.Z_BEST_COMPRESSION, zlib.DEFLATED, 25)
-					compress = compressor.compress(byte_read)
-					compress += compressor.flush()
-					compress = bytearray(compress)
-					# Zero out timestamp in gzip header to make builds deterministic
-					compress[4] = 0
-					compress[5] = 0
-					compress[6] = 0
-					compress[7] = 0
-				else:
-					compress = bytearray(gzip.compress(byte_read, compresslevel=9))
-					# Zero out timestamp in gzip header to make builds deterministic
-					compress[4] = 0
-					compress[5] = 0
-					compress[6] = 0
-					compress[7] = 0
 
-				if "compressed_size" in x and len(compress) > x["compressed_size"]:
-					print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
-					replacePointerTableFile(x["start"], compress)
-				else:
-					print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
-					fh.seek(x["start"])
-					fh.write(compress)
+			if "use_external_gzip" in x and x["use_external_gzip"]:
+				compress = byte_read
+				compress = bytearray(compress)
+			elif "use_zlib" in x and x["use_zlib"]:
+				compressor = zlib.compressobj(zlib.Z_BEST_COMPRESSION, zlib.DEFLATED, 25)
+				compress = compressor.compress(byte_read)
+				compress += compressor.flush()
+				compress = bytearray(compress)
+				# Zero out timestamp in gzip header to make builds deterministic
+				compress[4] = 0
+				compress[5] = 0
+				compress[6] = 0
+				compress[7] = 0
+			else:
+				compress = bytearray(gzip.compress(byte_read, compresslevel=9))
+				# Zero out timestamp in gzip header to make builds deterministic
+				compress[4] = 0
+				compress[5] = 0
+				compress[6] = 0
+				compress[7] = 0
+
+			if "compressed_size" in x and len(compress) > x["compressed_size"]:
+				print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
+				#replacePointerTableFile(x["start"], compress)
+			else:
+				print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
+				fh.seek(x["start"])
+				fh.write(compress)
 		else:
 			print(x["output_file"] + " does not exist")
 
@@ -150,12 +155,14 @@ with open(newROMName, "r+b") as fh:
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 
-	print("[5 / 5] - Writing modified pointer tables to ROM")
-	writeModifiedPointerTablesToROM(fh)
+	#print("[5 / 5] - Writing modified pointer tables to ROM")
+	#writeModifiedPointerTablesToROM(fh)
 
 	#print("[6 / 5] - Dumping details of all pointer tables")
 	#dumpPointerTableDetails()
 
 import generate_watch_file
+
+#print("TIME TAKEN: " + str(time.process_time() - start))
 
 exit()
