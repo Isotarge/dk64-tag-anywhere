@@ -138,11 +138,11 @@ with open(newROMName, "r+b") as fh:
 
 			if "compressed_size" in x and len(compress) > x["compressed_size"]:
 				print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
-				#replaceROMFile(x["start"], compress)
 			else:
 				print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 				fh.seek(x["start"])
 				fh.write(compress)
+			#replaceROMFile(x["start"], compress)
 		else:
 			print(x["output_file"] + " does not exist")
 
