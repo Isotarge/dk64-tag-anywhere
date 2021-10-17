@@ -333,6 +333,11 @@ def parsePointerTables(fh : BinaryIO):
 					# Smart but slow
 					absolute_size = getNextAbsoluteAddress(x["entries"][i]["absolute_address"]) - x["entries"][i]["absolute_address"]
 
+				# Hardcoded fix for the last file
+				# TODO: Come up with a better solution for this (looks like a pointer table too, bleh)
+				if x["entries"][i]["absolute_address"] == 0x188AF00:
+					absolute_size = 0x20
+
 				# Read data
 				fh.seek(x["entries"][i]["absolute_address"])
 				addFileToDatabase(x["entries"][i]["absolute_address"], fh.read(absolute_size))
