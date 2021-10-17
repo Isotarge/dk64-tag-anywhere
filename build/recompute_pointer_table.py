@@ -323,20 +323,20 @@ def parsePointerTables(fh : BinaryIO):
 	for x in pointer_tables:
 		if x["num_entries"] > 0:
 			i = 0
-			#print("CHECKING TABLE " + str(i))
 			while i < x["num_entries"]:
 				# Compute absolute size of each entry
 				absolute_size = 0
 				if i < x["num_entries"] - 1:
+					# Naive but fast, sometimes results in zeroes
 					absolute_size = x["entries"][i + 1]["absolute_address"] - x["entries"][i]["absolute_address"]
 				if absolute_size == 0:
+					# Smart but slow
 					absolute_size = getNextAbsoluteAddress(x["entries"][i]["absolute_address"]) - x["entries"][i]["absolute_address"]
 
 				# Read data
 				fh.seek(x["entries"][i]["absolute_address"])
 				addFileToDatabase(x["entries"][i]["absolute_address"], fh.read(absolute_size))
 				i += 1
-			#print("DONE")
 
 def addFileToDatabase(absolute_address : int, data: bytes):
 	global files
@@ -374,9 +374,16 @@ def replaceROMFile(absolute_address : int, data: bytes):
 	if not hex(absolute_address) in files:
 		addFileToDatabase(absolute_address, data)
 
-	files[hex(absolute_address)]["new_absolute_address"] = absolute_address
-	files[hex(absolute_address)]["has_been_modified"] = True
-	files[hex(absolute_address)]["data"] = data
+	file_info = getFileInfo(absolute_address)
+	if file_info:
+		# Align data to 2 byte boundary for DMA
+		if (len(data) % 2 == 1):
+			data_array = bytearray(data)
+			data_array.append(0)
+			data = bytes(data_array)
+
+		file_info["has_been_modified"] = True
+		file_info["data"] = data
 
 def getNextAbsoluteAddress(absolute_address : int):
 	global pointer_tables
@@ -407,6 +414,10 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 	# Reserve pointer table space and write new data
 	for x in pointer_tables:
+		# No need to recompute pointer tables with no entries in them
+		if x["num_entries"] == 0:
+			continue
+
 		# Reserve free space for the pointer table in ROM
 		space_required = x["num_entries"] * 4
 		x["new_absolute_address"] = next_available_free_space
@@ -437,6 +448,10 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 	# Recompute the pointer table using the new file addresses and write it in the reserved space
 	for x in pointer_tables:
+		# No need to recompute pointer tables with no entries in them
+		if x["num_entries"] == 0:
+			continue
+
 		for y in x["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
