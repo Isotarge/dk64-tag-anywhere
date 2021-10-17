@@ -3,7 +3,7 @@ import shutil
 import gzip
 import zlib
 import subprocess
-from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables
+from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -23,7 +23,6 @@ file_dict = [
 	{
 		"name": "Nintendo Logo",
 		"start": 0x1156AC4,
-		"compressed_size": 0xA0C,
 		"source_file": "bin/Nintendo.png",
 		#"source_file": "bin/Nintendo_TJ.png",
 		#"source_file": "bin/Nintendo_Adam.png",
@@ -32,14 +31,12 @@ file_dict = [
 	{
 		"name": "Dolby Logo",
 		"start": 0x116818C,
-		"compressed_size": 0x880,
 		"source_file": "bin/Dolby.png",
 		"texture_format": "i4",
 	},
 	{
 		"name": "Title Screen",
 		"start": 0x112F54E, # - 0x101C50 = 0x102D8FE
-		"compressed_size": 0x32FE,
 		#"source_file": "bin/Title.png",
 		"source_file": "bin/Title_Bigger.png",
 		"texture_format": "rgba5551",
@@ -48,7 +45,6 @@ file_dict = [
 	{
 		"name": "Menu Text",
 		"start": 0x1118420,
-		"compressed_size": 0x37A,
 		"source_file": "bin/Menu.bin",
 	},
 ]
@@ -56,7 +52,10 @@ file_dict = [
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
-	print("[1 / 4] - Unzipping files from ROM")
+	print("[1 / 5] - Parsing Pointer Tables")
+	parsePointerTables(fh)
+
+	print("[2 / 5] - Unzipping files from ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			x["do_not_extract"] = True
@@ -72,8 +71,14 @@ with open(ROMName, "r+b") as fh:
 			x["do_not_delete_source"] = True
 		
 		if not ("do_not_extract" in x and x['do_not_extract']):
-			fh.seek(x["start"])
-			byte_read = fh.read(x["compressed_size"])
+			byte_read = bytes()
+			file_info = getFileInfo(x["start"])
+			if file_info:
+				x["compressed_size"] = len(file_info["data"])
+				byte_read = file_info["data"]
+			else:
+				fh.seek(x["start"])
+				byte_read = fh.read(x["compressed_size"])
 
 			if os.path.exists(x["source_file"]):
 				os.remove(x["source_file"])
@@ -82,13 +87,10 @@ with open(ROMName, "r+b") as fh:
 				dec = gzip.decompress(byte_read)
 				fg.write(dec)
 
-print("[2 / 5] - Modifying extracted files")
+print("[3 / 5] - Modifying extracted files")
 import modules
 
 with open(newROMName, "r+b") as fh:
-	print("[3 / 5] - Parsing Pointer Tables")
-	parsePointerTables(fh)
-
 	print("[4 / 5] - Writing modified files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
