@@ -34,12 +34,11 @@ pointer_table_names = [
 	"Map Loading Zones",
 	"Unknown 19",
 	"Unknown 20",
-	"Unknown 20",
 	"Unknown 21",
+	"Unknown 22",
 	"Map Exits",
-	"Unknown 23",
+	"Unknown 24",
 	"Textures",
-	"Unknown 25",
 	"Unknown 26",
 	"Unknown 27",
 	"Unknown 28",
@@ -276,7 +275,6 @@ maps = [
 def parsePointerTables(fh : BinaryIO):
 	global pointer_tables
 	global main_pointer_table_offset
-	global pointer_table_names
 	global maps
 	global num_tables
 
@@ -287,7 +285,6 @@ def parsePointerTables(fh : BinaryIO):
 		relative_address = int.from_bytes(fh.read(4), "big")
 		pointer_tables.append({
 			"index": i,
-			"name": pointer_table_names[i],
 			"relative_address": relative_address,
 			"absolute_address": relative_address + main_pointer_table_offset,
 			"new_absolute_address": relative_address + main_pointer_table_offset,
@@ -414,22 +411,52 @@ def getNextAbsoluteAddress(absolute_address : int):
 
 	return absolute_address
 
+# TODO: Figure out which pointer table indexes cause crashes when rebuilt
+# TODO: Figure out how to fix those crashes
+# TODO: Fix crash in text map when pointer tables index 0 || 1 || 2 || 3 are relocated
+# TODO: Fix crash in Snide's when text index 42 (ROM 0x20064CE) is loaded when text table is relocated
+force_table_rewrite = [
+	# 0, # Unknown 0
+	# 1, # Map Geometry
+	# 2, # Map Walls
+	# 3, # Map Floors
+	# 4, # Unknown 4
+	# 5, # Unknown 5
+	# 6, # Unknown 6
+	# 7, # Unknown 7
+	# 8, # Map Cutscenes
+	# 9, # Map Object Setups
+	# 10, # Map Data 0xA
+	# 11, # Unknown 11
+	# 12, # Text
+	# 13, # Unknown 13
+	# 14, # Textures
+	# 15, # Map Balloon Trajectories
+	# 16, # Map Character Spawners
+	# 17, # Unknown 17
+	# 18, # Map Loading Zones
+	# 19, # Unknown 19
+	# 20, # Unknown 20
+	# 21, # Unknown 21
+	# 22, # Unknown 22
+	# 23, # Map Exits
+	# 24, # Unknown 24
+	# 25, # Textures
+	# 26, # Unknown 26
+	# 27, # Unknown 27
+	# 28, # Unknown 28
+	# 29, # Unknown 29
+	# 30, # Unknown 30
+	# 31, # Unknown 31
+	# 32, # Unknown 32
+]
+
 def shouldWritePointerTable(index : int):
 	global pointer_tables
-	
-	# if index == 0: # Unknown 0
-	# 	return True
-	# if index == 1: # Geometry
-	# 	return True
-	# if index == 2: # Walls
-	# 	return True
-	# if index == 3: # Floors
-	# 	return True
 
-	# TODO: Figure out which pointer table indexes cause crashes when rebuilt
-	# TODO: Figure out how to fix those crashes
-	# TODO: Fix crash in text map when pointer tables index 0 || 1 || 2 || 3 are relocated
-	# TODO: Fix crash in Snide's when text index 42 (ROM 0x20064CE) is loaded when text table is relocated
+	if index in force_table_rewrite:
+		return True
+
 	if pointer_tables[index]:
 		for y in pointer_tables[index]["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
@@ -441,6 +468,9 @@ def shouldWritePointerTable(index : int):
 
 def shouldRelocatePointerTable(index : int):
 	global pointer_tables
+
+	if index in force_table_rewrite:
+		return True
 
 	if pointer_tables[index]:
 		for y in pointer_tables[index]["entries"]:
@@ -521,9 +551,10 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 def dumpPointerTableDetails():
 	global pointer_tables
+	global pointer_table_names
 
 	for x in pointer_tables:
-		print(str(x["index"]) + ": " + x["name"] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
+		print(str(x["index"]) + ": " + pointer_table_names[x["index"]] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
 		for y in x["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
