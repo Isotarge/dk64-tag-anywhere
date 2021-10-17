@@ -369,15 +369,15 @@ def getFileInfo(absolute_address: int):
 	if hex(absolute_address) in files:
 		return files[hex(absolute_address)]
 
-def getFileBytes(absolute_address: int):
-	if hex(absolute_address) in files:
-		return files[hex(absolute_address)]["data"]
-	return bytes()
-
-def replaceROMFile(absolute_address : int, data: bytes):
+def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
 	global files
+
+	# Allow replacing files not contained in pointer tables
+	# Eg. Static Code
 	if not hex(absolute_address) in files:
-		addFileToDatabase(absolute_address, data)
+		fh.seek(absolute_address)
+		fh.write(data)
+		return
 
 	file_info = getFileInfo(absolute_address)
 	if file_info:
@@ -413,12 +413,25 @@ def getNextAbsoluteAddress(absolute_address : int):
 	return absolute_address
 
 def shouldWritePointerTable(index : int):
+	global pointer_tables
+	
+	# if index == 0: # Unknown 0
+	# 	return True
+	# if index == 1: # Geometry
+	# 	return True
+	# if index == 2: # Walls
+	# 	return True
+	# if index == 3: # Floors
+	# 	return True
+
 	# TODO: Figure out which pointer table indexes cause crashes when rebuilt
 	# TODO: Figure out how to fix those crashes
-	if index == 12:
-		return True
-	elif index == 14:
-		return True
+	if pointer_tables[index]:
+		for y in pointer_tables[index]["entries"]:
+			file_info = getFileInfo(y["absolute_address"])
+			if file_info:
+				if file_info["has_been_modified"]:
+					return True
 
 	return False
 

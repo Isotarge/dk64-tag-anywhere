@@ -5,9 +5,6 @@ import zlib
 import subprocess
 from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables
 
-import time
-start = time.process_time()
-
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
 
@@ -136,13 +133,15 @@ with open(newROMName, "r+b") as fh:
 				compress[6] = 0
 				compress[7] = 0
 
+			# Check whether compressed size is bigger than the original
+			# TODO: Only append modified pointer tables if the total compressed size is > total original compressed size
+			# Otherwise, modify them in place
 			if "compressed_size" in x and len(compress) > x["compressed_size"]:
-				print(" - ERROR: " + x["output_file"] + " is too big, expected compressed size <= " + hex(x["compressed_size"]) + " but got size " + hex(len(compress)) + ")")
+				print(" - WARNING: " + x["output_file"] + " (" + hex(len(compress)) + ") is bigger than the original (" + hex(x["compressed_size"]) + ")")
 			else:
-				print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
-				fh.seek(x["start"])
-				fh.write(compress)
-			replaceROMFile(x["start"], compress)
+				print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
+
+			replaceROMFile(fh, x["start"], compress)
 		else:
 			print(x["output_file"] + " does not exist")
 
@@ -162,7 +161,5 @@ with open(newROMName, "r+b") as fh:
 	#dumpPointerTableDetails()
 
 import generate_watch_file
-
-#print("TIME TAKEN: " + str(time.process_time() - start))
 
 exit()
