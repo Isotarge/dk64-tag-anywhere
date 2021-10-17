@@ -308,7 +308,7 @@ def parsePointerTables(fh : BinaryIO):
 		if x["num_entries"] > 0:
 			fh.seek(x["absolute_address"])
 			i = 0
-			while i < x["num_entries"]:
+			while i <= x["num_entries"]:
 				raw_int = int.from_bytes(fh.read(4), "big")
 				relative_address = raw_int & 0x7FFFFFFF
 				x["entries"].append({
@@ -323,10 +323,10 @@ def parsePointerTables(fh : BinaryIO):
 	for x in pointer_tables:
 		if x["num_entries"] > 0:
 			i = 0
-			while i < x["num_entries"]:
+			while i <= x["num_entries"]:
 				# Compute absolute size of each entry
 				absolute_size = 0
-				if i < x["num_entries"] - 1:
+				if i < x["num_entries"]:
 					# Naive but fast, sometimes results in zeroes
 					absolute_size = x["entries"][i + 1]["absolute_address"] - x["entries"][i]["absolute_address"]
 				if absolute_size == 0:
