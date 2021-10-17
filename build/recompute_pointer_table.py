@@ -360,6 +360,7 @@ def addFileToDatabase(absolute_address : int, data: bytes):
 		"original_absolute_address": absolute_address,
 		"new_absolute_address": absolute_address,
 		"has_been_modified": False,
+		"is_bigger_than_original": False,
 		"has_been_written_to_rom": has_been_written_to_rom,
 		"is_pointer_table": is_pointer_table,
 		"data": data,
@@ -388,6 +389,7 @@ def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
 			data = bytes(data_array)
 
 		file_info["has_been_modified"] = True
+		file_info["is_bigger_than_original"] = len(data) > len(file_info["data"])
 		file_info["data"] = data
 
 def getNextAbsoluteAddress(absolute_address : int):
@@ -426,11 +428,25 @@ def shouldWritePointerTable(index : int):
 
 	# TODO: Figure out which pointer table indexes cause crashes when rebuilt
 	# TODO: Figure out how to fix those crashes
+	# TODO: Fix crash in text map when pointer tables index 0 || 1 || 2 || 3 are relocated
+	# TODO: Fix crash in Snide's when text index 42 (ROM 0x20064CE) is loaded when text table is relocated
 	if pointer_tables[index]:
 		for y in pointer_tables[index]["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
 				if file_info["has_been_modified"]:
+					return True
+
+	return False
+
+def shouldRelocatePointerTable(index : int):
+	global pointer_tables
+
+	if pointer_tables[index]:
+		for y in pointer_tables[index]["entries"]:
+			file_info = getFileInfo(y["absolute_address"])
+			if file_info:
+				if file_info["has_been_modified"] and file_info["is_bigger_than_original"]:
 					return True
 
 	return False
@@ -451,8 +467,10 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 		# Reserve free space for the pointer table in ROM
 		space_required = x["num_entries"] * 4
-		x["new_absolute_address"] = next_available_free_space
-		next_available_free_space += space_required
+		should_relocate = shouldRelocatePointerTable(x["index"])
+		if should_relocate:
+			x["new_absolute_address"] = next_available_free_space
+			next_available_free_space += space_required
 
 		# Update the file_info entry for the pointer table to point to the new reserved absolute address
 		pointer_table_file_info = getFileInfo(x["absolute_address"])
@@ -465,15 +483,15 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 			if file_info:
 				if len(file_info["data"]) > 0:
 					if not file_info["has_been_written_to_rom"]:
-						# Append the file to the ROM at the address of the next available free space
-						file_info["new_absolute_address"] = next_available_free_space
+						if should_relocate:
+							# Append the file to the ROM at the address of the next available free space
+							file_info["new_absolute_address"] = next_available_free_space
+							# Move the free space pointer along
+							next_available_free_space += len(file_info["data"])
 						file_info["has_been_written_to_rom"] = True
 						#print("   - File " + hex(file_info["original_absolute_address"]) + " is being written to ROM at new address " + hex(file_info["new_absolute_address"]))
-						fh.seek(next_available_free_space)
+						fh.seek(file_info["new_absolute_address"])
 						fh.write(file_info["data"])
-
-						# Move the free space pointer along
-						next_available_free_space += len(file_info["data"])
 					# else:
 					# 	print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
 
