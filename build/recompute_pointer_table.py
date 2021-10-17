@@ -412,6 +412,16 @@ def getNextAbsoluteAddress(absolute_address : int):
 
 	return absolute_address
 
+def shouldWritePointerTable(index : int):
+	# TODO: Figure out which pointer table indexes cause crashes when rebuilt
+	# TODO: Figure out how to fix those crashes
+	if index == 12:
+		return True
+	elif index == 14:
+		return True
+
+	return False
+
 def writeModifiedPointerTablesToROM(fh : BinaryIO):
 	global next_available_free_space
 	global pointer_tables
@@ -421,6 +431,9 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 	for x in pointer_tables:
 		# No need to recompute pointer tables with no entries in them
 		if x["num_entries"] == 0:
+			continue
+
+		if not shouldWritePointerTable(x["index"]):
 			continue
 
 		# Reserve free space for the pointer table in ROM
@@ -448,13 +461,16 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 						# Move the free space pointer along
 						next_available_free_space += len(file_info["data"])
-					#else:
-						#print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
+					# else:
+					# 	print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
 
 	# Recompute the pointer table using the new file addresses and write it in the reserved space
 	for x in pointer_tables:
 		# No need to recompute pointer tables with no entries in them
 		if x["num_entries"] == 0:
+			continue
+
+		if not shouldWritePointerTable(x["index"]):
 			continue
 
 		for y in x["entries"]:
@@ -465,8 +481,8 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 					adjusted_pointer |= 0x80000000
 				fh.seek(x["new_absolute_address"] + y["index"] * 4)
 				fh.write(adjusted_pointer.to_bytes(4, "big"))
-			else:
-				print(" WARNING: NO FILE INFO FOUND FOR " + hex(y["absolute_address"]))
+			# else:
+			# 	print(" WARNING: NO FILE INFO FOUND FOR " + hex(y["absolute_address"]))
 
 		# Redirect the global pointer to the new table
 		fh.seek(main_pointer_table_offset + x["index"] * 4)

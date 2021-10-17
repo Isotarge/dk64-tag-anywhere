@@ -43,8 +43,8 @@ file_dict = [
 		"name": "Title Screen",
 		"start": 0x112F54E, # - 0x101C50 = 0x102D8FE
 		"compressed_size": 0x32FE,
-		"source_file": "bin/Title.png",
-		#"source_file": "bin/Title_Bigger.png",
+		#"source_file": "bin/Title.png",
+		"source_file": "bin/Title_Bigger.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
 	},
@@ -90,7 +90,7 @@ import modules
 
 with open(newROMName, "r+b") as fh:
 	print("[3 / 5] - Parsing Pointer Tables")
-	#parsePointerTables(fh)
+	parsePointerTables(fh)
 
 	print("[4 / 5] - Writing modified files to ROM")
 	for x in file_dict:
@@ -142,7 +142,7 @@ with open(newROMName, "r+b") as fh:
 				print(" - Writing " + x['output_file'] + " to ROM, compressed size " + hex(len(compress)))
 				fh.seek(x["start"])
 				fh.write(compress)
-			#replaceROMFile(x["start"], compress)
+			replaceROMFile(x["start"], compress)
 		else:
 			print(x["output_file"] + " does not exist")
 
@@ -156,7 +156,7 @@ with open(newROMName, "r+b") as fh:
 					os.remove(x["source_file"])
 
 	print("[5 / 5] - Writing modified pointer tables to ROM")
-	#writeModifiedPointerTablesToROM(fh)
+	writeModifiedPointerTablesToROM(fh)
 
 	#print("[6 / 5] - Dumping details of all pointer tables")
 	#dumpPointerTableDetails()
