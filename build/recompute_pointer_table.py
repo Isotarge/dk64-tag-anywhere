@@ -291,10 +291,6 @@ def parsePointerTables(fh : BinaryIO):
 			"relative_address": relative_address,
 			"absolute_address": relative_address + main_pointer_table_offset,
 			"new_absolute_address": relative_address + main_pointer_table_offset,
-			"pointers": [{
-				"absolute_address": main_pointer_table_offset + i * 4,
-				"length_address": (main_pointer_table_offset + num_tables * 4) + i * 4
-			}],
 			"num_entries": 0,
 			"entries": [],
 		})
@@ -317,7 +313,6 @@ def parsePointerTables(fh : BinaryIO):
 				relative_address = raw_int & 0x7FFFFFFF
 				x["entries"].append({
 					"index": i,
-					"pointers": [],
 					"relative_address": relative_address,
 					"absolute_address": relative_address + main_pointer_table_offset,
 					"bit_set": (raw_int & 0x80000000) > 0,
@@ -329,14 +324,14 @@ def parsePointerTables(fh : BinaryIO):
 		if x["num_entries"] > 0:
 			i = 0
 			#print("CHECKING TABLE " + str(i))
-			while i < x["num_entries"] - 1:
+			while i < x["num_entries"]:
 				# Compute absolute size of each entry
-				absolute_size = x["entries"][i + 1]["absolute_address"] - x["entries"][i]["absolute_address"]
-				size_before = absolute_size
+				absolute_size = 0
+				if i < x["num_entries"] - 1:
+					absolute_size = x["entries"][i + 1]["absolute_address"] - x["entries"][i]["absolute_address"]
 				if absolute_size == 0:
 					absolute_size = getNextAbsoluteAddress(x["entries"][i]["absolute_address"]) - x["entries"][i]["absolute_address"]
-				#if size_before != absolute_size or absolute_size == 0:
-					#print("     - " + hex(x["entries"][i]["absolute_address"]) + ": " + hex(size_before) + " vs " + hex(absolute_size))
+
 				# Read data
 				fh.seek(x["entries"][i]["absolute_address"])
 				addFileToDatabase(x["entries"][i]["absolute_address"], fh.read(absolute_size))
@@ -410,20 +405,17 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 	global pointer_tables
 	global main_pointer_table_offset
 
+	# Reserve pointer table space and write new data
 	for x in pointer_tables:
-		print(" - Pointer table " + str(x["index"]) + ": " + x["name"] + " has been modified, recomputing offsets and writing a copy to the end of the ROM")
-		
 		# Reserve free space for the pointer table in ROM
 		space_required = x["num_entries"] * 4
 		x["new_absolute_address"] = next_available_free_space
 		next_available_free_space += space_required
 
-		# Write all zeroes to that free space for now
-		fh.seek(x["new_absolute_address"])
-		i = 0
-		while i < space_required:
-			fh.write(bytes([0, 0, 0, 0]))
-			i += 4
+		# Update the file_info entry for the pointer table to point to the new reserved absolute address
+		pointer_table_file_info = getFileInfo(x["absolute_address"])
+		if pointer_table_file_info:
+			pointer_table_file_info["new_absolute_address"] = x["new_absolute_address"]
 		
 		# Append all files referenced by the pointer table to ROM
 		for y in x["entries"]:
@@ -434,25 +426,17 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 						# Append the file to the ROM at the address of the next available free space
 						file_info["new_absolute_address"] = next_available_free_space
 						file_info["has_been_written_to_rom"] = True
-						print("   - File " + hex(file_info["original_absolute_address"]) + " is being written to ROM at new address " + hex(file_info["new_absolute_address"]))
+						#print("   - File " + hex(file_info["original_absolute_address"]) + " is being written to ROM at new address " + hex(file_info["new_absolute_address"]))
 						fh.seek(next_available_free_space)
 						fh.write(file_info["data"])
 
 						# Move the free space pointer along
 						next_available_free_space += len(file_info["data"])
-					else:
-						print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
+					#else:
+						#print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
 
-					# Adjust the pointers to the file to point to the appended version instead of the original version
-					for pointer in y["pointers"]:
-						fh.seek(pointer["absolute_address"])
-						adjusted_pointer = file_info["new_absolute_address"] - pointer["relative_to"]
-						if y["bit_set"]:
-							adjusted_pointer |= 0x80000000
-						fh.write(adjusted_pointer.to_bytes(4, "big"))
-						print("   - Pointer at " + hex(pointer["absolute_address"]) + " has been overwritten with the new value " + hex(adjusted_pointer) + " data size " + hex(len(file_info["data"])))
-
-		# Recompute the pointer table and write it in the reserved space
+	# Recompute the pointer table using the new file addresses and write it in the reserved space
+	for x in pointer_tables:
 		for y in x["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
@@ -461,6 +445,8 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 					adjusted_pointer |= 0x80000000
 				fh.seek(x["new_absolute_address"] + y["index"] * 4)
 				fh.write(adjusted_pointer.to_bytes(4, "big"))
+			else:
+				print(" WARNING: NO FILE INFO FOUND FOR " + hex(y["absolute_address"]))
 
 		# Redirect the global pointer to the new table
 		fh.seek(main_pointer_table_offset + x["index"] * 4)
@@ -470,15 +456,15 @@ def dumpPointerTableDetails():
 	global pointer_tables
 
 	for x in pointer_tables:
-		print(str(x["index"]) + ": " + x["name"] + ": " + hex(x["absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
+		print(str(x["index"]) + ": " + x["name"] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
 		for y in x["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
 				# Yes I know this is slow, working on it
 				if x["num_entries"] == 221:
-					print(" - " + str(y["index"]) + ": " + hex(file_info["original_absolute_address"]) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ") (" + maps[y["index"]] + ")")
+					print(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ") (" + maps[y["index"]] + ")")
 				else:
-					print(" - " + str(y["index"]) + ": " + hex(file_info["original_absolute_address"]) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ")")
+					print(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ")")
 				#print("    - " + file_info["data"].hex())
 			else:
 				print(" - File info not found for " + hex(y["absolute_address"]))
