@@ -282,12 +282,11 @@ def parsePointerTables(fh : BinaryIO):
 	fh.seek(main_pointer_table_offset)
 	i = 0
 	while i < num_tables:
-		relative_address = int.from_bytes(fh.read(4), "big")
+		absolute_address = int.from_bytes(fh.read(4), "big") + main_pointer_table_offset
 		pointer_tables.append({
 			"index": i,
-			"relative_address": relative_address,
-			"absolute_address": relative_address + main_pointer_table_offset,
-			"new_absolute_address": relative_address + main_pointer_table_offset,
+			"absolute_address": absolute_address,
+			"new_absolute_address": absolute_address,
 			"num_entries": 0,
 			"entries": [],
 		})
@@ -300,44 +299,28 @@ def parsePointerTables(fh : BinaryIO):
 		pointer_tables[i]["num_entries"] = int.from_bytes(fh.read(4), "big")
 		i += 1
 
-	# Read pointer table entries
+	# Read pointer table entries and data
 	for x in pointer_tables:
 		if x["num_entries"] > 0:
-			fh.seek(x["absolute_address"])
 			i = 0
-			while i <= x["num_entries"]:
+			while i < x["num_entries"]:
+				# Compute address and size information about the pointer
+				fh.seek(x["absolute_address"] + i * 4)
 				raw_int = int.from_bytes(fh.read(4), "big")
-				relative_address = raw_int & 0x7FFFFFFF
+				absolute_address = (raw_int & 0x7FFFFFFF) + main_pointer_table_offset
+				next_absolute_address = (int.from_bytes(fh.read(4), "big") & 0x7FFFFFFF) + main_pointer_table_offset
+				absolute_size = next_absolute_address - absolute_address
 				x["entries"].append({
 					"index": i,
-					"relative_address": relative_address,
-					"absolute_address": relative_address + main_pointer_table_offset,
+					"absolute_address": absolute_address,
+					"next_absolute_address": next_absolute_address,
 					"bit_set": (raw_int & 0x80000000) > 0,
 				})
-				i += 1
-	
-	# Read pointer table data
-	for x in pointer_tables:
-		if x["num_entries"] > 0:
-			i = 0
-			while i <= x["num_entries"]:
-				# Compute absolute size of each entry
-				absolute_size = 0
-				if i < x["num_entries"]:
-					# Naive but fast, sometimes results in zeroes
-					absolute_size = x["entries"][i + 1]["absolute_address"] - x["entries"][i]["absolute_address"]
-				if absolute_size == 0:
-					# Smart but slow
-					absolute_size = getNextAbsoluteAddress(x["entries"][i]["absolute_address"]) - x["entries"][i]["absolute_address"]
-
-				# Hardcoded fix for the last file
-				# TODO: Come up with a better solution for this (looks like a pointer table too, bleh)
-				if x["entries"][i]["absolute_address"] == 0x188AF00:
-					absolute_size = 0x20
 
 				# Read data
-				fh.seek(x["entries"][i]["absolute_address"])
-				addFileToDatabase(x["entries"][i]["absolute_address"], fh.read(absolute_size))
+				if absolute_size > 0:
+					fh.seek(absolute_address)
+					addFileToDatabase(absolute_address, fh.read(absolute_size))
 				i += 1
 
 def addFileToDatabase(absolute_address : int, data: bytes):
@@ -389,32 +372,6 @@ def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
 		file_info["is_bigger_than_original"] = len(data) > len(file_info["data"])
 		file_info["data"] = data
 
-def getNextAbsoluteAddress(absolute_address : int):
-	global pointer_tables
-	global num_tables
-
-	i = 0
-	while i < num_tables:
-		# Skip pointer tables too early in ROM for this absolute address
-		# Little optimisation to skip looping over unnecessary entries
-		if i < num_tables - 1 and pointer_tables[i + 1]["absolute_address"] < absolute_address:
-			i += 1
-			continue
-
-		if pointer_tables[i]["absolute_address"] > absolute_address:
-			return pointer_tables[i]["absolute_address"]
-
-		for y in pointer_tables[i]["entries"]:
-			if y["absolute_address"] > absolute_address:
-				return y["absolute_address"]
-		i += 1
-
-	return absolute_address
-
-# TODO: Figure out which pointer table indexes cause crashes when rebuilt
-# TODO: Figure out how to fix those crashes
-# TODO: Fix crash in text map when pointer tables index 0 || 1 || 2 || 3 are relocated
-# TODO: Fix crash in Snide's when text index 42 (ROM 0x20064CE) is loaded when text table is relocated
 force_table_rewrite = [
 	# 0, # Unknown 0
 	# 1, # Map Geometry
@@ -496,7 +453,7 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 			continue
 
 		# Reserve free space for the pointer table in ROM
-		space_required = x["num_entries"] * 4
+		space_required = x["num_entries"] * 4 + 4
 		should_relocate = shouldRelocatePointerTable(x["index"])
 		if should_relocate:
 			x["new_absolute_address"] = next_available_free_space
@@ -525,7 +482,7 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 					# else:
 					# 	print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
 
-	# Recompute the pointer table using the new file addresses and write it in the reserved space
+	# Recompute the pointer tables using the new file addresses and write them in the reserved space
 	for x in pointer_tables:
 		# No need to recompute pointer tables with no entries in them
 		if x["num_entries"] == 0:
@@ -534,7 +491,10 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		if not shouldWritePointerTable(x["index"]):
 			continue
 
-		for y in x["entries"]:
+		i = 0
+		while i < x["num_entries"]:
+			y = x["entries"][i]
+			# The other pointers are calculated as normal
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
 				adjusted_pointer = file_info["new_absolute_address"] - main_pointer_table_offset
@@ -542,8 +502,26 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 					adjusted_pointer |= 0x80000000
 				fh.seek(x["new_absolute_address"] + y["index"] * 4)
 				fh.write(adjusted_pointer.to_bytes(4, "big"))
-			# else:
-			# 	print(" WARNING: NO FILE INFO FOUND FOR " + hex(y["absolute_address"]))
+			else:
+				# TODO: Is this logic needed at all?
+				for z in pointer_tables:
+					if z["absolute_address"] == y["absolute_address"]:
+						# TODO: Write the adjusted address for the pointer table
+						break
+
+			i += 1
+
+		# The last pointer doesn't need to point to anything, except exactly after the file before it
+		# This allows the game to figure out the compressed size of the entry before it to DMA into RDRAM
+		# The pointer serves no other purpose
+		last_entry = x["entries"][x["num_entries"] - 1]
+		last_file_info = getFileInfo(last_entry["absolute_address"])
+		if last_file_info:
+			adjusted_pointer = file_info["new_absolute_address"] + len(file_info["data"]) - main_pointer_table_offset
+			fh.seek(x["new_absolute_address"] + x["num_entries"] * 4)
+			fh.write(adjusted_pointer.to_bytes(4, "big"))
+		else:
+			print("WARNING: NO FILE INFO FOUND FOR " + hex(x["entries"][i - 1]["absolute_address"]))
 
 		# Redirect the global pointer to the new table
 		fh.seek(main_pointer_table_offset + x["index"] * 4)
@@ -565,4 +543,6 @@ def dumpPointerTableDetails():
 					print(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ")")
 				#print("    - " + file_info["data"].hex())
 			else:
+				# TODO: This probably means a pointer in a table was pointing to a pointer table
+				# yo dawg
 				print(" - File info not found for " + hex(y["absolute_address"]))
