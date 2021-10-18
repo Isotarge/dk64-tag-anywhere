@@ -492,22 +492,26 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 			continue
 
 		i = 0
+		last_file_info = False
 		while i < x["num_entries"]:
 			y = x["entries"][i]
-			# The other pointers are calculated as normal
+			# Pointers to regular files calculated as normal
+			fh.seek(x["new_absolute_address"] + y["index"] * 4)
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
+				last_file_info = file_info
 				adjusted_pointer = file_info["new_absolute_address"] - main_pointer_table_offset
 				if y["bit_set"]:
 					adjusted_pointer |= 0x80000000
-				fh.seek(x["new_absolute_address"] + y["index"] * 4)
 				fh.write(adjusted_pointer.to_bytes(4, "big"))
 			else:
-				# TODO: Is this logic needed at all?
-				for z in pointer_tables:
-					if z["absolute_address"] == y["absolute_address"]:
-						# TODO: Write the adjusted address for the pointer table
-						break
+				# If no file info is found, it probably means this pointer isn't used for anything other then size calculation
+				# So, we'll base it on the last file info we found until I come up with a better solution
+				if last_file_info:
+					adjusted_pointer = (last_file_info["new_absolute_address"] + len(last_file_info["data"])) - main_pointer_table_offset
+					fh.write(adjusted_pointer.to_bytes(4, "big"))
+				else:
+					print("TODO: last_file_info not found for pointer at " + (x["new_absolute_address"] + y["index"] * 4))
 
 			i += 1
 
