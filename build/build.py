@@ -36,7 +36,7 @@ file_dict = [
 	},
 	{
 		"name": "Title Screen",
-		"start": 0x112F54E, # - 0x101C50 = 0x102D8FE
+		"start": 0x112F54E,
 		#"source_file": "bin/Title.png",
 		"source_file": "bin/Title_Bigger.png",
 		"texture_format": "rgba5551",
@@ -47,6 +47,12 @@ file_dict = [
 		"start": 0x1118420,
 		"source_file": "bin/Menu.bin",
 	},
+	# {
+	# 	"name": "Test Map Setup",
+	# 	"start": 0xD0EBE4,
+	# 	"source_file": "bin/CustomSetup.bin",
+	# 	"do_not_extract": True,
+	# }
 ]
 
 print("DK64 Extractor")
@@ -70,7 +76,7 @@ with open(ROMName, "r+b") as fh:
 		if "do_not_extract" in x and x["do_not_extract"]:
 			x["do_not_delete_source"] = True
 		
-		if not ("do_not_extract" in x and x['do_not_extract']):
+		if not ("do_not_extract" in x and x["do_not_extract"]):
 			byte_read = bytes()
 			file_info = getFileInfo(x["start"])
 			if file_info:
@@ -80,15 +86,17 @@ with open(ROMName, "r+b") as fh:
 				fh.seek(x["start"])
 				byte_read = fh.read(x["compressed_size"])
 
-			if os.path.exists(x["source_file"]):
-				os.remove(x["source_file"])
+			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):	
+				if os.path.exists(x["source_file"]):
+					os.remove(x["source_file"])
 
-			with open(x["source_file"], "wb") as fg:
-				dec = gzip.decompress(byte_read)
-				fg.write(dec)
+				with open(x["source_file"], "wb") as fg:
+					dec = gzip.decompress(byte_read)
+					fg.write(dec)
 
 print("[3 / 5] - Modifying extracted files")
-import modules
+import staticcode
+import mainmenu
 
 with open(newROMName, "r+b") as fh:
 	print("[4 / 5] - Writing modified files to ROM")
@@ -150,7 +158,7 @@ with open(newROMName, "r+b") as fh:
 		# Cleanup temporary files
 		if not ("do_not_delete" in x and x["do_not_delete"]):
 			if not ("do_not_delete_output" in x and x["do_not_delete_output"]):
-				if os.path.exists(x["output_file"]):
+				if os.path.exists(x["output_file"]) and x["output_file"] != x["source_file"]:
 					os.remove(x["output_file"])
 			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
 				if os.path.exists(x["source_file"]):

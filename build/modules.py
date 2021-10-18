@@ -1,2 +1,0 @@
-import staticcode
-import mainmenu
