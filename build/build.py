@@ -48,8 +48,9 @@ file_dict = [
 		"source_file": "bin/Menu.bin",
 	},
 	# {
-	# 	"name": "Test Map Setup",
-	# 	"start": 0xD0EBE4,
+	# 	"name": "Custom Map Setup",
+	# 	"start": 0xD0EBE4, # Test Map
+	# 	#"start": 0xD1DF04, # Aztec
 	# 	"source_file": "bin/CustomSetup.bin",
 	# 	"do_not_extract": True,
 	# }
@@ -102,9 +103,7 @@ with open(newROMName, "r+b") as fh:
 	print("[4 / 5] - Writing modified files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
-			if x["texture_format"] == "rgba5551":
-				result = subprocess.check_output(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
-			elif x["texture_format"] == "i4":
+			if x["texture_format"] in ["rgba5551", "i4"]:
 				result = subprocess.check_output(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
 			else:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
@@ -143,14 +142,7 @@ with open(newROMName, "r+b") as fh:
 				compress[6] = 0
 				compress[7] = 0
 
-			# Check whether compressed size is bigger than the original
-			# TODO: Only append modified pointer tables if the total compressed size is > total original compressed size
-			# Otherwise, modify them in place
-			if "compressed_size" in x and len(compress) > x["compressed_size"]:
-				print(" - WARNING: " + x["output_file"] + " (" + hex(len(compress)) + ") is bigger than the original (" + hex(x["compressed_size"]) + ")")
-			else:
-				print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
-
+			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
 			replaceROMFile(fh, x["start"], compress)
 		else:
 			print(x["output_file"] + " does not exist")
