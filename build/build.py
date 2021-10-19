@@ -3,7 +3,13 @@ import shutil
 import gzip
 import zlib
 import subprocess
+
+# Infrastructure for recomputing DK64 global pointer tables
 from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
+
+# Patcher functions for the extracted files
+from staticcode import patchStaticCode
+from mainmenu import patchMainMenu
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -19,6 +25,7 @@ file_dict = [
 		"compressed_size": 0xB15E4,
 		"source_file": "bin/StaticCode.bin",
 		"use_external_gzip": True,
+		"patcher": patchStaticCode
 	},
 	{
 		"name": "Nintendo Logo",
@@ -46,6 +53,7 @@ file_dict = [
 		"name": "Menu Text",
 		"start": 0x1118420,
 		"source_file": "bin/Menu.bin",
+		"patcher": patchMainMenu
 	},
 	# {
 	# 	"name": "Custom Map Setup",
@@ -59,10 +67,10 @@ file_dict = [
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
-	print("[1 / 5] - Parsing Pointer Tables")
+	print("[1 / 6] - Parsing pointer tables")
 	parsePointerTables(fh)
 
-	print("[2 / 5] - Unzipping files from ROM")
+	print("[2 / 6] - Extracting files from ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			x["do_not_extract"] = True
@@ -95,12 +103,14 @@ with open(ROMName, "r+b") as fh:
 					dec = gzip.decompress(byte_read)
 					fg.write(dec)
 
-print("[3 / 5] - Modifying extracted files")
-import staticcode
-import mainmenu
+print("[3 / 6] - Patching Extracted Files")
+for x in file_dict:
+	if "patcher" in x and callable(x["patcher"]):
+		print(" - Running patcher for " + x["source_file"])
+		x["patcher"](x["source_file"])
 
 with open(newROMName, "r+b") as fh:
-	print("[4 / 5] - Writing modified files to ROM")
+	print("[4 / 6] - Writing patched files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] in ["rgba5551", "i4"]:
@@ -156,10 +166,10 @@ with open(newROMName, "r+b") as fh:
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 
-	print("[5 / 5] - Writing modified pointer tables to ROM")
+	print("[5 / 6] - Writing recomputed pointer tables to ROM")
 	writeModifiedPointerTablesToROM(fh)
 
-	print("[6 / 5] - Dumping details of all pointer tables")
+	print("[6 / 6] - Dumping details of all pointer tables to build.log")
 	dumpPointerTableDetails()
 
 import generate_watch_file
