@@ -8,11 +8,11 @@ def patchStaticCode(filename):
 		# fh.seek(0x11925B)
 		# fh.write(bytearray([0x0])) # File Start Exit
 		# Enable setup files larger than originals
-		# fh.seek(0x8D690)
-		# fh.write(bytearray([0x24, 0x14, 0x00, 0x01]))
-		# fh.seek(0x369B4)
-		# fh.write(bytearray([0x10, 0x00, 0x00, 0x28]))
-		# fh.seek(0x369B8)
-		# fh.write(bytearray([0x00, 0x00, 0x00, 0x00]))
-		# fh.seek(0x369BC)
-		# fh.write(bytearray([0x00, 0x00, 0x00, 0x00]))
+		# fh.seek(0x8D690) # RDRAM 80688990
+		# fh.write(bytearray([0x24, 0x14, 0x00, 0x01])) # ADDIU $s4 $zero 0x0001
+		# fh.seek(0x369B4) # RDRAM 80631CB4
+		# fh.write(bytearray([0x10, 0x00, 0x00, 0x28])) # BEQ $zero $zero 0x0028
+		# fh.seek(0x369B8) # RDRAM 80631CB8
+		# fh.write(bytearray([0x00, 0x00, 0x00, 0x00])) # NOP
+		# fh.seek(0x369BC) # RDRAM 80631CBC
+		# fh.write(bytearray([0x00, 0x00, 0x00, 0x00])) # NOP
