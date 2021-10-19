@@ -493,39 +493,34 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 		i = 0
 		last_file_info = False
+		adjusted_pointer = 0
+		fh.seek(x["new_absolute_address"])
 		while i < x["num_entries"]:
 			y = x["entries"][i]
-			# Pointers to regular files calculated as normal
-			fh.seek(x["new_absolute_address"] + y["index"] * 4)
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
+				# Pointers to regular files calculated as normal
 				last_file_info = file_info
 				adjusted_pointer = file_info["new_absolute_address"] - main_pointer_table_offset
 				if y["bit_set"]:
 					adjusted_pointer |= 0x80000000
-				fh.write(adjusted_pointer.to_bytes(4, "big"))
 			else:
 				# If no file info is found, it probably means this pointer isn't used for anything other then size calculation
 				# So, we'll base it on the last file info we found until I come up with a better solution
 				if last_file_info:
-					adjusted_pointer = (last_file_info["new_absolute_address"] + len(last_file_info["data"])) - main_pointer_table_offset
-					fh.write(adjusted_pointer.to_bytes(4, "big"))
+					adjusted_pointer = last_file_info["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
 				else:
-					print("TODO: last_file_info not found for pointer at " + (x["new_absolute_address"] + y["index"] * 4))
+					print("TODO: last_file_info not found for pointer at " + hex(x["new_absolute_address"] + y["index"] * 4))
 
+			fh.write(adjusted_pointer.to_bytes(4, "big"))
 			i += 1
 
 		# The last pointer doesn't need to point to anything, except exactly after the file before it
 		# This allows the game to figure out the compressed size of the entry before it to DMA into RDRAM
 		# The pointer serves no other purpose
-		last_entry = x["entries"][x["num_entries"] - 1]
-		last_file_info = getFileInfo(last_entry["absolute_address"])
 		if last_file_info:
-			adjusted_pointer = file_info["new_absolute_address"] + len(file_info["data"]) - main_pointer_table_offset
-			fh.seek(x["new_absolute_address"] + x["num_entries"] * 4)
+			adjusted_pointer = last_file_info["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
 			fh.write(adjusted_pointer.to_bytes(4, "big"))
-		else:
-			print("WARNING: NO FILE INFO FOUND FOR " + hex(x["entries"][i - 1]["absolute_address"]))
 
 		# Redirect the global pointer to the new table
 		fh.seek(main_pointer_table_offset + x["index"] * 4)
