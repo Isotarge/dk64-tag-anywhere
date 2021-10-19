@@ -555,5 +555,5 @@ def dumpPointerTableDetails():
 				else:
 					# TODO: This probably means a pointer in a table was pointing to a pointer table
 					# yo dawg
-					fh.write(" - File info not found for " + hex(y["absolute_address"]))
+					fh.write(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " - WARNING: File info not found for " + hex(y["absolute_address"]))
 					fh.write("\n")
