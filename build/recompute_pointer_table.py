@@ -537,7 +537,6 @@ def dumpPointerTableDetails():
 
 	with open("build.log", "w") as fh:
 		for x in pointer_tables:
-			fh.writelines
 			fh.write(str(x["index"]) + ": " + pointer_table_names[x["index"]] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
 			fh.write("\n")
 			for y in x["entries"]:
