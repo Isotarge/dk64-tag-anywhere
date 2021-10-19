@@ -159,8 +159,8 @@ with open(newROMName, "r+b") as fh:
 	print("[5 / 5] - Writing modified pointer tables to ROM")
 	writeModifiedPointerTablesToROM(fh)
 
-	#print("[6 / 5] - Dumping details of all pointer tables")
-	#dumpPointerTableDetails()
+	print("[6 / 5] - Dumping details of all pointer tables")
+	dumpPointerTableDetails()
 
 import generate_watch_file
 

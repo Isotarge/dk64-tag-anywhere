@@ -535,18 +535,25 @@ def dumpPointerTableDetails():
 	global pointer_tables
 	global pointer_table_names
 
-	for x in pointer_tables:
-		print(str(x["index"]) + ": " + pointer_table_names[x["index"]] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
-		for y in x["entries"]:
-			file_info = getFileInfo(y["absolute_address"])
-			if file_info:
-				# Yes I know this is slow, working on it
-				if x["num_entries"] == 221:
-					print(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ") (" + maps[y["index"]] + ")")
+	with open("build.log", "w") as fh:
+		for x in pointer_tables:
+			fh.writelines
+			fh.write(str(x["index"]) + ": " + pointer_table_names[x["index"]] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
+			fh.write("\n")
+			for y in x["entries"]:
+				file_info = getFileInfo(y["absolute_address"])
+				if file_info:
+					# Yes I know this is slow, working on it
+					if x["num_entries"] == 221:
+						fh.write(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ") (" + maps[y["index"]] + ")")
+						fh.write("\n")
+					else:
+						fh.write(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ")")
+						fh.write("\n")
+					# fh.write("    - " + file_info["data"].hex())
+					# fh.write("\n")
 				else:
-					print(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ")")
-				#print("    - " + file_info["data"].hex())
-			else:
-				# TODO: This probably means a pointer in a table was pointing to a pointer table
-				# yo dawg
-				print(" - File info not found for " + hex(y["absolute_address"]))
+					# TODO: This probably means a pointer in a table was pointing to a pointer table
+					# yo dawg
+					fh.write(" - File info not found for " + hex(y["absolute_address"]))
+					fh.write("\n")
