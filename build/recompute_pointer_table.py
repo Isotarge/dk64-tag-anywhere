@@ -272,6 +272,27 @@ maps = [
 	"UNKNOWN 221",
 ]
 
+def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_index : int):
+	global pointer_tables
+
+	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
+
+	# print("Reading size for file " + str(pointer_table_index) + "->" + str(file_index) + " from ROM address " + hex(ROMAddress))
+
+	fh.seek(ROMAddress)
+	return int.from_bytes(fh.read(4), "big")
+
+# Write the new uncompressed size back to ROM to prevent malloc buffer overruns when decompressing
+def writeUncompressedSize(fh: BinaryIO, pointer_table_index : int, file_index : int, uncompressed_size : int):
+	global pointer_tables
+
+	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
+
+	print(" - Writing new uncompressed size " + hex(uncompressed_size) + " for file " + str(pointer_table_index) + "->" + str(file_index) + " to ROM address " + hex(ROMAddress))
+
+	fh.seek(ROMAddress)
+	fh.write(int.to_bytes(uncompressed_size, 4, "big"))
+
 def parsePointerTables(fh : BinaryIO):
 	global pointer_tables
 	global main_pointer_table_offset
@@ -299,7 +320,7 @@ def parsePointerTables(fh : BinaryIO):
 		pointer_tables[i]["num_entries"] = int.from_bytes(fh.read(4), "big")
 		i += 1
 
-	# Read pointer table entries and data
+	# Read pointer table entries
 	for x in pointer_tables:
 		if x["num_entries"] > 0:
 			i = 0
@@ -309,48 +330,49 @@ def parsePointerTables(fh : BinaryIO):
 				raw_int = int.from_bytes(fh.read(4), "big")
 				absolute_address = (raw_int & 0x7FFFFFFF) + main_pointer_table_offset
 				next_absolute_address = (int.from_bytes(fh.read(4), "big") & 0x7FFFFFFF) + main_pointer_table_offset
-				absolute_size = next_absolute_address - absolute_address
 				x["entries"].append({
 					"index": i,
 					"absolute_address": absolute_address,
 					"next_absolute_address": next_absolute_address,
 					"bit_set": (raw_int & 0x80000000) > 0,
 				})
-
-				# Read data
-				if absolute_size > 0:
-					fh.seek(absolute_address)
-					addFileToDatabase(absolute_address, fh.read(absolute_size))
 				i += 1
 
-def addFileToDatabase(absolute_address : int, data: bytes):
+	# Read data and original uncompressed size
+	for x in pointer_tables:
+		for y in x["entries"]:
+			absolute_size = y["next_absolute_address"] - y["absolute_address"]
+
+			if absolute_size > 0:
+				fh.seek(y["absolute_address"])
+				data = fh.read(absolute_size)
+				addFileToDatabase(y["absolute_address"], data, getOriginalUncompressedSize(fh, x["index"], y["index"]))
+
+def addFileToDatabase(absolute_address : int, data: bytes, uncompressed_size : int):
 	global files
 	global pointer_tables
 
 	has_been_written_to_rom = False
-	is_pointer_table = False
 	for x in pointer_tables:
 		if x["absolute_address"] == absolute_address:
 			has_been_written_to_rom = True
-			is_pointer_table = True
 			#print("WARNING: POINTER TABLE " + str(x["index"]) + " BEING USED AS FILE!")
 			break
 
 	files[hex(absolute_address)] = {
-		"original_absolute_address": absolute_address,
 		"new_absolute_address": absolute_address,
 		"has_been_modified": False,
 		"is_bigger_than_original": False,
 		"has_been_written_to_rom": has_been_written_to_rom,
-		"is_pointer_table": is_pointer_table,
 		"data": data,
+		"uncompressed_size": uncompressed_size,
 	}
 
 def getFileInfo(absolute_address: int):
 	if hex(absolute_address) in files:
 		return files[hex(absolute_address)]
 
-def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
+def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes, uncompressed_size : int):
 	global files
 
 	# Allow replacing files not contained in pointer tables
@@ -371,6 +393,7 @@ def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
 		file_info["has_been_modified"] = True
 		file_info["is_bigger_than_original"] = len(data) > len(file_info["data"])
 		file_info["data"] = data
+		file_info["uncompressed_size"] = uncompressed_size
 
 force_table_rewrite = [
 	# 0, # Music MIDI
@@ -488,11 +511,11 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 							# Move the free space pointer along
 							next_available_free_space += len(file_info["data"])
 						file_info["has_been_written_to_rom"] = True
-						#print("   - File " + hex(file_info["original_absolute_address"]) + " is being written to ROM at new address " + hex(file_info["new_absolute_address"]))
 						fh.seek(file_info["new_absolute_address"])
 						fh.write(file_info["data"])
-					# else:
-					# 	print("   - File " + hex(file_info["original_absolute_address"]) + " has already been written to ROM, skipping")
+
+				if file_info["has_been_modified"]:
+					writeUncompressedSize(fh, x["index"], y["index"], file_info["uncompressed_size"])
 
 	# Recompute the pointer tables using the new file addresses and write them in the reserved space
 	for x in pointer_tables:

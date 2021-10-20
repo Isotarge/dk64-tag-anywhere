@@ -128,8 +128,10 @@ with open(newROMName, "r+b") as fh:
 
 		if os.path.exists(x["output_file"]):
 			byte_read = bytes()
+			uncompressed_size = 0
 			with open(x["output_file"], "rb") as fg:
 				byte_read = fg.read()
+				uncompressed_size = len(byte_read)
 
 			if "use_external_gzip" in x and x["use_external_gzip"]:
 				compress = byte_read
@@ -153,7 +155,7 @@ with open(newROMName, "r+b") as fh:
 				compress[7] = 0
 
 			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
-			replaceROMFile(fh, x["start"], compress)
+			replaceROMFile(fh, x["start"], compress, uncompressed_size)
 		else:
 			print(x["output_file"] + " does not exist")
 
