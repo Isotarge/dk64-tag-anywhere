@@ -39,7 +39,7 @@ pointer_table_names = [
 	"Map Exits",
 	"Unknown 24",
 	"Textures",
-	"Unknown 26",
+	"Uncompressed File Sizes",
 	"Unknown 27",
 	"Unknown 28",
 	"Unknown 29",
@@ -399,7 +399,7 @@ force_table_rewrite = [
 	# 23, # Map Exits
 	# 24, # Unknown 24
 	# 25, # Textures
-	# 26, # Unknown 26
+	# 26, # Uncompressed File Sizes
 	# 27, # Unknown 27
 	# 28, # Unknown 28
 	# 29, # Unknown 29
@@ -410,6 +410,12 @@ force_table_rewrite = [
 
 def shouldWritePointerTable(index : int):
 	global pointer_tables
+
+	# Table 26 is a special case, it should never be manually overwritten
+	# Instead, it should be recomputed based on the new uncompressed file sizes of the replaced files
+	# This fixes heap corruption caused by a buffer overrun when decompressing a replaced file into a malloc'd buffer
+	if index == 26:
+		return False
 
 	if index in force_table_rewrite:
 		return True
@@ -425,6 +431,12 @@ def shouldWritePointerTable(index : int):
 
 def shouldRelocatePointerTable(index : int):
 	global pointer_tables
+
+	# Table 26 is a special case, it should never be manually overwritten
+	# Instead, it should be recomputed based on the new uncompressed file sizes of the replaced files
+	# This fixes heap corruption caused by a buffer overrun when decompressing a replaced file into a malloc'd buffer
+	if index == 26:
+		return False
 
 	if index in force_table_rewrite:
 		return True
