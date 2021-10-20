@@ -13,18 +13,18 @@ main_pointer_table_offset = 0x101C50
 files = {}
 
 pointer_table_names = [
-	"Unknown 0",
+	"Music MIDI",
 	"Map Geometry",
 	"Map Walls",
 	"Map Floors",
-	"Unknown 4",
-	"Unknown 5",
+	"Object Model 2 Geometry",
+	"Actor Geometry",
 	"Unknown 6",
-	"Unknown 7",
+	"Textures (Uncompressed)",
 	"Map Cutscenes",
 	"Map Object Setups",
 	"Map Data 0xA",
-	"Unknown 11",
+	"Animations",
 	"Text",
 	"Unknown 13",
 	"Textures",
@@ -373,18 +373,18 @@ def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
 		file_info["data"] = data
 
 force_table_rewrite = [
-	# 0, # Unknown 0
+	# 0, # Music MIDI
 	# 1, # Map Geometry
 	# 2, # Map Walls
 	# 3, # Map Floors
-	# 4, # Unknown 4
-	# 5, # Unknown 5
+	# 4, # Object Model 2 Geometry
+	# 5, # Actor Geometry
 	# 6, # Unknown 6
-	# 7, # Unknown 7
+	# 7, # Textures (Uncompressed)
 	# 8, # Map Cutscenes
 	# 9, # Map Object Setups
 	# 10, # Map Data 0xA
-	# 11, # Unknown 11
+	# 11, # Animations
 	# 12, # Text
 	# 13, # Unknown 13
 	# 14, # Textures
