@@ -87,12 +87,12 @@ def extractMap(mapIndex : int, mapPath : str):
     global relevant_pointer_tables
 
     if len(pointer_tables) < num_tables:
-        print("Warning: Pointer tables not initialized when calling extractMap(" + str(mapIndex) + ")")
+        # print("Warning: Pointer tables not initialized when calling extractMap(" + str(mapIndex) + ")")
         return
 
     for pointer_table in relevant_pointer_tables:
         if len(pointer_tables[pointer_table["index"]]["entries"]) <= mapIndex:
-            print("Warning: Pointer table " + str(pointer_table["index"]) + " did not contain an entry for index " + str(mapIndex))
+            # print("Warning: Pointer table " + str(pointer_table["index"]) + " did not contain an entry for index " + str(mapIndex))
             return
 
         entry = pointer_tables[pointer_table["index"]]["entries"][mapIndex]

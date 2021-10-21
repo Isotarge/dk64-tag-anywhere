@@ -5,8 +5,8 @@ import zlib
 import subprocess
 
 # Infrastructure for recomputing DK64 global pointer tables
-from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
-from extract_maps import extractMaps
+from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo, pointer_tables
+from extract_maps import extractMaps, relevant_pointer_tables
 
 # Patcher functions for the extracted files
 from staticcode import patchStaticCode
@@ -65,11 +65,34 @@ file_dict = [
 	# }
 ]
 
+map_replacements = [
+	# {
+	# 	"name": "Test Map",
+	# 	"map_index": 0,
+	# 	"map_folder": "maps/208 - Bloopers_Ending/"
+	# }
+]
+
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
 	print("[1 / 6] - Parsing pointer tables")
 	parsePointerTables(fh)
+
+	for x in map_replacements:
+		print(" - Processing map replacement " + x["name"])
+		if os.path.exists(x["map_folder"]):
+			for y in relevant_pointer_tables:
+				if os.path.exists(x["map_folder"] + y["output_filename"]):
+					print("  - Found " + x["map_folder"] + y["output_filename"])
+					entry = pointer_tables[y["index"]]["entries"][x["map_index"]]
+					if entry:
+						file_dict.append({
+							"name": x["name"] + y["name"],
+							"start": entry["absolute_address"],
+							"source_file": x["map_folder"] + y["output_filename"],
+							"do_not_extract": True,
+						})
 
 	print("[2 / 6] - Extracting files from ROM")
 	#extractMaps()
