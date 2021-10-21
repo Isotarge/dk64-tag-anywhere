@@ -6,6 +6,7 @@ import subprocess
 
 # Infrastructure for recomputing DK64 global pointer tables
 from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
+from extract_maps import extractMaps
 
 # Patcher functions for the extracted files
 from staticcode import patchStaticCode
@@ -71,6 +72,8 @@ with open(ROMName, "r+b") as fh:
 	parsePointerTables(fh)
 
 	print("[2 / 6] - Extracting files from ROM")
+	#extractMaps()
+
 	for x in file_dict:
 		if "texture_format" in x:
 			x["do_not_extract"] = True

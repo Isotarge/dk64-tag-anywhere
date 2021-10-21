@@ -28,13 +28,13 @@ pointer_table_names = [
 	"Text",
 	"Unknown 13",
 	"Textures",
-	"Map Balloon Trajectories",
+	"Map Paths",
 	"Map Character Spawners",
 	"Unknown 17",
 	"Map Loading Zones",
 	"Unknown 19",
 	"Unknown 20",
-	"Unknown 21",
+	"Map Data 0x15",
 	"Unknown 22",
 	"Map Exits",
 	"Unknown 24",
@@ -315,10 +315,8 @@ def parsePointerTables(fh : BinaryIO):
 
 	# Read pointer table lengths
 	fh.seek(main_pointer_table_offset + num_tables * 4)
-	i = 0
-	while i < num_tables:
-		pointer_tables[i]["num_entries"] = int.from_bytes(fh.read(4), "big")
-		i += 1
+	for x in pointer_tables:
+		x["num_entries"] = int.from_bytes(fh.read(4), "big")
 
 	# Read pointer table entries
 	for x in pointer_tables:
@@ -411,13 +409,13 @@ force_table_rewrite = [
 	# 12, # Text
 	# 13, # Unknown 13
 	# 14, # Textures
-	# 15, # Map Balloon Trajectories
+	# 15, # Map Paths
 	# 16, # Map Character Spawners
 	# 17, # Unknown 17
 	# 18, # Map Loading Zones
 	# 19, # Unknown 19
 	# 20, # Unknown 20
-	# 21, # Unknown 21
+	# 21, # Map Data 0x15
 	# 22, # Unknown 22
 	# 23, # Map Exits
 	# 24, # Unknown 24
@@ -530,8 +528,7 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		last_file_info = False
 		adjusted_pointer = 0
 		fh.seek(x["new_absolute_address"])
-		while i < x["num_entries"]:
-			y = x["entries"][i]
+		for y in x["entries"]:
 			file_info = getFileInfo(y["absolute_address"])
 			if file_info:
 				# Pointers to regular files calculated as normal
@@ -548,7 +545,6 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 					print("TODO: last_file_info not found for pointer at " + hex(x["new_absolute_address"] + y["index"] * 4))
 
 			fh.write(adjusted_pointer.to_bytes(4, "big"))
-			i += 1
 
 		# The last pointer doesn't need to point to anything, except exactly after the file before it
 		# This allows the game to figure out the compressed size of the entry before it to DMA into RDRAM

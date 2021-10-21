@@ -16,3 +16,6 @@ def patchStaticCode(filename):
 		# fh.write(bytearray([0x00, 0x00, 0x00, 0x00])) # NOP
 		# fh.seek(0x369BC) # RDRAM 80631CBC
 		# fh.write(bytearray([0x00, 0x00, 0x00, 0x00])) # NOP
+		# Load race overlay when no overlay specified
+		# fh.seek(0x15108) # RDRAM 80631048
+		# fh.write(bytearray([0x24, 0x09, 0x00, 0x05])) # ADDIU $t1 $zero 0x0005
