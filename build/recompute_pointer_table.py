@@ -524,7 +524,6 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		if not shouldWritePointerTable(x["index"]):
 			continue
 
-		i = 0
 		last_file_info = False
 		adjusted_pointer = 0
 		fh.seek(x["new_absolute_address"])
@@ -534,7 +533,8 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 				# Pointers to regular files calculated as normal
 				last_file_info = file_info
 				adjusted_pointer = file_info["new_absolute_address"] - main_pointer_table_offset
-				if y["bit_set"]:
+				# TODO: Pass in whether bit should be set from file_dict
+				if y["bit_set"] and not file_info["has_been_modified"]:
 					adjusted_pointer |= 0x80000000
 			else:
 				# If no file info is found, it probably means this pointer isn't used for anything other then size calculation
