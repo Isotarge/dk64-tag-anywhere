@@ -23,7 +23,7 @@ pointer_table_names = [
 	"Textures (Uncompressed)",
 	"Map Cutscenes",
 	"Map Object Setups",
-	"Map Data 0xA",
+	"Map Object Model 2 Behaviour Scripts",
 	"Animations",
 	"Text",
 	"Unknown 13",
@@ -37,7 +37,7 @@ pointer_table_names = [
 	"Map Data 0x15",
 	"Unknown 22",
 	"Map Exits",
-	"Unknown 24",
+	"Map Race Checkpoints",
 	"Textures",
 	"Uncompressed File Sizes",
 	"Unknown 27",
@@ -404,7 +404,7 @@ force_table_rewrite = [
 	# 7, # Textures (Uncompressed)
 	# 8, # Map Cutscenes
 	# 9, # Map Object Setups
-	# 10, # Map Data 0xA
+	# 10, # Map Object Model 2 Behaviour Scripts
 	# 11, # Animations
 	# 12, # Text
 	# 13, # Unknown 13
@@ -418,7 +418,7 @@ force_table_rewrite = [
 	# 21, # Map Data 0x15
 	# 22, # Unknown 22
 	# 23, # Map Exits
-	# 24, # Unknown 24
+	# 24, # Map Race Checkpoints
 	# 25, # Textures
 	# 26, # Uncompressed File Sizes
 	# 27, # Unknown 27

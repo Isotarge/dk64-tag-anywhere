@@ -6,7 +6,7 @@ import subprocess
 
 # Infrastructure for recomputing DK64 global pointer tables
 from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo, pointer_tables
-from extract_maps import extractMaps, relevant_pointer_tables
+from extract_maps import relevant_pointer_tables
 
 # Patcher functions for the extracted files
 from staticcode import patchStaticCode
@@ -45,8 +45,7 @@ file_dict = [
 	{
 		"name": "Title Screen",
 		"start": 0x112F54E,
-		#"source_file": "bin/Title.png",
-		"source_file": "bin/Title_Bigger.png",
+		"source_file": "bin/Title.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
 	},
@@ -56,13 +55,6 @@ file_dict = [
 		"source_file": "bin/Menu.bin",
 		"patcher": patchMainMenu
 	},
-	# {
-	# 	"name": "Custom Map Setup",
-	# 	"start": 0xD0EBE4, # Test Map
-	# 	#"start": 0xD1DF04, # Aztec
-	# 	"source_file": "bin/CustomSetup.bin",
-	# 	"do_not_extract": True,
-	# }
 ]
 
 map_replacements = [
@@ -76,7 +68,7 @@ map_replacements = [
 print("DK64 Extractor")
 
 with open(ROMName, "r+b") as fh:
-	print("[1 / 6] - Parsing pointer tables")
+	print("[1 / 7] - Parsing pointer tables")
 	parsePointerTables(fh)
 
 	for x in map_replacements:
@@ -94,8 +86,7 @@ with open(ROMName, "r+b") as fh:
 							"do_not_extract": True,
 						})
 
-	print("[2 / 6] - Extracting files from ROM")
-	#extractMaps()
+	print("[2 / 7] - Extracting files from ROM")
 
 	for x in file_dict:
 		if "texture_format" in x:
@@ -129,14 +120,14 @@ with open(ROMName, "r+b") as fh:
 					dec = gzip.decompress(byte_read)
 					fg.write(dec)
 
-print("[3 / 6] - Patching Extracted Files")
+print("[3 / 7] - Patching Extracted Files")
 for x in file_dict:
 	if "patcher" in x and callable(x["patcher"]):
 		print(" - Running patcher for " + x["source_file"])
 		x["patcher"](x["source_file"])
 
 with open(newROMName, "r+b") as fh:
-	print("[4 / 6] - Writing patched files to ROM")
+	print("[4 / 7] - Writing patched files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] in ["rgba5551", "i4"]:
@@ -194,12 +185,13 @@ with open(newROMName, "r+b") as fh:
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 
-	print("[5 / 6] - Writing recomputed pointer tables to ROM")
+	print("[5 / 7] - Writing recomputed pointer tables to ROM")
 	writeModifiedPointerTablesToROM(fh)
 
-	print("[6 / 6] - Dumping details of all pointer tables to build.log")
+	print("[6 / 7] - Dumping details of all pointer tables to build.log")
 	dumpPointerTableDetails()
 
+print("[7 / 7] - Generating BizHawk RAM watch")
 import generate_watch_file
 
 exit()

@@ -2,7 +2,9 @@ from typing import BinaryIO
 import os
 import zlib
 
-from recompute_pointer_table import num_tables, pointer_tables, maps, files, getFileInfo
+ROMName = "./rom/dk64.z64"
+
+from recompute_pointer_table import num_tables, pointer_tables, maps, files, getFileInfo, parsePointerTables
 
 relevant_pointer_tables = [
     {
@@ -32,8 +34,8 @@ relevant_pointer_tables = [
     },
     {
         "index": 10,
-        "name": "Map Data 0xA",
-        "output_filename": "map_0x0a.bin",
+        "name": "Map Object Model 2 Behaviour Scripts",
+        "output_filename": "object_behaviour_scripts.bin",
     },
     {
         "index": 15,
@@ -59,6 +61,11 @@ relevant_pointer_tables = [
         "index": 23,
         "name": "Map Exits",
         "output_filename": "exits.bin",
+    },
+    {
+        "index": 24,
+        "name": "Map Race Checkpoints",
+        "output_filename": "race_checkpoints.bin",
     },
 ]
 
@@ -114,3 +121,10 @@ def extractMap(mapIndex : int, mapPath : str):
                 else:
                     with open(built_filename, "wb") as fh:
                         fh.write(data)
+
+if __name__ == '__main__':
+    with open(ROMName, "r+b") as fh:
+        print("[1 / 2] - Parsing pointer tables")
+        parsePointerTables(fh)
+        print("[2 / 2] - Extracting maps")
+        extractMaps()
