@@ -4,8 +4,10 @@ import gzip
 import zlib
 import subprocess
 
+import json
+
 # Infrastructure for recomputing DK64 global pointer tables
-from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo, pointer_tables
+from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
 from extract_maps import relevant_pointer_tables
 
 # Patcher functions for the extracted files
@@ -30,7 +32,8 @@ file_dict = [
 	},
 	{
 		"name": "Nintendo Logo",
-		"start": 0x1156AC4,
+		"pointer_table_index": 14,
+		"file_index": 94,
 		"source_file": "bin/Nintendo.png",
 		#"source_file": "bin/Nintendo_TJ.png",
 		#"source_file": "bin/Nintendo_Adam.png",
@@ -38,20 +41,23 @@ file_dict = [
 	},
 	{
 		"name": "Dolby Logo",
-		"start": 0x116818C,
+		"pointer_table_index": 14,
+		"file_index": 176,
 		"source_file": "bin/Dolby.png",
 		"texture_format": "i4",
 	},
 	{
 		"name": "Title Screen",
-		"start": 0x112F54E,
+		"pointer_table_index": 14,
+		"file_index": 44,
 		"source_file": "bin/Title.png",
 		"texture_format": "rgba5551",
 		"use_zlib": True,
 	},
 	{
 		"name": "Menu Text",
-		"start": 0x1118420,
+		"pointer_table_index": 12,
+		"file_index": 37,
 		"source_file": "bin/Menu.bin",
 		"patcher": patchMainMenu
 	},
@@ -80,19 +86,18 @@ with open(ROMName, "r+b") as fh:
 
 				if os.path.exists(x["map_folder"] + y["output_filename"]):
 					print("  - Found " + x["map_folder"] + y["output_filename"])
-					entry = pointer_tables[y["index"]]["entries"][x["map_index"]]
-					if entry:
-						file_dict.append({
-							"name": x["name"] + y["name"],
-							"start": entry["absolute_address"],
-							"source_file": x["map_folder"] + y["output_filename"],
-							"do_not_extract": True,
-							"do_not_compress": "do_not_compress" in y and y["do_not_compress"],
-						})
+					file_dict.append({
+						"name": x["name"] + y["name"],
+						"pointer_table_index": y["index"],
+						"file_index": x["map_index"],
+						"source_file": x["map_folder"] + y["output_filename"],
+						"do_not_extract": True,
+						"do_not_compress": "do_not_compress" in y and y["do_not_compress"],
+					})
 
 	print("[2 / 7] - Extracting files from ROM")
-
 	for x in file_dict:
+		# N64Tex conversions do not need to be extracted to disk from ROM
 		if "texture_format" in x:
 			x["do_not_extract"] = True
 			x["output_file"] = x["source_file"].replace(".png", "." + x["texture_format"])
@@ -100,21 +105,25 @@ with open(ROMName, "r+b") as fh:
 		if not "output_file" in x:
 			x["output_file"] = x["source_file"]
 
+		# gzip.exe appends .gz to the filename, we'll do the same
 		if "use_external_gzip" in x and x["use_external_gzip"]:
 			x["output_file"] = x["output_file"] + ".gz"
 
+		# If we're not extracting the file to disk, we're using a custom .bin that shoudn't be deleted
 		if "do_not_extract" in x and x["do_not_extract"]:
 			x["do_not_delete_source"] = True
-		
+
+		# Extract the compressed file from ROM
 		if not ("do_not_extract" in x and x["do_not_extract"]):
 			byte_read = bytes()
-			file_info = getFileInfo(x["start"])
-			if file_info:
-				x["compressed_size"] = len(file_info["data"])
-				byte_read = file_info["data"]
-			else:
-				fh.seek(x["start"])
-				byte_read = fh.read(x["compressed_size"])
+			if "pointer_table_index" in x and "file_index" in x:
+				file_info = getFileInfo(x["pointer_table_index"], x["file_index"])
+				if file_info:
+					x["start"] = file_info["new_absolute_address"]
+					x["compressed_size"] = len(file_info["data"])
+
+			fh.seek(x["start"])
+			byte_read = fh.read(x["compressed_size"])
 
 			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):	
 				if os.path.exists(x["source_file"]):
@@ -177,7 +186,12 @@ with open(newROMName, "r+b") as fh:
 				compress[7] = 0
 
 			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
-			replaceROMFile(fh, x["start"], compress, uncompressed_size)
+			if "start" in x:
+				# Simply write the bytes at the absolute address in ROM specified by x["start"]
+				writeROMFile(fh, x["start"], compress)
+			elif "pointer_table_index" in x and "file_index" in x:
+				# More complicated write, update the pointer tables to point to the new data
+				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size)
 		else:
 			print(x["output_file"] + " does not exist")
 
@@ -194,7 +208,7 @@ with open(newROMName, "r+b") as fh:
 	writeModifiedPointerTablesToROM(fh)
 
 	print("[6 / 7] - Dumping details of all pointer tables to build.log")
-	dumpPointerTableDetails()
+	dumpPointerTableDetails(fh)
 
 print("[7 / 7] - Generating BizHawk RAM watch")
 import generate_watch_file

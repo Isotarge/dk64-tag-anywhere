@@ -4,7 +4,7 @@ import zlib
 
 ROMName = "./rom/dk64.z64"
 
-from recompute_pointer_table import num_tables, pointer_tables, maps, files, getFileInfo, parsePointerTables
+from recompute_pointer_table import num_tables, pointer_tables, maps, getFileInfo, parsePointerTables
 
 relevant_pointer_tables = [
     {
@@ -93,7 +93,6 @@ def extractMaps():
 
 def extractMap(mapIndex : int, mapPath : str):
     global pointer_tables
-    global files
     global num_tables
     global relevant_pointer_tables
 
@@ -109,12 +108,12 @@ def extractMap(mapIndex : int, mapPath : str):
         entry = pointer_tables[pointer_table["index"]]["entries"][mapIndex]
 
         if entry["bit_set"]:
-            file_info = getFileInfo(entry["absolute_address"])
+            file_info = getFileInfo(pointer_table["index"], entry["index"])
             if file_info:
                 index = int.from_bytes(bytes([file_info["data"][0], file_info["data"][1]]), "big")
                 entry = pointer_tables[pointer_table["index"]]["entries"][index]
 
-        file_info = getFileInfo(entry["absolute_address"])
+        file_info = getFileInfo(pointer_table["index"], entry["index"])
         if file_info:
             if len(file_info["data"]) > 0:
                 built_filename = mapPath + pointer_table["output_filename"]
