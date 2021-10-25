@@ -1,3 +1,4 @@
+import hashlib
 from typing import BinaryIO
 
 # The address of the next available byte of free space in ROM
@@ -11,6 +12,11 @@ pointer_tables = []
 main_pointer_table_offset = 0x101C50
 
 files = {}
+
+# These will be indexed by pointer table index then by SHA1 hash of the data
+pointer_table_files = []
+for i in range(num_tables):
+	pointer_table_files.append({})
 
 pointer_table_names = [
 	"Music MIDI",
@@ -301,8 +307,7 @@ def parsePointerTables(fh : BinaryIO):
 
 	# Read pointer table addresses
 	fh.seek(main_pointer_table_offset)
-	i = 0
-	while i < num_tables:
+	for i in range(num_tables):
 		absolute_address = int.from_bytes(fh.read(4), "big") + main_pointer_table_offset
 		pointer_tables.append({
 			"index": i,
@@ -311,7 +316,6 @@ def parsePointerTables(fh : BinaryIO):
 			"num_entries": 0,
 			"entries": [],
 		})
-		i += 1
 
 	# Read pointer table lengths
 	fh.seek(main_pointer_table_offset + num_tables * 4)
@@ -321,8 +325,7 @@ def parsePointerTables(fh : BinaryIO):
 	# Read pointer table entries
 	for x in pointer_tables:
 		if x["num_entries"] > 0:
-			i = 0
-			while i < x["num_entries"]:
+			for i in range(x["num_entries"]):
 				# Compute address and size information about the pointer
 				fh.seek(x["absolute_address"] + i * 4)
 				raw_int = int.from_bytes(fh.read(4), "big")
@@ -334,19 +337,21 @@ def parsePointerTables(fh : BinaryIO):
 					"next_absolute_address": next_absolute_address,
 					"bit_set": (raw_int & 0x80000000) > 0,
 				})
-				i += 1
 
 	# Read data and original uncompressed size
 	for x in pointer_tables:
 		for y in x["entries"]:
-			absolute_size = y["next_absolute_address"] - y["absolute_address"]
+			if y["bit_set"]:
+				continue
+			else:					
+				absolute_size = y["next_absolute_address"] - y["absolute_address"]
 
-			if absolute_size > 0:
-				fh.seek(y["absolute_address"])
-				data = fh.read(absolute_size)
-				addFileToDatabase(y["absolute_address"], data, getOriginalUncompressedSize(fh, x["index"], y["index"]))
+				if absolute_size > 0:
+					fh.seek(y["absolute_address"])
+					data = fh.read(absolute_size)
+					addFileToDatabase(fh, y["absolute_address"], data, x["index"], y["index"])
 
-def addFileToDatabase(absolute_address : int, data: bytes, uncompressed_size : int):
+def addFileToDatabase(fh : BinaryIO, absolute_address : int, data: bytes, pointer_table_index : int, file_index : int):
 	global files
 	global pointer_tables
 
@@ -357,10 +362,24 @@ def addFileToDatabase(absolute_address : int, data: bytes, uncompressed_size : i
 			#print("WARNING: POINTER TABLE " + str(x["index"]) + " BEING USED AS FILE!")
 			break
 
+	dataSHA1Hash = hashlib.sha1(data).hexdigest()
+	uncompressed_size = getOriginalUncompressedSize(fh, pointer_table_index, file_index)
+
+	pointer_tables[pointer_table_index]["entries"][file_index]["original_sha1"] = dataSHA1Hash
+	pointer_tables[pointer_table_index]["entries"][file_index]["new_sha1"] = dataSHA1Hash
+
+	# TODO: Get rid of this
 	files[hex(absolute_address)] = {
 		"new_absolute_address": absolute_address,
 		"has_been_modified": False,
 		"is_bigger_than_original": False,
+		"has_been_written_to_rom": has_been_written_to_rom,
+		"data": data,
+		"uncompressed_size": uncompressed_size,
+		"sha1": dataSHA1Hash
+	}
+	pointer_table_files[pointer_table_index][dataSHA1Hash] = {
+		"new_absolute_address": absolute_address,
 		"has_been_written_to_rom": has_been_written_to_rom,
 		"data": data,
 		"uncompressed_size": uncompressed_size,
@@ -369,6 +388,10 @@ def addFileToDatabase(absolute_address : int, data: bytes, uncompressed_size : i
 def getFileInfo(absolute_address: int):
 	if hex(absolute_address) in files:
 		return files[hex(absolute_address)]
+
+def writeROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
+	fh.seek(absolute_address)
+	fh.write(data)
 
 def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes, uncompressed_size : int):
 	global files
@@ -388,9 +411,11 @@ def replaceROMFile(fh : BinaryIO, absolute_address : int, data: bytes, uncompres
 			data_array.append(0)
 			data = bytes(data_array)
 
+		dataSHA1Hash = hashlib.sha1(data).hexdigest()
 		file_info["has_been_modified"] = True
 		file_info["is_bigger_than_original"] = len(data) > len(file_info["data"])
 		file_info["data"] = data
+		file_info["sha1"] = dataSHA1Hash
 		file_info["uncompressed_size"] = uncompressed_size
 
 force_table_rewrite = [
@@ -569,12 +594,17 @@ def dumpPointerTableDetails():
 				file_info = getFileInfo(y["absolute_address"])
 				if file_info:
 					# Yes I know this is slow, working on it
+					fh.write(" - " + str(y["index"]) + ": ")
+					fh.write(hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]))
+					fh.write(" (" + hex(len(file_info["data"])) + ")")
+					fh.write(" (" + str(y["bit_set"]) + ")")
+
 					if x["num_entries"] == 221:
-						fh.write(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ") (" + maps[y["index"]] + ")")
-						fh.write("\n")
-					else:
-						fh.write(" - " + str(y["index"]) + ": " + hex(x["new_absolute_address"] + y["index"] * 4) + " -> " + hex(file_info["new_absolute_address"]) + " (" + hex(len(file_info["data"])) + ") (" + str(y["bit_set"]) + ")")
-						fh.write("\n")
+						fh.write(" (" + maps[y["index"]] + ")")
+
+					fh.write(" (" + str(file_info["sha1"]) + ")")
+					fh.write("\n")
+
 					# fh.write("    - " + file_info["data"].hex())
 					# fh.write("\n")
 				else:
