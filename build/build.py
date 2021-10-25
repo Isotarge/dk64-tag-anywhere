@@ -7,7 +7,7 @@ import subprocess
 import json
 
 # Infrastructure for recomputing DK64 global pointer tables
-from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
+from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
 from extract_maps import relevant_pointer_tables
 
 # Patcher functions for the extracted files
@@ -188,7 +188,8 @@ with open(newROMName, "r+b") as fh:
 			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
 			if "start" in x:
 				# Simply write the bytes at the absolute address in ROM specified by x["start"]
-				writeROMFile(fh, x["start"], compress)
+				fh.seek(x["start"])
+				fh.write(compress)
 			elif "pointer_table_index" in x and "file_index" in x:
 				# More complicated write, update the pointer tables to point to the new data
 				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size)

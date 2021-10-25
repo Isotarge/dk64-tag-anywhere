@@ -220,12 +220,6 @@ def getFileInfo(pointer_table_index : int, file_index : int):
 
 	return pointer_table_files[pointer_table_index][pointer_tables[pointer_table_index]["entries"][file_index]["new_sha1"]]
 
-# Allow replacing files not contained in pointer tables
-# Eg. Static Code
-def writeROMFile(fh : BinaryIO, absolute_address : int, data: bytes):
-	fh.seek(absolute_address)
-	fh.write(data)
-
 def replaceROMFile(pointer_table_index : int, file_index : int, data: bytes, uncompressed_size : int):
 	global pointer_tables
 	global pointer_table_files
@@ -274,31 +268,6 @@ def shouldWritePointerTable(index : int):
 
 	return False
 
-def shouldRelocatePointerTable(index : int):
-	global pointer_tables
-
-	# Table 6 is nonsense.
-	# Table 26 is a special case, it should never be manually overwritten
-	# Instead, it should be recomputed based on the new uncompressed file sizes of the replaced files
-	# This fixes heap corruption caused by a buffer overrun when decompressing a replaced file into a malloc'd buffer
-	if index in [6, 26]:
-		return False
-
-	# No need to recompute pointer tables with no entries in them
-	if pointer_tables[index]["num_entries"] == 0:
-		return False
-
-	if index in force_table_rewrite:
-		return True
-
-	# TODO: Better logic for this
-	if pointer_tables[index]:
-		for y in pointer_tables[index]["entries"]:
-			if y["original_sha1"] != y["new_sha1"]:
-				return True
-
-	return False
-
 def writeModifiedPointerTablesToROM(fh : BinaryIO):
 	global next_available_free_space
 	global pointer_tables
@@ -311,11 +280,11 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 		# Reserve free space for the pointer table in ROM
 		space_required = x["num_entries"] * 4 + 4
-		should_relocate = shouldRelocatePointerTable(x["index"])
+		should_relocate = shouldWritePointerTable(x["index"])
 		if should_relocate:
 			x["new_absolute_address"] = next_available_free_space
 			next_available_free_space += space_required
-		
+
 		# Append all files referenced by the pointer table to ROM
 		for y in x["entries"]:
 			file_info = getFileInfo(x["index"], y["index"])
