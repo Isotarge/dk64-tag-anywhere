@@ -106,13 +106,6 @@ def extractMap(mapIndex : int, mapPath : str):
             return
 
         entry = pointer_tables[pointer_table["index"]]["entries"][mapIndex]
-
-        if entry["bit_set"]:
-            file_info = getFileInfo(pointer_table["index"], entry["index"])
-            if file_info:
-                index = int.from_bytes(bytes([file_info["data"][0], file_info["data"][1]]), "big")
-                entry = pointer_tables[pointer_table["index"]]["entries"][index]
-
         file_info = getFileInfo(pointer_table["index"], entry["index"])
         if file_info:
             if len(file_info["data"]) > 0:

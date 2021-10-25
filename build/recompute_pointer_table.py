@@ -139,6 +139,7 @@ def parsePointerTables(fh : BinaryIO):
 					"index": i,
 					"pointer_address": hex(x["absolute_address"] + i * 4),
 					"absolute_address": absolute_address,
+					"new_absolute_address": absolute_address,
 					"next_absolute_address": next_absolute_address,
 					"bit_set": (raw_int & 0x80000000) > 0,
 					"original_sha1": "",
@@ -197,8 +198,6 @@ def addFileToDatabase(fh : BinaryIO, absolute_address : int, absolute_size: int,
 	pointer_tables[pointer_table_index]["entries"][file_index]["new_sha1"] = dataSHA1Hash
 
 	pointer_table_files[pointer_table_index][dataSHA1Hash] = {
-		"has_been_written_to_rom": False,
-		"new_file_index": file_index, # We'll use this to compute the 2 byte lookup for bit_set style pointers in the recomputed tables
 		"new_absolute_address": absolute_address,
 		"data": data,
 		"sha1": dataSHA1Hash,
@@ -233,8 +232,6 @@ def replaceROMFile(pointer_table_index : int, file_index : int, data: bytes, unc
 	# Insert the new data into the database
 	dataSHA1Hash = hashlib.sha1(data).hexdigest()
 	pointer_table_files[pointer_table_index][dataSHA1Hash] = {
-		"has_been_written_to_rom": False,
-		"new_file_index": file_index, # We'll use this to compute the 2 byte lookup for bit_set style pointers in the recomputed tables
 		"data": data,
 		"sha1": dataSHA1Hash,
 		"uncompressed_size": uncompressed_size,
@@ -290,72 +287,49 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 			file_info = getFileInfo(x["index"], y["index"])
 			if file_info:
 				if len(file_info["data"]) > 0:
-					if not file_info["has_been_written_to_rom"]:
 						if should_relocate:
 							# Append the file to the ROM at the address of the next available free space
-							file_info["new_absolute_address"] = next_available_free_space
-							y["test_new_absolute_address"] = next_available_free_space
+							y["new_absolute_address"] = next_available_free_space
 							# Move the free space pointer along
 							next_available_free_space += len(file_info["data"])
-						file_info["new_file_index"] = y["index"]
-						# TODO: Re-enable deduplication once crashes are figured out
-						#file_info["has_been_written_to_rom"] = True
-						fh.seek(file_info["new_absolute_address"])
+						fh.seek(y["new_absolute_address"])
 						fh.write(file_info["data"])
-					else:
-						# Create a bit set pointer instead for this index
-						print("Warning: File " + hex(file_info["new_absolute_address"]) + " has already been written to ROM")
-						y["bit_set"] = True
-						y["bit_set_absolute_address"] = next_available_free_space
-						fh.seek(next_available_free_space)
-						fh.write(file_info["new_file_index"].to_bytes(2, "big"))
-						# next_available_free_space += 2
-						# TODO: What do these bytes mean
-						fh.write(bytearray([0x08, 0x00]))
-						fh.write(bytearray([0x00, 0x00, 0x00, 0x00]))
-						next_available_free_space += 8
 
 	# Recompute the pointer tables using the new file addresses and write them in the reserved space
 	for x in pointer_tables:
 		if not shouldWritePointerTable(x["index"]):
 			continue
 
+		last_entry = False
 		last_file_info = False
 		adjusted_pointer = 0
+		next_pointer = 0
 		for y in x["entries"]:
+			last_entry = y
 			file_info = getFileInfo(x["index"], y["index"])
 			if file_info:
 				# Pointers to regular files calculated as normal
-				last_file_info = file_info
-				# TODO: Figure this out
-				#adjusted_pointer = file_info["new_absolute_address"] - main_pointer_table_offset
-				adjusted_pointer = y["test_new_absolute_address"] - main_pointer_table_offset
-				if y["bit_set"]:
-					adjusted_pointer = y["bit_set_absolute_address"] - main_pointer_table_offset
-					adjusted_pointer |= 0x80000000
+				adjusted_pointer = y["new_absolute_address"] - main_pointer_table_offset
+				next_pointer = y["new_absolute_address"] + len(file_info["data"]) - main_pointer_table_offset
 			else:
 				# If no file info is found, it probably means this pointer isn't used for anything other then size calculation
 				# So, we'll base it on the last file info we found until I come up with a better solution
-				if last_file_info:
-					adjusted_pointer = last_file_info["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
+				if last_entry and "new_absolute_address" in last_entry:
+					last_file_info = getFileInfo(x["index"], last_entry["index"])
+					if last_file_info:
+						adjusted_pointer = last_entry["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
+						next_pointer = last_entry["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
 				else:
 					print("TODO: last_file_info not found for pointer at " + hex(x["new_absolute_address"] + y["index"] * 4))
 
 			# Update the pointer
 			fh.seek(x["new_absolute_address"] + y["index"] * 4)
 			fh.write(adjusted_pointer.to_bytes(4, "big"))
+			fh.write(next_pointer.to_bytes(4, "big"))
 
 			# Update the uncompressed filesize
 			if file_info and y["original_sha1"] != y["new_sha1"]:
 				writeUncompressedSize(fh, x["index"], y["index"], file_info["uncompressed_size"])
-
-		# The last pointer doesn't need to point to anything, except exactly after the file before it
-		# This allows the game to figure out the compressed size of the entry before it to DMA into RDRAM
-		# The pointer serves no other purpose
-		if last_file_info:
-			adjusted_pointer = last_file_info["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
-			fh.seek(x["new_absolute_address"] + x["num_entries"] * 4)
-			fh.write(adjusted_pointer.to_bytes(4, "big"))
 
 		# Redirect the global pointer to the new table
 		fh.seek(main_pointer_table_offset + x["index"] * 4)
@@ -385,19 +359,8 @@ def dumpPointerTableDetails(fr : BinaryIO):
 
 				fh.write(" (" + str(y["bit_set"]) + ")")
 
-				# Yes I know this is slow, working on it
 				if x["num_entries"] == 221:
 					fh.write(" (" + maps[y["index"]] + ")")
 
 				fh.write(" (" + str(y["new_sha1"]) + ")")
 				fh.write("\n")
-
-				if y["bit_set"]:
-					fr.seek(y["absolute_address"])
-					temp_bytes = fr.read(8)
-					fh.write(temp_bytes.hex())
-					fh.write("\n")
-
-				# Output full data
-				# fh.write("    - " + file_info["data"].hex())
-				# fh.write("\n")
