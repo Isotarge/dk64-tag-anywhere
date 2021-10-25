@@ -75,6 +75,9 @@ with open(ROMName, "r+b") as fh:
 		print(" - Processing map replacement " + x["name"])
 		if os.path.exists(x["map_folder"]):
 			for y in relevant_pointer_tables:
+				if "do_not_reimport" in y and y["do_not_reimport"]:
+					continue
+
 				if os.path.exists(x["map_folder"] + y["output_filename"]):
 					print("  - Found " + x["map_folder"] + y["output_filename"])
 					entry = pointer_tables[y["index"]]["entries"][x["map_index"]]
@@ -84,6 +87,7 @@ with open(ROMName, "r+b") as fh:
 							"start": entry["absolute_address"],
 							"source_file": x["map_folder"] + y["output_filename"],
 							"do_not_extract": True,
+							"do_not_compress": "do_not_compress" in y and y["do_not_compress"],
 						})
 
 	print("[2 / 7] - Extracting files from ROM")
@@ -150,9 +154,10 @@ with open(newROMName, "r+b") as fh:
 				byte_read = fg.read()
 				uncompressed_size = len(byte_read)
 
-			if "use_external_gzip" in x and x["use_external_gzip"]:
-				compress = byte_read
-				compress = bytearray(compress)
+			if "do_not_compress" in x and x["do_not_compress"]:
+				compress = bytearray(byte_read)
+			elif "use_external_gzip" in x and x["use_external_gzip"]:
+				compress = bytearray(byte_read)
 			elif "use_zlib" in x and x["use_zlib"]:
 				compressor = zlib.compressobj(zlib.Z_BEST_COMPRESSION, zlib.DEFLATED, 25)
 				compress = compressor.compress(byte_read)

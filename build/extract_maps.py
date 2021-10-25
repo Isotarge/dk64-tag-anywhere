@@ -36,15 +36,17 @@ relevant_pointer_tables = [
         "index": 10,
         "name": "Map Object Model 2 Behaviour Scripts",
         "output_filename": "object_behaviour_scripts.bin",
+        "do_not_reimport": True,
     },
     {
         "index": 15,
         "name": "Map Paths",
         "output_filename": "paths.bin",
+        "do_not_compress": True,
     },
     {
         "index": 16,
-        "name": "Map Paths",
+        "name": "Map Character Spawners",
         "output_filename": "character_spawners.bin",
     },
     {
@@ -56,11 +58,13 @@ relevant_pointer_tables = [
         "index": 21,
         "name": "Map Data 0x15",
         "output_filename": "map_0x15.bin",
+        "do_not_compress": True,
     },
     {
         "index": 23,
         "name": "Map Exits",
         "output_filename": "exits.bin",
+        "do_not_compress": True,
     },
     {
         "index": 24,
