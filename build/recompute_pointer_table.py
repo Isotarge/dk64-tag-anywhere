@@ -171,7 +171,7 @@ def parsePointerTables(fh : BinaryIO):
 					if file_info:
 						y["original_sha1"] = file_info["sha1"]
 						y["new_sha1"] = file_info["sha1"]
-						y["bit_set"] = False # We'll turn this back on later when recomputing pointer tables
+						#y["bit_set"] = False # We'll turn this back on later when recomputing pointer tables
 
 				# Find an entry with the same absolute address and copy the cached SHA1
 				if y["new_sha1"] == "":
@@ -335,11 +335,11 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		fh.seek(main_pointer_table_offset + x["index"] * 4)
 		fh.write((x["new_absolute_address"] - main_pointer_table_offset).to_bytes(4, "big"))
 
-def dumpPointerTableDetails(fr : BinaryIO):
+def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 	global pointer_tables
 	global pointer_table_names
 
-	with open("build.log", "w") as fh:
+	with open(filename, "w") as fh:
 		# fh.write(json.dumps(pointer_tables, indent=4, default=str))
 		# fh.write("\n")
 		for x in pointer_tables:

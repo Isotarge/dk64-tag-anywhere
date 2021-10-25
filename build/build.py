@@ -209,7 +209,7 @@ with open(newROMName, "r+b") as fh:
 	writeModifiedPointerTablesToROM(fh)
 
 	print("[6 / 7] - Dumping details of all pointer tables to build.log")
-	dumpPointerTableDetails(fh)
+	dumpPointerTableDetails("build.log", fh)
 
 print("[7 / 7] - Generating BizHawk RAM watch")
 import generate_watch_file
