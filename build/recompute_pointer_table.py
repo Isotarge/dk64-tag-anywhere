@@ -285,22 +285,24 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		# Reserve free space for the pointer table in ROM
 		space_required = x["num_entries"] * 4 + 4
 		should_relocate = shouldWritePointerTable(x["index"])
+		earliest_file_address = 0
 		if should_relocate:
 			x["new_absolute_address"] = next_available_free_space
 			next_available_free_space += space_required
+			earliest_file_address = next_available_free_space
 
 		# Append all files referenced by the pointer table to ROM
 		for y in x["entries"]:
 			file_info = getFileInfo(x["index"], y["index"])
 			if file_info:
 				if len(file_info["data"]) > 0:
-						if should_relocate:
-							# Append the file to the ROM at the address of the next available free space
-							y["new_absolute_address"] = next_available_free_space
-							# Move the free space pointer along
-							next_available_free_space += len(file_info["data"])
-						fh.seek(y["new_absolute_address"])
-						fh.write(file_info["data"])
+					if should_relocate:
+						# Append the file to the ROM at the address of the next available free space
+						y["new_absolute_address"] = next_available_free_space
+						# Move the free space pointer along
+						next_available_free_space += len(file_info["data"])
+					fh.seek(y["new_absolute_address"])
+					fh.write(file_info["data"])
 
 	# Recompute the pointer tables using the new file addresses and write them in the reserved space
 	for x in pointer_tables:
@@ -321,6 +323,11 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 					writeUncompressedSize(fh, x["index"], y["index"], file_info["uncompressed_size"])
 			else:
 				adjusted_pointer = next_pointer
+
+			# Fix for tables with no entry at slot 0
+			if adjusted_pointer == 0:
+				adjusted_pointer = earliest_file_address - main_pointer_table_offset
+				next_pointer = earliest_file_address - main_pointer_table_offset
 
 			# Update the pointer
 			fh.seek(x["new_absolute_address"] + y["index"] * 4)
