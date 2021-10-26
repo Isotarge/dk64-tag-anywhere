@@ -67,7 +67,8 @@ map_replacements = [
 	# {
 	# 	"name": "Test Map",
 	# 	"map_index": 0,
-	# 	"map_folder": "maps/208 - Bloopers_Ending/"
+	# 	# "map_folder": "maps/208 - Bloopers_Ending/"
+	# 	"map_folder": "maps/38 - Angry_Aztec/"
 	# }
 ]
 
@@ -186,13 +187,15 @@ with open(newROMName, "r+b") as fh:
 				compress[7] = 0
 
 			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
-			if "start" in x:
+			if "pointer_table_index" in x and "file_index" in x:
+				# More complicated write, update the pointer tables to point to the new data
+				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size)
+			elif "start" in x:
 				# Simply write the bytes at the absolute address in ROM specified by x["start"]
 				fh.seek(x["start"])
 				fh.write(compress)
-			elif "pointer_table_index" in x and "file_index" in x:
-				# More complicated write, update the pointer tables to point to the new data
-				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size)
+			else:
+				print("  - WARNING: Can't find address information in file_dict entry to write " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
 		else:
 			print(x["output_file"] + " does not exist")
 

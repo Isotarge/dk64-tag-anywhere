@@ -26,6 +26,7 @@ relevant_pointer_tables = [
         "index": 8,
         "name": "Map Cutscenes",
         "output_filename": "cutscenes.bin",
+        "do_not_reimport": True, # TODO: Figure out why this crashes
     },
     {
         "index": 9,
@@ -36,7 +37,7 @@ relevant_pointer_tables = [
         "index": 10,
         "name": "Map Object Model 2 Behaviour Scripts",
         "output_filename": "object_behaviour_scripts.bin",
-        "do_not_reimport": True,
+        # "do_not_reimport": True, # TODO: Does this still crash?
     },
     {
         "index": 15,

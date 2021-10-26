@@ -19,6 +19,7 @@ pointer_table_files = []
 for i in range(num_tables):
 	pointer_table_files.append({})
 
+# TODO: Merge into array of dicts by pointer table index, see relevant_pointer_tables
 pointer_table_names = [
 	"Music MIDI",
 	"Map Geometry",
@@ -54,6 +55,18 @@ pointer_table_names = [
 	"Unknown 31",
 	"Unknown 32",
 ]
+dont_overwrite_uncompressed_sizes = [
+	2, # Map Walls
+	3, # Map Floors
+	6, # Unknown 6
+	7, # Textures (Uncompressed)
+	11, # Animations
+	15, # Map Paths
+	20, # Unknown 20
+	21, # Map Data 0x15
+	23, # Map Exits
+	26, # Uncompressed File Sizes
+]
 force_table_rewrite = [
 	# 0, # Music MIDI
 	# 1, # Map Geometry
@@ -62,21 +75,16 @@ force_table_rewrite = [
 	# 4, # Object Model 2 Geometry
 	# 5, # Actor Geometry
 	# 7, # Textures (Uncompressed)
-	# 8, # Map Cutscenes
+	# 8, # Map Cutscenes # TODO: Why does this crash in Japes Lobby (talking to B. Locker or Wrinkly)?
 	# 9, # Map Object Setups
 	# 10, # Map Object Model 2 Behaviour Scripts
 	# 11, # Animations
 	# 12, # Text
-	# 13, # Unknown 13
 	# 14, # Textures
 	# 15, # Map Paths
 	# 16, # Map Character Spawners
-	# 17, # Unknown 17
 	# 18, # Map Loading Zones
-	# 19, # Unknown 19
-	# 20, # Unknown 20
 	# 21, # Map Data 0x15
-	# 22, # Unknown 22
 	# 23, # Map Exits
 	# 24, # Map Race Checkpoints
 	# 25, # Textures
@@ -84,6 +92,10 @@ force_table_rewrite = [
 
 def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_index : int):
 	global pointer_tables
+	global dont_overwrite_uncompressed_sizes
+
+	if pointer_table_index in dont_overwrite_uncompressed_sizes:
+		return 0
 
 	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
 
@@ -95,6 +107,10 @@ def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_i
 # Write the new uncompressed size back to ROM to prevent malloc buffer overruns when decompressing
 def writeUncompressedSize(fh: BinaryIO, pointer_table_index : int, file_index : int, uncompressed_size : int):
 	global pointer_tables
+	global dont_overwrite_uncompressed_sizes
+
+	if pointer_table_index in dont_overwrite_uncompressed_sizes:
+		return
 
 	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
 
@@ -148,16 +164,13 @@ def parsePointerTables(fh : BinaryIO):
 
 	# Read data and original uncompressed size
 	# Note: Needs to happen after all entries are read for annoying reasons
-	quickSHA1Lookup = []
 	for x in pointer_tables:
-		quickSHA1Lookup.append({})
 		if x["num_entries"] > 0:
 			for y in x["entries"]:
 				if not y["bit_set"]:
 					absolute_size = y["next_absolute_address"] - y["absolute_address"]
 					if absolute_size > 0:
 						file_info = addFileToDatabase(fh, y["absolute_address"], absolute_size, x["index"], y["index"])
-						quickSHA1Lookup[x["index"]][y["absolute_address"]] = file_info["sha1"]
 
 	# Go back over and look up SHA1s for the bit_set entries
 	# Note: Needs to be last because it's possible earlier entries point to later entries that might not have data yet
@@ -172,13 +185,6 @@ def parsePointerTables(fh : BinaryIO):
 						y["original_sha1"] = file_info["sha1"]
 						y["new_sha1"] = file_info["sha1"]
 						#y["bit_set"] = False # We'll turn this back on later when recomputing pointer tables
-
-				# Find an entry with the same absolute address and copy the cached SHA1
-				if y["new_sha1"] == "":
-					if y["absolute_address"] in quickSHA1Lookup[x["index"]]:
-						quickSHA1 = quickSHA1Lookup[x["index"]][y["absolute_address"]]
-						y["original_sha1"] = quickSHA1
-						y["new_sha1"] = quickSHA1
 
 def addFileToDatabase(fh : BinaryIO, absolute_address : int, absolute_size: int, pointer_table_index : int, file_index : int):
 	global pointer_tables
@@ -244,10 +250,11 @@ def shouldWritePointerTable(index : int):
 	global pointer_tables
 
 	# Table 6 is nonsense.
+	# TODO: Table 8 is per map cutscenes, I have no idea why these cause crashes but I'd like to figure it out eventually and re-enable this
 	# Table 26 is a special case, it should never be manually overwritten
 	# Instead, it should be recomputed based on the new uncompressed file sizes of the replaced files
 	# This fixes heap corruption caused by a buffer overrun when decompressing a replaced file into a malloc'd buffer
-	if index in [6, 26]:
+	if index in [6, 8, 26]:
 		return False
 
 	# No need to recompute pointer tables with no entries in them
@@ -300,36 +307,25 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		if not shouldWritePointerTable(x["index"]):
 			continue
 
-		last_entry = False
-		last_file_info = False
 		adjusted_pointer = 0
 		next_pointer = 0
 		for y in x["entries"]:
-			last_entry = y
 			file_info = getFileInfo(x["index"], y["index"])
 			if file_info:
 				# Pointers to regular files calculated as normal
 				adjusted_pointer = y["new_absolute_address"] - main_pointer_table_offset
 				next_pointer = y["new_absolute_address"] + len(file_info["data"]) - main_pointer_table_offset
+
+				# Update the uncompressed filesize
+				if y["original_sha1"] != y["new_sha1"]:
+					writeUncompressedSize(fh, x["index"], y["index"], file_info["uncompressed_size"])
 			else:
-				# If no file info is found, it probably means this pointer isn't used for anything other then size calculation
-				# So, we'll base it on the last file info we found until I come up with a better solution
-				if last_entry and "new_absolute_address" in last_entry:
-					last_file_info = getFileInfo(x["index"], last_entry["index"])
-					if last_file_info:
-						adjusted_pointer = last_entry["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
-						next_pointer = last_entry["new_absolute_address"] + len(last_file_info["data"]) - main_pointer_table_offset
-				else:
-					print("TODO: last_file_info not found for pointer at " + hex(x["new_absolute_address"] + y["index"] * 4))
+				adjusted_pointer = next_pointer
 
 			# Update the pointer
 			fh.seek(x["new_absolute_address"] + y["index"] * 4)
 			fh.write(adjusted_pointer.to_bytes(4, "big"))
 			fh.write(next_pointer.to_bytes(4, "big"))
-
-			# Update the uncompressed filesize
-			if file_info and y["original_sha1"] != y["new_sha1"]:
-				writeUncompressedSize(fh, x["index"], y["index"], file_info["uncompressed_size"])
 
 		# Redirect the global pointer to the new table
 		fh.seek(main_pointer_table_offset + x["index"] * 4)
@@ -338,6 +334,7 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 	global pointer_tables
 	global pointer_table_names
+	global main_pointer_table_offset
 
 	with open(filename, "w") as fh:
 		# fh.write(json.dumps(pointer_tables, indent=4, default=str))
@@ -346,17 +343,21 @@ def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 			fh.write(str(x["index"]) + ": " + pointer_table_names[x["index"]] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
 			fh.write("\n")
 			for y in x["entries"]:
-				file_info = getFileInfo(x["index"], y["index"])
-				
 				fh.write(" - " + str(y["index"]) + ": ")
 				fh.write(hex(x["new_absolute_address"] + y["index"] * 4) + " -> ")
+				fr.seek(x["new_absolute_address"] + y["index"] * 4)
+				pointing_to = (int.from_bytes(fr.read(4), "big") & 0x7FFFFFFF) + main_pointer_table_offset
+				fh.write(hex(pointing_to))
 
+				file_info = getFileInfo(x["index"], y["index"])
 				if file_info and "new_absolute_address" in file_info:
-					fh.write(hex(file_info["new_absolute_address"]))
 					fh.write(" (" + hex(len(file_info["data"])) + ")")
 				else:
-					fh.write("WARNING: File info not found for " + hex(y["absolute_address"]))
+					fh.write(" WARNING: File info not found")
 
+				uncompressed_size = getOriginalUncompressedSize(fr, x["index"], y["index"])
+				if uncompressed_size > 0:
+					fh.write(" (" + hex(uncompressed_size) + ")")
 				fh.write(" (" + str(y["bit_set"]) + ")")
 
 				if x["num_entries"] == 221:
