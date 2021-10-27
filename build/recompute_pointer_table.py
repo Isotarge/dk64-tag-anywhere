@@ -4,69 +4,175 @@ from typing import BinaryIO
 
 import json
 
+pointer_tables = [
+	{
+		"index": 0,
+		"name": "Music MIDI",
+	},
+	{
+		"index": 1,
+		"name": "Map Geometry",
+		"output_filename": "geometry.bin",
+	},
+	{
+		"index": 2,
+		"name": "Map Walls",
+		"output_filename": "walls.bin",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 3,
+		"name": "Map Floors",
+		"output_filename": "floors.bin",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 4,
+		"name": "Object Model 2 Geometry",
+	},
+	{
+		"index": 5,
+		"name": "Actor Geometry",
+	},
+	{
+		"index": 6,
+		"name": "Unknown 6",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 7,
+		"name": "Textures (Uncompressed)",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 8,
+		"name": "Map Cutscenes",
+		"output_filename": "cutscenes.bin",
+	},
+	{
+		"index": 9,
+		"name": "Map Object Setups",
+		"output_filename": "setup.bin",
+	},
+	{
+		"index": 10,
+		"name": "Map Object Model 2 Behaviour Scripts",
+		"output_filename": "object_behaviour_scripts.bin",
+	},
+	{
+		"index": 11,
+		"name": "Animations",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 12,
+		"name": "Text",
+	},
+	{
+		"index": 13,
+		"name": "Unknown 13",
+	},
+	{
+		"index": 14,
+		"name": "Textures",
+	},
+	{
+		"index": 15,
+		"name": "Map Paths",
+		"output_filename": "paths.bin",
+		"do_not_compress": True,
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 16,
+		"name": "Map Character Spawners",
+		"output_filename": "character_spawners.bin",
+	},
+	{
+		"index": 17,
+		"name": "Unknown 17",
+	},
+	{
+		"index": 18,
+		"name": "Map Loading Zones",
+		"output_filename": "loading_zones.bin",
+	},
+	{
+		"index": 19,
+		"name": "Unknown 19",
+	},
+	{
+		"index": 20,
+		"name": "Unknown 20",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 21,
+		"name": "Map Autowalk Data",
+		"output_filename": "autowalk.bin",
+		"do_not_compress": True,
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 22,
+		"name": "Unknown 22",
+	},
+	{
+		"index": 23,
+		"name": "Map Exits",
+		"output_filename": "exits.bin",
+		"do_not_compress": True,
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 24,
+		"name": "Map Race Checkpoints",
+		"output_filename": "race_checkpoints.bin",
+	},
+	{
+		"index": 25,
+		"name": "Textures",
+	},
+	{
+		"index": 26,
+		"name": "Uncompressed File Sizes",
+		"dont_overwrite_uncompressed_sizes": True,
+	},
+	{
+		"index": 27,
+		"name": "Unknown 27",
+	},
+	{
+		"index": 28,
+		"name": "Unknown 28",
+	},
+	{
+		"index": 29,
+		"name": "Unknown 29",
+	},
+	{
+		"index": 30,
+		"name": "Unknown 30",
+	},
+	{
+		"index": 31,
+		"name": "Unknown 31",
+	},
+]
+
+num_tables = len(pointer_tables)
+main_pointer_table_offset = 0x101C50
+
 # The address of the next available byte of free space in ROM
 # used when appending files to the end of the ROM
 #next_available_free_space = 0x1FED020
 next_available_free_space = 0x2000000
 
-#num_tables = 27
-num_tables = 32
-pointer_tables = []
-main_pointer_table_offset = 0x101C50
-
 # These will be indexed by pointer table index then by SHA1 hash of the data
 pointer_table_files = []
-for i in range(num_tables):
+for x in pointer_tables:
 	pointer_table_files.append({})
 
-# TODO: Merge into array of dicts by pointer table index, see relevant_pointer_tables
-pointer_table_names = [
-	"Music MIDI",
-	"Map Geometry",
-	"Map Walls",
-	"Map Floors",
-	"Object Model 2 Geometry",
-	"Actor Geometry",
-	"Unknown 6",
-	"Textures (Uncompressed)",
-	"Map Cutscenes",
-	"Map Object Setups",
-	"Map Object Model 2 Behaviour Scripts",
-	"Animations",
-	"Text",
-	"Unknown 13",
-	"Textures",
-	"Map Paths",
-	"Map Character Spawners",
-	"Unknown 17",
-	"Map Loading Zones",
-	"Unknown 19",
-	"Unknown 20",
-	"Map Data 0x15",
-	"Unknown 22",
-	"Map Exits",
-	"Map Race Checkpoints",
-	"Textures",
-	"Uncompressed File Sizes",
-	"Unknown 27",
-	"Unknown 28",
-	"Unknown 29",
-	"Unknown 30",
-	"Unknown 31",
-	"Unknown 32",
-]
-dont_overwrite_uncompressed_sizes = [
-	2, # Map Walls
-	3, # Map Floors
-	6, # Unknown 6
-	7, # Textures (Uncompressed)
-	11, # Animations
-	15, # Map Paths
-	20, # Unknown 20
-	21, # Map Data 0x15
-	23, # Map Exits
-	26, # Uncompressed File Sizes
-]
 force_table_rewrite = [
 	# 0, # Music MIDI
 	# 1, # Map Geometry
@@ -75,7 +181,7 @@ force_table_rewrite = [
 	# 4, # Object Model 2 Geometry
 	# 5, # Actor Geometry
 	# 7, # Textures (Uncompressed)
-	# 8, # Map Cutscenes # TODO: Why does this crash in Japes Lobby (talking to B. Locker or Wrinkly)?
+	# 8, # Map Cutscenes
 	# 9, # Map Object Setups
 	# 10, # Map Object Model 2 Behaviour Scripts
 	# 11, # Animations
@@ -84,7 +190,7 @@ force_table_rewrite = [
 	# 15, # Map Paths
 	# 16, # Map Character Spawners
 	# 18, # Map Loading Zones
-	# 21, # Map Data 0x15
+	# 21, # Map Autowalk Data
 	# 23, # Map Exits
 	# 24, # Map Race Checkpoints
 	# 25, # Textures
@@ -92,9 +198,8 @@ force_table_rewrite = [
 
 def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_index : int):
 	global pointer_tables
-	global dont_overwrite_uncompressed_sizes
 
-	if pointer_table_index in dont_overwrite_uncompressed_sizes:
+	if "dont_overwrite_uncompressed_sizes" in pointer_tables[pointer_table_index]:
 		return 0
 
 	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
@@ -107,10 +212,9 @@ def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_i
 # Write the new uncompressed size back to ROM to prevent malloc buffer overruns when decompressing
 def writeUncompressedSize(fh: BinaryIO, pointer_table_index : int, file_index : int, uncompressed_size : int):
 	global pointer_tables
-	global dont_overwrite_uncompressed_sizes
 
-	if pointer_table_index in dont_overwrite_uncompressed_sizes:
-		return
+	if "dont_overwrite_uncompressed_sizes" in pointer_tables[pointer_table_index]:
+		return 0
 
 	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
 
@@ -127,20 +231,16 @@ def parsePointerTables(fh : BinaryIO):
 
 	# Read pointer table addresses
 	fh.seek(main_pointer_table_offset)
-	for i in range(num_tables):
+	for x in pointer_tables:
 		absolute_address = int.from_bytes(fh.read(4), "big") + main_pointer_table_offset
-		pointer_tables.append({
-			"index": i,
-			"absolute_address": absolute_address,
-			"new_absolute_address": absolute_address,
-			"num_entries": 0,
-			"entries": [],
-		})
+		x["absolute_address"] = absolute_address
+		x["new_absolute_address"] = absolute_address
 
 	# Read pointer table lengths
 	fh.seek(main_pointer_table_offset + num_tables * 4)
 	for x in pointer_tables:
 		x["num_entries"] = int.from_bytes(fh.read(4), "big")
+		x["entries"] = []
 
 	# Read pointer table entries
 	for x in pointer_tables:
@@ -190,6 +290,7 @@ def addFileToDatabase(fh : BinaryIO, absolute_address : int, absolute_size: int,
 	global pointer_tables
 	global pointer_table_files
 
+	# TODO: Get rid of this check
 	for x in pointer_tables:
 		if x["absolute_address"] == absolute_address:
 			print("WARNING: POINTER TABLE " + str(x["index"]) + " BEING USED AS FILE!")
@@ -229,6 +330,11 @@ def replaceROMFile(pointer_table_index : int, file_index : int, data: bytes, unc
 	global pointer_tables
 	global pointer_table_files
 
+	# TODO: Get this working
+	if pointer_table_index == 8 and file_index == 0:
+		print(" - WARNING: Tried to replace Test Map cutscenes. This will replace global cutscenes, so it has been disabled for now to prevent crashes.")
+		return
+
 	# Align data to 2 byte boundary for DMA
 	if (len(data) % 2 == 1):
 		data_array = bytearray(data)
@@ -250,11 +356,10 @@ def shouldWritePointerTable(index : int):
 	global pointer_tables
 
 	# Table 6 is nonsense.
-	# TODO: Table 8 is per map cutscenes, I have no idea why these cause crashes but I'd like to figure it out eventually and re-enable this
 	# Table 26 is a special case, it should never be manually overwritten
 	# Instead, it should be recomputed based on the new uncompressed file sizes of the replaced files
 	# This fixes heap corruption caused by a buffer overrun when decompressing a replaced file into a malloc'd buffer
-	if index in [6, 8, 26]:
+	if index in [6, 26]:
 		return False
 
 	# No need to recompute pointer tables with no entries in them
@@ -347,7 +452,7 @@ def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 		# fh.write(json.dumps(pointer_tables, indent=4, default=str))
 		# fh.write("\n")
 		for x in pointer_tables:
-			fh.write(str(x["index"]) + ": " + pointer_table_names[x["index"]] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
+			fh.write(str(x["index"]) + ": " + x["name"] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
 			fh.write("\n")
 			for y in x["entries"]:
 				fh.write(" - " + str(y["index"]) + ": ")

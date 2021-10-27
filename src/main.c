@@ -8,5 +8,11 @@ void cFuncLoop(void) {
 	*(unsigned int *)(0x80632014) = 0x24090212; // li $t1, 485 (original, Gloomy Galleon)
 	*(unsigned int *)(0x80632004) = 0x24080212; // li $t0, 500 (original, Angry Aztec)
 	*(unsigned int *)(0x80631FE4) = 0x24180212; // li $t8, 530 (original, Fungi Forest)
+
+	// Fix Bone Displacement
+	// Note: This will crash on console
+	// Note: Only enable this if you're playing on old versions of BizHawk, mupen64(plus) or PJ64
+	// *(unsigned int *)(0x8061963C) = 0x00000000;
+
 	tagAnywhere();
 }

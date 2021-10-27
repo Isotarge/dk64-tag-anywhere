@@ -7,8 +7,7 @@ import subprocess
 import json
 
 # Infrastructure for recomputing DK64 global pointer tables
-from recompute_pointer_table import dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
-from extract_maps import relevant_pointer_tables
+from recompute_pointer_table import pointer_tables, dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
 
 # Patcher functions for the extracted files
 from staticcode import patchStaticCode
@@ -69,7 +68,13 @@ map_replacements = [
 	# 	"map_index": 0,
 	# 	# "map_folder": "maps/208 - Bloopers_Ending/"
 	# 	"map_folder": "maps/38 - Angry_Aztec/"
-	# }
+	# },
+	# {
+	# 	"name": "Bloopers Ending",
+	# 	"map_index": 208,
+	# 	# "map_folder": "maps/208 - Bloopers_Ending/"
+	# 	"map_folder": "maps/38 - Angry_Aztec/"
+	# },
 ]
 
 print("DK64 Extractor")
@@ -81,8 +86,10 @@ with open(ROMName, "r+b") as fh:
 	for x in map_replacements:
 		print(" - Processing map replacement " + x["name"])
 		if os.path.exists(x["map_folder"]):
-			for y in relevant_pointer_tables:
+			for y in pointer_tables:
 				if "do_not_reimport" in y and y["do_not_reimport"]:
+					continue
+				if not "output_filename" in y:
 					continue
 
 				if os.path.exists(x["map_folder"] + y["output_filename"]):
