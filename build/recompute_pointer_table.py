@@ -445,7 +445,6 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 	global pointer_tables
-	global pointer_table_names
 	global main_pointer_table_offset
 
 	with open(filename, "w") as fh:
