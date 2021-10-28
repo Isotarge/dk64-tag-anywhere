@@ -53,6 +53,9 @@ def extractMap(mapIndex : int, mapPath : str):
                     with open(built_filename, "wb") as fh:
                         fh.write(data)
 
+                if "decoder" in pointer_table and callable(pointer_table["decoder"]):
+                    pointer_table["decoder"](built_filename)
+
 if __name__ == '__main__':
     with open(ROMName, "r+b") as fh:
         print("[1 / 2] - Parsing pointer tables")

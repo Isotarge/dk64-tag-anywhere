@@ -123,6 +123,8 @@ pointer_tables = [
 		"output_filename": "exits.bin",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
+		#"encoder": print,
+		#"decoder": print,
 	},
 	{
 		"index": 24,
