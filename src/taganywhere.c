@@ -256,7 +256,7 @@ int inBadMovementState(void) {
 		// Check for gorilla gone in effect bitfield
 		if (Player->strong_kong_ostand_bitfield & 0x40) {
 			return 1;
-		}	
+		}
 	}
 	return 0;
 }
@@ -266,8 +266,6 @@ void tagDenied() {
 		playSound(152, 0x2FFF, 63.0f, 1.0f, 0, 0);
 	} else if (NewlyPressedControllerInput.Buttons & D_Left) {
 		playSound(152, 0x2FFF, 63.0f, 1.0f, 0, 0);
-	} else {
-		return;
 	}
 }
 
@@ -275,24 +273,6 @@ void tagAnywhere(void) {
 	int _dest_character;
 	int tagDirection;
 	char* Snide;
-
-	// Enable stack trace upon crash
-	*(char *)(0x807563B4) = 1;
-	*(int *)(0x80731F78) = 0;
-
-	// Set Arcade High Scores
-	*(unsigned int *)(0x807467EC) = 999950;
-	*(unsigned int *)(0x807467F0) = 999950;
-	*(unsigned int *)(0x807467F4) = 999950;
-	*(unsigned int *)(0x807467F8) = 999950;
-	*(unsigned int *)(0x807467FC) = 999950;
-
-	// Unlock Mystery Menu
-	if (!checkFlag(0, 1)) {
-		for (int i = 0; i < 35; i++) {
-			setFlag(i, 1, 1);
-		}
-	}
 
 	// Main Menu
 	if (CurrentMap == 80) {

@@ -1,3 +1,3 @@
-.importobj "obj/lib.o"
-.importobj "obj/main.o"
-.importobj "obj/taganywhere.o"
+.importobj "obj/src_lib.o"
+.importobj "obj/src_main.o"
+.importobj "obj/src_taganywhere.o"

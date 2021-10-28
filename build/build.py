@@ -133,7 +133,7 @@ with open(ROMName, "r+b") as fh:
 			fh.seek(x["start"])
 			byte_read = fh.read(x["compressed_size"])
 
-			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):	
+			if not ("do_not_delete_source" in x and x["do_not_delete_source"]):
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 

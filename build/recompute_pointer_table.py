@@ -317,7 +317,7 @@ def getFileInfo(pointer_table_index : int, file_index : int):
 	global pointer_table_files
 	if not pointer_table_index in range(len(pointer_tables)):
 		return
-	
+
 	if not file_index in range(len(pointer_tables[pointer_table_index]["entries"])):
 		return
 

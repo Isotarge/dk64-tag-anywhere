@@ -4,7 +4,6 @@ echo.
 echo Compiling C code
 mkdir obj
 python build\compile.py
-move *.o obj\ > NUL
 echo.
 
 python build\build.py
