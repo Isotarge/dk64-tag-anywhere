@@ -4,6 +4,8 @@ from typing import BinaryIO
 
 import json
 
+from encoders import encodeExits, decodeExits
+
 pointer_tables = [
 	{
 		"index": 0,
@@ -121,10 +123,11 @@ pointer_tables = [
 		"index": 23,
 		"name": "Map Exits",
 		"output_filename": "exits.bin",
+		"input_filename": "exits.json",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
-		#"encoder": print,
-		#"decoder": print,
+		"encoder": encodeExits,
+		"decoder": decodeExits,
 	},
 	{
 		"index": 24,

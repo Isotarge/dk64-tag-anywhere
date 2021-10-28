@@ -70,10 +70,9 @@ map_replacements = [
 	# 	"map_folder": "maps/38 - Angry_Aztec/"
 	# },
 	# {
-	# 	"name": "Bloopers Ending",
-	# 	"map_index": 208,
-	# 	# "map_folder": "maps/208 - Bloopers_Ending/"
-	# 	"map_folder": "maps/38 - Angry_Aztec/"
+	# 	"name": "Fairy Island Exit Test",
+	# 	"map_index": 189,
+	# 	"map_folder": "maps/exit_test/"
 	# },
 ]
 
@@ -91,6 +90,12 @@ with open(ROMName, "r+b") as fh:
 					continue
 				if not "output_filename" in y:
 					continue
+
+				# Convert input_filename to output_filename using the encoder function
+				# Eg. exits.json to exits.bin
+				if "encoder" in y and callable(y["encoder"]):
+					if "input_filename" in y and os.path.exists(x["map_folder"] + y["input_filename"]):
+						y["encoder"](x["map_folder"] + y["input_filename"])
 
 				if os.path.exists(x["map_folder"] + y["output_filename"]):
 					print("  - Found " + x["map_folder"] + y["output_filename"])
