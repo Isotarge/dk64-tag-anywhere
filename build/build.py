@@ -8,6 +8,7 @@ import json
 
 # Infrastructure for recomputing DK64 global pointer tables
 from recompute_pointer_table import pointer_tables, dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
+from recompute_overlays import isROMAddressOverlay, readOverlayOriginalData, replaceOverlayData, writeModifiedOverlaysToROM
 
 # Patcher functions for the extracted files
 from staticcode import patchStaticCode
@@ -81,6 +82,7 @@ print("DK64 Extractor")
 with open(ROMName, "r+b") as fh:
 	print("[1 / 7] - Parsing pointer tables")
 	parsePointerTables(fh)
+	readOverlayOriginalData(fh)
 
 	for x in map_replacements:
 		print(" - Processing map replacement " + x["name"])
@@ -203,9 +205,12 @@ with open(newROMName, "r+b") as fh:
 				# More complicated write, update the pointer tables to point to the new data
 				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size)
 			elif "start" in x:
-				# Simply write the bytes at the absolute address in ROM specified by x["start"]
-				fh.seek(x["start"])
-				fh.write(compress)
+				if isROMAddressOverlay(x["start"]):
+					replaceOverlayData(x["start"], compress)
+				else:
+					# Simply write the bytes at the absolute address in ROM specified by x["start"]
+					fh.seek(x["start"])
+					fh.write(compress)
 			else:
 				print("  - WARNING: Can't find address information in file_dict entry to write " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
 		else:
@@ -222,6 +227,7 @@ with open(newROMName, "r+b") as fh:
 
 	print("[5 / 7] - Writing recomputed pointer tables to ROM")
 	writeModifiedPointerTablesToROM(fh)
+	writeModifiedOverlaysToROM(fh)
 
 	print("[6 / 7] - Dumping details of all pointer tables to build.log")
 	dumpPointerTableDetails("build.log", fh)
