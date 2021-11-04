@@ -61,6 +61,15 @@ file_dict = [
 		"source_file": "bin/Menu.bin",
 		"patcher": patchMainMenu
 	},
+	# {
+	# 	"name": "Chunky's Vest Back (Green & Yellow)",
+	# 	"pointer_table_index": 25,
+	# 	"file_index": 3769,
+	# 	"do_not_delete": True,
+	# 	"do_not_extract": True,
+	# 	"source_file": "bin/ChunkyVest.bin",
+	# 	# "texture_format": "rgba5551",
+	# },
 ]
 
 map_replacements = [
@@ -73,6 +82,11 @@ map_replacements = [
 	# {
 	# 	"name": "Fairy Island Exit Test",
 	# 	"map_index": 189,
+	# 	"map_folder": "maps/exit_test/"
+	# },
+	# {
+	# 	"name": "Japes Exit Test",
+	# 	"map_index": 7,
 	# 	"map_folder": "maps/exit_test/"
 	# },
 ]
@@ -90,22 +104,22 @@ with open(ROMName, "r+b") as fh:
 			for y in pointer_tables:
 				if "do_not_reimport" in y and y["do_not_reimport"]:
 					continue
-				if not "output_filename" in y:
+				if not "encoded_filename" in y:
 					continue
 
-				# Convert input_filename to output_filename using the encoder function
+				# Convert decoded_filename to encoded_filename using the encoder function
 				# Eg. exits.json to exits.bin
 				if "encoder" in y and callable(y["encoder"]):
-					if "input_filename" in y and os.path.exists(x["map_folder"] + y["input_filename"]):
-						y["encoder"](x["map_folder"] + y["input_filename"])
+					if "decoded_filename" in y and os.path.exists(x["map_folder"] + y["decoded_filename"]):
+						y["encoder"](x["map_folder"] + y["decoded_filename"], x["map_folder"] + y["encoded_filename"])
 
-				if os.path.exists(x["map_folder"] + y["output_filename"]):
-					print("  - Found " + x["map_folder"] + y["output_filename"])
+				if os.path.exists(x["map_folder"] + y["encoded_filename"]):
+					print("  - Found " + x["map_folder"] + y["encoded_filename"])
 					file_dict.append({
 						"name": x["name"] + y["name"],
 						"pointer_table_index": y["index"],
 						"file_index": x["map_index"],
-						"source_file": x["map_folder"] + y["output_filename"],
+						"source_file": x["map_folder"] + y["encoded_filename"],
 						"do_not_extract": True,
 						"do_not_compress": "do_not_compress" in y and y["do_not_compress"],
 					})

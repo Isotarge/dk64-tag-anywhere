@@ -33,7 +33,7 @@ def extractMap(mapIndex : int, mapPath : str):
         return
 
     for pointer_table in pointer_tables:
-        if not "output_filename" in pointer_table:
+        if not "encoded_filename" in pointer_table:
             continue
 
         if len(pointer_tables[pointer_table["index"]]["entries"]) <= mapIndex:
@@ -44,17 +44,18 @@ def extractMap(mapIndex : int, mapPath : str):
         file_info = getFileInfo(pointer_table["index"], entry["index"])
         if file_info:
             if len(file_info["data"]) > 0:
-                built_filename = mapPath + pointer_table["output_filename"]
+                decoded_filename = mapPath + pointer_table["decoded_filename"]
+                encoded_filename = mapPath + pointer_table["encoded_filename"]
                 data = file_info["data"]
                 if len(data) > 3 and data[0] == 0x1F and data[1] == 0x8B and data[2] == 0x08:
-                    with open(built_filename, "wb") as fh:
+                    with open(encoded_filename, "wb") as fh:
                         fh.write(zlib.decompress(data, 15 + 32))
                 else:
-                    with open(built_filename, "wb") as fh:
+                    with open(encoded_filename, "wb") as fh:
                         fh.write(data)
 
                 if "decoder" in pointer_table and callable(pointer_table["decoder"]):
-                    pointer_table["decoder"](built_filename)
+                    pointer_table["decoder"](decoded_filename, encoded_filename)
 
 if __name__ == '__main__':
     with open(ROMName, "r+b") as fh:

@@ -4,7 +4,7 @@ from typing import BinaryIO
 
 import json
 
-from encoders import encodeExits, decodeExits
+from encoders import encodeExits, decodeExits, encodeExitsPython, decodeExitsPython
 
 pointer_tables = [
 	{
@@ -14,18 +14,21 @@ pointer_tables = [
 	{
 		"index": 1,
 		"name": "Map Geometry",
-		"output_filename": "geometry.bin",
+		"encoded_filename": "geometry.bin",
+		"decoded_filename": "geometry.todo",
 	},
 	{
 		"index": 2,
 		"name": "Map Walls",
-		"output_filename": "walls.bin",
+		"encoded_filename": "walls.bin",
+		"decoded_filename": "walls.obj",
 		"dont_overwrite_uncompressed_sizes": True,
 	},
 	{
 		"index": 3,
 		"name": "Map Floors",
-		"output_filename": "floors.bin",
+		"encoded_filename": "floors.bin",
+		"decoded_filename": "floors.obj",
 		"dont_overwrite_uncompressed_sizes": True,
 	},
 	{
@@ -49,17 +52,20 @@ pointer_tables = [
 	{
 		"index": 8,
 		"name": "Map Cutscenes",
-		"output_filename": "cutscenes.bin",
+		"encoded_filename": "cutscenes.bin",
+		"decoded_filename": "cutscenes.todo",
 	},
 	{
 		"index": 9,
 		"name": "Map Object Setups",
-		"output_filename": "setup.bin",
+		"encoded_filename": "setup.bin",
+		"decoded_filename": "setup.yaml",
 	},
 	{
 		"index": 10,
 		"name": "Map Object Model 2 Behaviour Scripts",
-		"output_filename": "object_behaviour_scripts.bin",
+		"encoded_filename": "object_behaviour_scripts.bin",
+		"decoded_filename": "object_behaviour_scripts.todo",
 	},
 	{
 		"index": 11,
@@ -81,14 +87,16 @@ pointer_tables = [
 	{
 		"index": 15,
 		"name": "Map Paths",
-		"output_filename": "paths.bin",
+		"encoded_filename": "paths.bin",
+		"decoded_filename": "paths.yaml",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 	},
 	{
 		"index": 16,
 		"name": "Map Character Spawners",
-		"output_filename": "character_spawners.bin",
+		"encoded_filename": "character_spawners.bin",
+		"decoded_filename": "character_spawners.yaml",
 	},
 	{
 		"index": 17,
@@ -97,7 +105,8 @@ pointer_tables = [
 	{
 		"index": 18,
 		"name": "Map Loading Zones",
-		"output_filename": "loading_zones.bin",
+		"encoded_filename": "loading_zones.bin",
+		"decoded_filename": "loading_zones.yaml",
 	},
 	{
 		"index": 19,
@@ -111,7 +120,8 @@ pointer_tables = [
 	{
 		"index": 21,
 		"name": "Map Autowalk Data",
-		"output_filename": "autowalk.bin",
+		"encoded_filename": "autowalk.bin",
+		"decoded_filename": "autowalk.yaml",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 	},
@@ -122,17 +132,20 @@ pointer_tables = [
 	{
 		"index": 23,
 		"name": "Map Exits",
-		"output_filename": "exits.bin",
-		"input_filename": "exits.json",
+		"encoded_filename": "exits.bin",
+		"decoded_filename": "exits.json",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 		"encoder": encodeExits,
-		"decoder": decodeExits,
+		# "encoder": encodeExitsPython, # TODO
+		# "decoder": decodeExits,
+		"decoder": decodeExitsPython, # Sorry Mittenz, this is much faster than calling the C# version
 	},
 	{
 		"index": 24,
 		"name": "Map Race Checkpoints",
-		"output_filename": "race_checkpoints.bin",
+		"encoded_filename": "race_checkpoints.bin",
+		"decoded_filename": "race_checkpoints.yaml",
 	},
 	{
 		"index": 25,
