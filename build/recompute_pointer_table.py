@@ -2,9 +2,7 @@ import hashlib
 from map_names import maps
 from typing import BinaryIO
 
-import json
-
-from encoders import encodeExits, decodeExits, encodeExitsPython, decodeExitsPython
+from encoders import encodeExits, decodeExits
 
 pointer_tables = [
 	{
@@ -136,10 +134,10 @@ pointer_tables = [
 		"decoded_filename": "exits.json",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
+		# "encoder": encodeExitsCSharp,
+		# "decoder": decodeExitsCSharp,
 		"encoder": encodeExits,
-		# "encoder": encodeExitsPython, # TODO
-		# "decoder": decodeExits,
-		"decoder": decodeExitsPython, # Sorry Mittenz, this is much faster than calling the C# version
+		"decoder": decodeExits, # Sorry Mittenz, this is much faster than calling the C# version
 	},
 	{
 		"index": 24,
@@ -466,8 +464,6 @@ def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 	global main_pointer_table_offset
 
 	with open(filename, "w") as fh:
-		# fh.write(json.dumps(pointer_tables, indent=4, default=str))
-		# fh.write("\n")
 		for x in pointer_tables:
 			fh.write(str(x["index"]) + ": " + x["name"] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
 			fh.write("\n")
