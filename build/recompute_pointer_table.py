@@ -2,7 +2,7 @@ import hashlib
 from map_names import maps
 from typing import BinaryIO
 
-from encoders import encodeExits, decodeExits
+from encoders import encodeExits, decodeExits, decodePaths
 
 pointer_tables = [
 	{
@@ -86,7 +86,8 @@ pointer_tables = [
 		"index": 15,
 		"name": "Map Paths",
 		"encoded_filename": "paths.bin",
-		"decoded_filename": "paths.yaml",
+		"decoded_filename": "paths.json",
+		"decoder": decodePaths,
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 	},
