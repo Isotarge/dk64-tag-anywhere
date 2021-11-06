@@ -2,12 +2,6 @@ import subprocess
 import json
 import math
 
-def encodeExitsCSharp(decoded_filename : str, encoded_filename :str):
-    result = subprocess.check_output(["./build/dk64converter.exe", "encode", "exits", decoded_filename])
-
-def decodeExitsCSharp(decoded_filename : str, encoded_filename :str):
-    result = subprocess.check_output(["./build/dk64converter.exe", "decode", "exits", encoded_filename])
-
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
         exits = json.load(fjson)
@@ -76,3 +70,7 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
 
         with open(decoded_filename, "w") as fjson:
             json.dump(paths, fjson, indent=4, default=str)
+
+def encodePaths(decoded_filename : str, encoded_filename : str):
+    # TODO: Path encoder
+    return 0

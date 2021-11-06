@@ -2,7 +2,7 @@ import hashlib
 from map_names import maps
 from typing import BinaryIO
 
-from encoders import encodeExits, decodeExits, decodePaths
+from encoders import encodeExits, decodeExits, encodePaths, decodePaths
 
 pointer_tables = [
 	{
@@ -88,6 +88,7 @@ pointer_tables = [
 		"encoded_filename": "paths.bin",
 		"decoded_filename": "paths.json",
 		"decoder": decodePaths,
+		#"encoder": encodePaths, # TODO
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 	},
@@ -135,10 +136,8 @@ pointer_tables = [
 		"decoded_filename": "exits.json",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
-		# "encoder": encodeExitsCSharp,
-		# "decoder": decodeExitsCSharp,
 		"encoder": encodeExits,
-		"decoder": decodeExits, # Sorry Mittenz, this is much faster than calling the C# version
+		"decoder": decodeExits,
 	},
 	{
 		"index": 24,
