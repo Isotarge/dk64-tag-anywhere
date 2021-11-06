@@ -15,7 +15,7 @@ def encodeExits(decoded_filename : str, encoded_filename :str):
                 fh.write(int(exit["size"]).to_bytes(1, byteorder="big"))
 
 def decodeExits(decoded_filename : str, encoded_filename : str):
-    with open(encoded_filename, "r+b") as fh:
+    with open(encoded_filename, "rb") as fh:
         byte_read = fh.read()
         num_exits = math.floor(len(byte_read) / 0xA)
         exits = []
@@ -35,7 +35,7 @@ def decodeExits(decoded_filename : str, encoded_filename : str):
             json.dump(exits, fjson, indent=4, default=str)
 
 def decodePaths(decoded_filename : str, encoded_filename : str):
-    with open(encoded_filename, "r+b") as fh:
+    with open(encoded_filename, "rb") as fh:
         byte_read = fh.read()
 
         paths = []
@@ -72,5 +72,26 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
             json.dump(paths, fjson, indent=4, default=str)
 
 def encodePaths(decoded_filename : str, encoded_filename : str):
-    # TODO: Path encoder
-    return 0
+    with open(decoded_filename) as fjson:
+        paths = json.load(fjson)
+        with open(encoded_filename, "w+b") as fh:
+            # File header
+            fh.write(len(paths).to_bytes(2, byteorder="big", signed=False))
+
+            for path in paths:
+                num_points = len(path["points"]) if "points" in path else 0
+
+                # Path header
+                fh.write(int(path["id"]).to_bytes(2, byteorder="big", signed=False))
+                fh.write(num_points.to_bytes(2, byteorder="big", signed=False))
+                fh.write(int(path["unk4"]).to_bytes(2, byteorder="big", signed=False))
+
+                for p in range(num_points):
+                    point = path["points"][p]
+                    # Path points
+                    fh.write(int(point["unk0"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(int(point["x_pos"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(int(point["y_pos"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(int(point["z_pos"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(int(point["speed"]).to_bytes(1, byteorder="big"))
+                    fh.write(int(point["unk9"]).to_bytes(1, byteorder="big"))

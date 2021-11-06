@@ -87,8 +87,8 @@ pointer_tables = [
 		"name": "Map Paths",
 		"encoded_filename": "paths.bin",
 		"decoded_filename": "paths.json",
+		"encoder": encodePaths,
 		"decoder": decodePaths,
-		#"encoder": encodePaths, # TODO
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 	},
@@ -211,6 +211,14 @@ force_table_rewrite = [
 	# 24, # Map Race Checkpoints
 	# 25, # Textures
 ]
+
+def make_safe_filename(s : str):
+    def safe_char(c : str):
+        if c.isalnum():
+            return c
+        else:
+            return "_"
+    return "".join(safe_char(c) for c in s).rstrip("_")
 
 def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_index : int):
 	global pointer_tables

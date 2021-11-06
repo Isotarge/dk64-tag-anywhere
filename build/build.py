@@ -7,7 +7,8 @@ import subprocess
 import json
 
 # Infrastructure for recomputing DK64 global pointer tables
-from recompute_pointer_table import pointer_tables, dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo
+from map_names import maps
+from recompute_pointer_table import pointer_tables, dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo, make_safe_filename
 from recompute_overlays import isROMAddressOverlay, readOverlayOriginalData, replaceOverlayData, writeModifiedOverlaysToROM
 
 # Patcher functions for the extracted files
@@ -77,7 +78,8 @@ map_replacements = [
 	# 	"name": "Test Map",
 	# 	"map_index": 0,
 	# 	# "map_folder": "maps/208 - Bloopers_Ending/"
-	# 	"map_folder": "maps/38 - Angry_Aztec/"
+	# 	# "map_folder": "maps/38 - Angry_Aztec/"
+	# 	"map_folder": "maps/path_test/"
 	# },
 	# {
 	# 	"name": "Fairy Island Exit Test",
@@ -91,9 +93,19 @@ map_replacements = [
 	# },
 ]
 
+# Test all map replacements at once
+# TODO: Why does this crash with any combination of floors||walls||geometry
+# for mapIndex, mapName in enumerate(maps):
+# 	mapPath = "maps/" + str(mapIndex) + " - " + make_safe_filename(mapName) + "/"
+# 	map_replacements.append({
+# 		"name": mapName,
+# 		"map_index": mapIndex,
+# 		"map_folder": mapPath,
+# 	})
+
 print("DK64 Extractor")
 
-with open(ROMName, "r+b") as fh:
+with open(ROMName, "rb") as fh:
 	print("[1 / 7] - Parsing pointer tables")
 	parsePointerTables(fh)
 	readOverlayOriginalData(fh)

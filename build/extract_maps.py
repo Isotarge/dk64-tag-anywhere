@@ -4,15 +4,8 @@ import zlib
 
 ROMName = "./rom/dk64.z64"
 
-from recompute_pointer_table import num_tables, pointer_tables, maps, getFileInfo, parsePointerTables
-
-def make_safe_filename(s):
-    def safe_char(c):
-        if c.isalnum():
-            return c
-        else:
-            return "_"
-    return "".join(safe_char(c) for c in s).rstrip("_")
+from map_names import maps
+from recompute_pointer_table import num_tables, pointer_tables, getFileInfo, parsePointerTables, make_safe_filename
 
 def extractMaps():
     global maps
@@ -58,7 +51,7 @@ def extractMap(mapIndex : int, mapPath : str):
                     pointer_table["decoder"](decoded_filename, encoded_filename)
 
 if __name__ == '__main__':
-    with open(ROMName, "r+b") as fh:
+    with open(ROMName, "rb") as fh:
         print("[1 / 2] - Parsing pointer tables")
         parsePointerTables(fh)
         print("[2 / 2] - Extracting maps")
