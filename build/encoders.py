@@ -137,5 +137,31 @@ def decodeCheckpoints(decoded_filename : str, encoded_filename : str):
             json.dump(checkpoints, fjson, indent=4, default=str)
 
 def encodeCheckpoints(decoded_filename : str, encoded_filename : str):
-    # TODO
-    return 0
+    with open(decoded_filename) as fjson:
+        checkpoints = json.load(fjson)
+        with open(encoded_filename, "w+b") as fh:
+            # File header
+            fh.write(bytes([0x1]))
+            fh.write(len(checkpoints).to_bytes(2, byteorder="big", signed=False)) # Num Checkpoints
+            fh.write(len(checkpoints).to_bytes(2, byteorder="big", signed=False)) # Num Mappings
+
+            # Checkpoint index mapping
+            for checkpointIndex, checkpoint in enumerate(checkpoints):
+                if "mapping" in checkpoint:
+                    fh.write(checkpoint["mapping"].to_bytes(2, byteorder="big"))
+                else:
+                    fh.write(checkpointIndex.to_bytes(2, byteorder="big"))
+
+            # Checkpoint data
+            for checkpointIndex, checkpoint in enumerate(checkpoints):
+                fh.write(int(checkpoint["x_pos"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(checkpoint["y_pos"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(checkpoint["z_pos"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(checkpoint["angle"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(struct.pack('>f', checkpoint["unk8"])) # Float
+                fh.write(struct.pack('>f', checkpoint["unkC"])) # Float
+                fh.write(int(checkpoint["unk10"]).to_bytes(2, byteorder="big"))
+                fh.write(int(checkpoint["unk12"]).to_bytes(2, byteorder="big"))
+                fh.write(struct.pack('>f', checkpoint["unk14"])) # Float
+                fh.write(int(checkpoint["unk18"]).to_bytes(2, byteorder="big"))
+                fh.write(int(checkpoint["unk1A"]).to_bytes(2, byteorder="big"))

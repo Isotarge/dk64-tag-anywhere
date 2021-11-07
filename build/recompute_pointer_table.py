@@ -144,7 +144,7 @@ pointer_tables = [
 		"name": "Map Race Checkpoints",
 		"encoded_filename": "race_checkpoints.bin",
 		"decoded_filename": "race_checkpoints.json",
-		#"encoder": encodeCheckpoints, # TODO
+		"encoder": encodeCheckpoints,
 		"decoder": decodeCheckpoints,
 	},
 	{
