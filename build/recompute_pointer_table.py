@@ -2,7 +2,7 @@ import hashlib
 from map_names import maps
 from typing import BinaryIO
 
-from encoders import encodeExits, decodeExits, encodePaths, decodePaths
+from encoders import encodeExits, decodeExits, encodePaths, decodePaths, encodeCheckpoints, decodeCheckpoints
 
 pointer_tables = [
 	{
@@ -143,7 +143,9 @@ pointer_tables = [
 		"index": 24,
 		"name": "Map Race Checkpoints",
 		"encoded_filename": "race_checkpoints.bin",
-		"decoded_filename": "race_checkpoints.yaml",
+		"decoded_filename": "race_checkpoints.json",
+		#"encoder": encodeCheckpoints, # TODO
+		"decoder": decodeCheckpoints,
 	},
 	{
 		"index": 25,

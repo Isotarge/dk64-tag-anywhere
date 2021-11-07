@@ -1,6 +1,6 @@
-import subprocess
 import json
 import math
+import struct
 
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
@@ -95,3 +95,47 @@ def encodePaths(decoded_filename : str, encoded_filename : str):
                     fh.write(int(point["z_pos"]).to_bytes(2, byteorder="big", signed=True))
                     fh.write(int(point["speed"]).to_bytes(1, byteorder="big"))
                     fh.write(int(point["unk9"]).to_bytes(1, byteorder="big"))
+
+def decodeCheckpoints(decoded_filename : str, encoded_filename : str):
+    with open(encoded_filename, "rb") as fh:
+        byte_read = fh.read()
+
+        checkpoints = []
+        num_checkpoints = int.from_bytes(byte_read[0x1:0x3], byteorder="big", signed=False)
+        num_checkpoint_mappings = int.from_bytes(byte_read[0x3:0x5], byteorder="big", signed=False)
+
+        if num_checkpoints != num_checkpoint_mappings:
+            print(" - Error: Number of checkpoints does not match number of checkpoint mappings.")
+            return 0
+
+        checkpoint_base = 5 + num_checkpoint_mappings * 2
+        for i in range(num_checkpoints):
+            this_checkpoint = byte_read[checkpoint_base:checkpoint_base+0x1C]
+            mapping = int.from_bytes(byte_read[5+i*2:7+i*2], byteorder="big")
+            checkpoint = {
+                "x_pos": int.from_bytes(this_checkpoint[0x0:0x2], byteorder="big", signed=True),
+                "y_pos": int.from_bytes(this_checkpoint[0x2:0x4], byteorder="big", signed=True),
+                "z_pos": int.from_bytes(this_checkpoint[0x4:0x6], byteorder="big", signed=True),
+                "angle": int.from_bytes(this_checkpoint[0x6:0x8], byteorder="big", signed=True),
+                "unk8": struct.unpack('>f', this_checkpoint[0x8:0xC])[0], # Float
+                "unkC": struct.unpack('>f', this_checkpoint[0xC:0x10])[0], # Float
+                "unk10": int.from_bytes(this_checkpoint[0x10:0x12], byteorder="big"),
+                "unk12": int.from_bytes(this_checkpoint[0x12:0x14], byteorder="big"),
+                "unk14": struct.unpack('>f', this_checkpoint[0x14:0x18])[0], # Float
+                "unk18": int.from_bytes(this_checkpoint[0x18:0x1A], byteorder="big"),
+                "unk1A": int.from_bytes(this_checkpoint[0x1A:0x1C], byteorder="big"),
+            }
+
+            # Only include the mapping in the JSON if it does not match the physical index
+            if mapping != i:
+                checkpoint["mapping"] = mapping
+
+            checkpoints.append(checkpoint)
+            checkpoint_base += 0x1C
+
+        with open(decoded_filename, "w") as fjson:
+            json.dump(checkpoints, fjson, indent=4, default=str)
+
+def encodeCheckpoints(decoded_filename : str, encoded_filename : str):
+    # TODO
+    return 0
