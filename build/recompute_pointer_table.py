@@ -98,7 +98,7 @@ pointer_tables = [
 		"encoded_filename": "character_spawners.bin",
 		"decoded_filename": "character_spawners.json",
 		# "encoder": encodeCharacterSpawners, # TODO
-		# "decoder": decodeCharacterSpawners, # TODO: Finish this based on GL's documentation
+		"decoder": decodeCharacterSpawners, # TODO: Finish this based on GL's/Tom's documentation
 	},
 	{
 		"index": 17,
