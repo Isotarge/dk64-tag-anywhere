@@ -2,7 +2,7 @@ import hashlib
 from map_names import maps
 from typing import BinaryIO
 
-from encoders import encodeExits, decodeExits, encodePaths, decodePaths, encodeCheckpoints, decodeCheckpoints
+from encoders import encodeExits, decodeExits, encodePaths, decodePaths, encodeCheckpoints, decodeCheckpoints, encodeCharacterSpawners, decodeCharacterSpawners
 
 pointer_tables = [
 	{
@@ -96,7 +96,9 @@ pointer_tables = [
 		"index": 16,
 		"name": "Map Character Spawners",
 		"encoded_filename": "character_spawners.bin",
-		"decoded_filename": "character_spawners.yaml",
+		"decoded_filename": "character_spawners.json",
+		# "encoder": encodeCharacterSpawners, # TODO
+		# "decoder": decodeCharacterSpawners, # TODO: Finish this based on GL's documentation
 	},
 	{
 		"index": 17,
