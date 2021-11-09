@@ -1,6 +1,7 @@
 from typing import BinaryIO
 import os
 import zlib
+import json
 
 ROMName = "./rom/dk64.z64"
 
@@ -57,4 +58,4 @@ if __name__ == '__main__':
         parsePointerTables(fh)
         print("[2 / 2] - Extracting maps")
         extractMaps()
-        print(valueSamples)
+        print(json.dumps(valueSamples, indent=4, default=str, sort_keys=True))
