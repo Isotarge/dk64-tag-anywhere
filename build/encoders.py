@@ -18,6 +18,9 @@ def sampleValue(tag : str, value):
     valueSamples[tag]["all"][value] += 1
     return value
 
+def ScriptHawkSetPosition(x, y, z):
+    return "Game.setPosition(" + str(x) + "," + str(y) + "," + str(z) + ");"
+
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
         exits = json.load(fjson)
@@ -208,11 +211,13 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 if num_points > 0:
                     unknown_data["points_0x6"] = []
                     for i in range(num_points):
-                        unknown_data["points_0x6"].append({
+                        this_point = {
                             "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
                             "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
                             "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                        })
+                        }
+                        # this_point["SETPOS"] = ScriptHawkSetPosition(this_point["x_pos"], this_point["y_pos"], this_point["z_pos"])
+                        unknown_data["points_0x6"].append(this_point)
                         read_header += 0x6
 
                 # Points_0xA
@@ -222,14 +227,17 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 if num_points_0xA > 0:
                     unknown_data["points_0xA"] = []
                     for i in range(num_points_0xA):
-                        unknown_data["points_0xA"].append({
+                        this_point = {
                             "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
                             "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
                             "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
                             "unk6Raw": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(),
-                        })
+                        }
+                        # this_point["SETPOS"] = ScriptHawkSetPosition(this_point["x_pos"], this_point["y_pos"], this_point["z_pos"])
+                        unknown_data["points_0xA"].append(this_point)
                         read_header += 0xA
 
+                # unknown_data["unkFooterAddress"] = hex(read_header)
                 unknown_data["unkFooter"] = byte_read[read_header+0x0:read_header+0x4].hex(" ").upper()
                 read_header += 4
 
@@ -243,6 +251,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
             extract["character_spawners"] = []
             for i in range (spawn_count):
                 spawner_data = {
+                    # "spawner_address": hex(read_header),
                     "enemy_val": byte_read[read_header+0x0],
                     "unk1": byte_read[read_header+0x1],
                     "y_rot": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big"),
@@ -262,10 +271,13 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                     "initial_respawn_timer": byte_read[read_header+0x14],
                     "unk15": byte_read[read_header+0x15],
                 }
+                # spawner_data["SETPOS"] = ScriptHawkSetPosition(spawner_data["x_pos"], spawner_data["y_pos"], spawner_data["z_pos"])
                 # sampleValue("character_spawner->unk1", spawner_data["unk1"])
                 # sampleValue("character_spawner->unkB", spawner_data["unkB"])
                 # sampleValue("character_spawner->unkE", spawner_data["unkE"])
                 # sampleValue("character_spawner->unk11", spawner_data["unk11"])
+                # sampleValue("character_spawner->initial_spawn_state", spawner_data["initial_spawn_state"])
+                # sampleValue("character_spawner->initial_respawn_timer", spawner_data["initial_respawn_timer"])
                 # sampleValue("character_spawner->unk15", spawner_data["unk15"])
 
                 # TODO: This is true for several spawners, figure out why
