@@ -16,6 +16,7 @@ def sampleValue(tag : str, value):
     if not value in valueSamples[tag]["all"]:
         valueSamples[tag]["all"][value] = 0
     valueSamples[tag]["all"][value] += 1
+    return value
 
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
@@ -63,7 +64,7 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
                 "id": int.from_bytes(this_path[0x0:0x2], byteorder="big"),
                 "unk4": int.from_bytes(this_path[0x4:0x6], byteorder="big"),
             }
-            #sampleValue("path->unk4", path["unk4"])
+            # sampleValue("path->unk4", path["unk4"])
             path_base += 0x6
 
             if num_points > 0:
@@ -80,9 +81,9 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
                         "speed": this_point[0x8], # 1 - 3 in vanilla
                         "unk9": this_point[0x9],
                     })
-                    #sampleValue("path->point->unk0", int.from_bytes(this_point[0x0:0x2], byteorder="big", signed=True))
-                    #sampleValue("path->point->speed", this_point[0x8])
-                    #sampleValue("path->point->unk9", this_point[0x9])
+                    # sampleValue("path->point->unk0", int.from_bytes(this_point[0x0:0x2], byteorder="big", signed=True))
+                    # sampleValue("path->point->speed", this_point[0x8])
+                    # sampleValue("path->point->unk9", this_point[0x9])
                     path_base += 0xA
 
             paths.append(path)
@@ -229,6 +230,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                         })
                         read_header += 0xA
 
+                unknown_data["unkFooter"] = byte_read[read_header+0x0:read_header+0x4].hex(" ").upper()
                 read_header += 4
 
                 extract["fences"].append(unknown_data)
