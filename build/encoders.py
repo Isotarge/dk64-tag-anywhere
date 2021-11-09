@@ -9,11 +9,13 @@ def sampleValue(tag : str, value):
         valueSamples[tag] = {
             "min": math.inf,
             "max": -math.inf,
-            "all": []
+            "all": {}
         }
     valueSamples[tag]["min"] = min(value, valueSamples[tag]["min"])
     valueSamples[tag]["max"] = max(value, valueSamples[tag]["max"])
-    valueSamples[tag]["all"].append(value)
+    if not value in valueSamples[tag]["all"]:
+        valueSamples[tag]["all"][value] = 0
+    valueSamples[tag]["all"][value] += 1
 
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
