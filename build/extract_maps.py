@@ -6,6 +6,7 @@ ROMName = "./rom/dk64.z64"
 
 from map_names import maps
 from recompute_pointer_table import num_tables, pointer_tables, getFileInfo, parsePointerTables, make_safe_filename
+from encoders import valueSamples
 
 def extractMaps():
     global maps
@@ -56,3 +57,4 @@ if __name__ == '__main__':
         parsePointerTables(fh)
         print("[2 / 2] - Extracting maps")
         extractMaps()
+        print(valueSamples)

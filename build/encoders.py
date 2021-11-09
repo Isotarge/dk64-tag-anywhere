@@ -2,6 +2,19 @@ import json
 import math
 import struct
 
+# Useful for detecting booleans, enums, etc
+valueSamples = {}
+def sampleValue(tag : str, value):
+    if not tag in valueSamples:
+        valueSamples[tag] = {
+            "min": math.inf,
+            "max": -math.inf,
+            "all": []
+        }
+    valueSamples[tag]["min"] = min(value, valueSamples[tag]["min"])
+    valueSamples[tag]["max"] = max(value, valueSamples[tag]["max"])
+    valueSamples[tag]["all"].append(value)
+
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
         exits = json.load(fjson)
@@ -48,6 +61,7 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
                 "id": int.from_bytes(this_path[0x0:0x2], byteorder="big"),
                 "unk4": int.from_bytes(this_path[0x4:0x6], byteorder="big"),
             }
+            #sampleValue("path->unk4", path["unk4"])
             path_base += 0x6
 
             if num_points > 0:
@@ -61,9 +75,12 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
                         "x_pos": int.from_bytes(this_point[0x2:0x4], byteorder="big", signed=True),
                         "y_pos": int.from_bytes(this_point[0x4:0x6], byteorder="big", signed=True),
                         "z_pos": int.from_bytes(this_point[0x6:0x8], byteorder="big", signed=True),
-                        "speed": this_point[0x8],
+                        "speed": this_point[0x8], # 1 - 3 in vanilla
                         "unk9": this_point[0x9],
                     })
+                    #sampleValue("path->point->unk0", int.from_bytes(this_point[0x0:0x2], byteorder="big", signed=True))
+                    #sampleValue("path->point->speed", this_point[0x8])
+                    #sampleValue("path->point->unk9", this_point[0x9])
                     path_base += 0xA
 
             paths.append(path)
@@ -169,99 +186,102 @@ def encodeCheckpoints(decoded_filename : str, encoded_filename : str):
 def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
     with open(encoded_filename, "rb") as fh:
         byte_read = fh.read()
-        extract = {
-            "paths": [],
-            "character_spawners": [],
-        }
-        
-        # Paths?
         read_header = 0
-        path_count = int.from_bytes(byte_read[0x0:0x2], byteorder="big", signed=False)
+        extract = {}
+        
+        # fences?
+        fence_count = int.from_bytes(byte_read[0x0:0x2], byteorder="big", signed=False)
         read_header += 2
 
-        for i in range(path_count):
-            unknown_data = {}
+        if fence_count > 0:
+            extract["fences"] = []
+            for i in range(fence_count):
+                unknown_data = {}
 
-            # Points
-            num_points = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
-            read_header += 2
+                # Points
+                num_points = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
+                read_header += 2
 
-            if num_points > 0:
-                unknown_data["points"] = []
-                for i in range(num_points):
-                    unknown_data["points"].append({
-                        "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
-                        "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
-                        "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                    })
-                    read_header += 0x6
+                if num_points > 0:
+                    unknown_data["points"] = []
+                    for i in range(num_points):
+                        unknown_data["points"].append({
+                            "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
+                            "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
+                            "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
+                        })
+                        read_header += 0x6
 
-            # Unknown path data
-            num_0xA_structs = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
-            read_header += 2
+                # Unknown path data
+                num_0xA_structs = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
+                read_header += 2
 
-            if num_0xA_structs > 0:
-                unknown_data["0xA_structs"] = []
-                for i in range(num_0xA_structs):
-                    unknown_data["0xA_structs"].append({
-                        "unk0Raw": byte_read[read_header+0x0:read_header+0xA].hex(" ").upper(),
-                        # "unk0": list(byte_read[read_header+0x0:read_header+0xA])
-                    })
-                    read_header += 0xA
+                if num_0xA_structs > 0:
+                    unknown_data["0xA_structs"] = []
+                    for i in range(num_0xA_structs):
+                        unknown_data["0xA_structs"].append({
+                            "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
+                            "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
+                            "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
+                            "unk6Raw": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(),
+                        })
+                        read_header += 0xA
 
-            read_header += 4
+                read_header += 4
 
-            extract["paths"].append(unknown_data)
+                extract["fences"].append(unknown_data)
 
         # Spawners
         spawn_count = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
         read_header += 2
 
-        for i in range (spawn_count):
-            spawner_data = {
-                "enemy_val": byte_read[read_header+0x0],
-                "unk1": byte_read[read_header+0x1],
-                "y_rot": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big"),
-                "x_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                "y_pos": int.from_bytes(byte_read[read_header+0x6:read_header+0x8], byteorder="big", signed=True),
-                "z_pos": int.from_bytes(byte_read[read_header+0x8:read_header+0xA], byteorder="big", signed=True),
-                # 0xA is cutscene model, which is read further down
-                "unkB": byte_read[read_header+0xB],
-                "max_idle_speed": byte_read[read_header+0xC],
-                "max_aggro_sped": byte_read[read_header+0xD],
-                "unkE": byte_read[read_header+0xE],
-                "scale": byte_read[read_header+0xF],
-                "aggro": byte_read[read_header+0x10],
-                "unk11": byte_read[read_header+0x11],
-                "initial_spawn_state": byte_read[read_header+0x12],
-                "spawn_trigger": byte_read[read_header+0x13],
-                "initial_respawn_timer": byte_read[read_header+0x14],
-                "unk15": byte_read[read_header+0x15],
-            }
+        if spawn_count > 0:
+            extract["character_spawners"] = []
+            for i in range (spawn_count):
+                spawner_data = {
+                    "enemy_val": byte_read[read_header+0x0],
+                    "unk1": byte_read[read_header+0x1],
+                    "y_rot": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big"),
+                    "x_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
+                    "y_pos": int.from_bytes(byte_read[read_header+0x6:read_header+0x8], byteorder="big", signed=True),
+                    "z_pos": int.from_bytes(byte_read[read_header+0x8:read_header+0xA], byteorder="big", signed=True),
+                    # 0xA is cutscene model, which is read further down
+                    "unkB": byte_read[read_header+0xB],
+                    "max_idle_speed": byte_read[read_header+0xC],
+                    "max_aggro_sped": byte_read[read_header+0xD],
+                    "unkE": byte_read[read_header+0xE],
+                    "scale": byte_read[read_header+0xF],
+                    "aggro": byte_read[read_header+0x10],
+                    "unk11": byte_read[read_header+0x11],
+                    "initial_spawn_state": byte_read[read_header+0x12],
+                    "spawn_trigger": byte_read[read_header+0x13],
+                    "initial_respawn_timer": byte_read[read_header+0x14],
+                    "unk15": byte_read[read_header+0x15],
+                }
 
-            # TODO: This is true for several spawners, figure out why
-            # if spawner_data["enemy_val"] != 0x50 and byte_read[read_header+0xA] != 0:
-                # print("NON CUTSCENE OBJECT HAS CUTSCENE MODEL BYTE SET " + hex(spawner_data["enemy_val"]) + " " + hex(byte_read[read_header+0xA]) + " " + decoded_filename)
+                # TODO: This is true for several spawners, figure out why
+                # if spawner_data["enemy_val"] != 0x50 and byte_read[read_header+0xA] != 0:
+                    # print("NON CUTSCENE OBJECT HAS CUTSCENE MODEL BYTE SET " + hex(spawner_data["enemy_val"]) + " " + hex(byte_read[read_header+0xA]) + " " + decoded_filename)
 
-            if spawner_data["enemy_val"] == 0x50 or byte_read[read_header+0xA] != 0:
-                spawner_data["cutscene_model"] = byte_read[read_header+0xA]
+                if spawner_data["enemy_val"] == 0x50 or byte_read[read_header+0xA] != 0:
+                    spawner_data["cutscene_model"] = byte_read[read_header+0xA]
 
-            extra_count = int(byte_read[read_header+0x11])
-            read_header += 0x16
+                extra_count = int(byte_read[read_header+0x11])
+                read_header += 0x16
 
-            # TODO: Figure what it does
-            if (extra_count > 0):
-                spawner_data["extra_data"] = []
-                for j in range(extra_count):
-                    spawner_data["extra_data"].append(int.from_bytes(byte_read[read_header+0:read_header+2], byteorder="big"))
-                    read_header += 2
+                # TODO: Figure what it does
+                if (extra_count > 0):
+                    spawner_data["extra_data"] = []
+                    for j in range(extra_count):
+                        spawner_data["extra_data"].append(int.from_bytes(byte_read[read_header+0:read_header+2], byteorder="big"))
+                        read_header += 2
 
-            extract["character_spawners"].append(spawner_data)
+                extract["character_spawners"].append(spawner_data)
 
         # Note: This is the case for several maps
-        # TODO: Figure out why, and if/how they map paths onto spawners
-        # if spawn_count != path_count:
-            # print("PATH COUNT (" + str(path_count) + ") != SPAWN COUNT (" + str(spawn_count) + ") IN " + decoded_filename)
+        # TODO: Figure out why, and if/how they map fences onto spawners
+        # if spawn_count != fence_count:
+            # print("FENCE COUNT (" + str(fence_count) + ") != SPAWN COUNT (" + str(spawn_count) + ") IN " + decoded_filename)
 
         with open(decoded_filename, "w") as fjson:
             json.dump(extract, fjson, indent=4, default=str)
