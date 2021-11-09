@@ -4,7 +4,18 @@ import gzip
 import zlib
 import subprocess
 
-import json
+print("Compiling C Code")
+with open('./asm/objects.asm', 'w') as obj_asm:
+	for root, dirs, files in os.walk(r'src'):
+		for file in files:
+			if file.endswith('.c'):
+				_o = os.path.join(root, file).replace("/","_").replace("\\","_").replace(".c", ".o")
+				print(os.path.join(root, file))
+				obj_asm.write(".importobj \"obj/" + _o + "\"\n")
+				cmd = ["mips64-elf-gcc", "-Wall", "-O1", "-mtune=vr4300", "-march=vr4300", "-mabi=32", "-fomit-frame-pointer", "-G0", "-c", os.path.join(root, file)]
+				subprocess.Popen(cmd).wait()
+				shutil.move("./" + file.replace(".c",".o"), "obj/" + _o)
+print()
 
 # Infrastructure for recomputing DK64 global pointer tables
 from map_names import maps

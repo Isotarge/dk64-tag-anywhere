@@ -1,11 +1,7 @@
 @echo off
 echo Started: %date% %time%
 echo.
-echo Compiling C code
 mkdir obj
-python build\compile.py
-echo.
-
 python build\build.py
 echo.
 build\armips.exe asm\main.asm -sym rom\dk64-tag-anywhere-dev.sym
