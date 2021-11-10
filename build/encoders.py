@@ -2,7 +2,7 @@ import json
 import math
 import struct
 
-# Useful for detecting booleans, enums, etc
+# Useful for detecting booleans, enums, indexes etc
 valueSamples = {}
 def sampleValue(tag : str, value):
     if not tag in valueSamples:
@@ -11,8 +11,9 @@ def sampleValue(tag : str, value):
             "max": -math.inf,
             "all": {}
         }
-    valueSamples[tag]["min"] = min(value, valueSamples[tag]["min"])
-    valueSamples[tag]["max"] = max(value, valueSamples[tag]["max"])
+    if type(value) == int or type(value) == float:
+        valueSamples[tag]["min"] = min(value, valueSamples[tag]["min"])
+        valueSamples[tag]["max"] = max(value, valueSamples[tag]["max"])
     if not value in valueSamples[tag]["all"]:
         valueSamples[tag]["all"][value] = 0
     valueSamples[tag]["all"][value] += 1
@@ -308,5 +309,80 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
             json.dump(extract, fjson, indent=4, default=str)
 
 def encodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
+    # TODO
+    return 0
+
+def decodeSetup(decoded_filename : str, encoded_filename : str):
+    with open(encoded_filename, "rb") as fh:
+        byte_read = fh.read()
+        pointer = 0
+
+        setup = {}
+
+        # Object Model 2
+        num_model2 = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big", signed=False)
+        pointer += 4
+
+        if num_model2 > 0:
+            setup["model2"] = []
+            for i in range(num_model2):
+                this_model2 = byte_read[pointer:pointer+0x30]
+                model2_data = {
+                    "x_pos": struct.unpack('>f', this_model2[0x0:0x4])[0], # Float
+                    "y_pos": struct.unpack('>f', this_model2[0x4:0x8])[0], # Float
+                    "z_pos": struct.unpack('>f', this_model2[0x8:0xC])[0], # Float
+                    "scale": struct.unpack('>f', this_model2[0xC:0x10])[0], # Float
+                    "behaviour": int.from_bytes(this_model2[0x28:0x2A], byteorder="big"),
+                }
+
+                setup["model2"].append(model2_data)
+                pointer += 0x30
+
+        # Conveyor Data
+        num_conveyor = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big", signed=False)
+        pointer += 4
+
+        if num_conveyor > 0:
+            for i in range(num_conveyor):
+                this_conveyor = byte_read[pointer:pointer+0x24]
+                model2_index = int.from_bytes(this_conveyor[0x0:0x4], byteorder="big")
+                conveyor_data = {
+                    # "model2_index": model2_index,
+                    "unk4": struct.unpack('>f', this_conveyor[0x4:0x8])[0], # Float
+                    "unk8": struct.unpack('>f', this_conveyor[0x8:0xC])[0], # Float
+                    "unkC": struct.unpack('>f', this_conveyor[0xC:0x10])[0], # Float
+                    "unk10": struct.unpack('>f', this_conveyor[0x10:0x14])[0], # Float
+                    "unk14": struct.unpack('>f', this_conveyor[0x14:0x18])[0], # Float
+                    "unk18": struct.unpack('>f', this_conveyor[0x18:0x1C])[0], # Float
+                    "unk1C": struct.unpack('>f', this_conveyor[0x1C:0x20])[0], # Float
+                    "unk20": struct.unpack('>f', this_conveyor[0x20:0x24])[0], # Float
+                }
+
+                setup["model2"][model2_index]["conveyor_data"] = conveyor_data
+                pointer += 0x24
+
+        # Actor Spawners
+        num_actor_spawners = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big", signed=False)
+        pointer += 4
+
+        if num_actor_spawners > 0:
+            setup["actors"] = []
+            for i in range(num_actor_spawners):
+                this_actor = byte_read[pointer:pointer+0x38]
+                actor_data = {
+                    "x_pos": struct.unpack('>f', this_actor[0x0:0x4])[0], # Float
+                    "y_pos": struct.unpack('>f', this_actor[0x4:0x8])[0], # Float
+                    "z_pos": struct.unpack('>f', this_actor[0x8:0xC])[0], # Float
+                    "scale": struct.unpack('>f', this_actor[0xC:0x10])[0], # Float
+                    "behaviour": int.from_bytes(this_actor[0x32:0x34], byteorder="big"),
+                }
+
+                setup["actors"].append(actor_data)
+                pointer += 0x38
+
+        with open(decoded_filename, "w") as fjson:
+            json.dump(setup, fjson, indent=4, default=str)
+
+def encodeSetup(decoded_filename : str, encoded_filename : str):
     # TODO
     return 0

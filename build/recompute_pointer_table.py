@@ -2,7 +2,7 @@ import hashlib
 from map_names import maps
 from typing import BinaryIO
 
-from encoders import encodeExits, decodeExits, encodePaths, decodePaths, encodeCheckpoints, decodeCheckpoints, encodeCharacterSpawners, decodeCharacterSpawners
+import encoders
 
 pointer_tables = [
 	{
@@ -57,7 +57,9 @@ pointer_tables = [
 		"index": 9,
 		"name": "Map Object Setups",
 		"encoded_filename": "setup.bin",
-		"decoded_filename": "setup.yaml",
+		"decoded_filename": "setup.json",
+		#"encoder": encoders.encodeSetup, # TODO
+		"decoder": encoders.decodeSetup,
 	},
 	{
 		"index": 10,
@@ -87,8 +89,8 @@ pointer_tables = [
 		"name": "Map Paths",
 		"encoded_filename": "paths.bin",
 		"decoded_filename": "paths.json",
-		"encoder": encodePaths,
-		"decoder": decodePaths,
+		"encoder": encoders.encodePaths,
+		"decoder": encoders.decodePaths,
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
 	},
@@ -97,8 +99,8 @@ pointer_tables = [
 		"name": "Map Character Spawners",
 		"encoded_filename": "character_spawners.bin",
 		"decoded_filename": "character_spawners.json",
-		# "encoder": encodeCharacterSpawners, # TODO
-		"decoder": decodeCharacterSpawners, # TODO: Finish this based on GL's/Tom's documentation
+		# "encoder": encoders.encodeCharacterSpawners, # TODO
+		"decoder": encoders.decodeCharacterSpawners, # TODO: Finish this based on GL's/Tom's documentation
 	},
 	{
 		"index": 17,
@@ -138,16 +140,16 @@ pointer_tables = [
 		"decoded_filename": "exits.json",
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
-		"encoder": encodeExits,
-		"decoder": decodeExits,
+		"encoder": encoders.encodeExits,
+		"decoder": encoders.decodeExits,
 	},
 	{
 		"index": 24,
 		"name": "Map Race Checkpoints",
 		"encoded_filename": "race_checkpoints.bin",
 		"decoded_filename": "race_checkpoints.json",
-		"encoder": encodeCheckpoints,
-		"decoder": decodeCheckpoints,
+		"encoder": encoders.encodeCheckpoints,
+		"decoder": encoders.decodeCheckpoints,
 	},
 	{
 		"index": 25,
