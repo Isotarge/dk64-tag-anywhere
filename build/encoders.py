@@ -234,7 +234,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                             "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
                             "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
                             "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                            "unk6Raw": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(),
+                            "unk6": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(),
                         }
                         # this_point["SETPOS"] = ScriptHawkSetPosition(this_point["x_pos"], this_point["y_pos"], this_point["z_pos"])
                         unknown_data["points_0xA"].append(this_point)
@@ -334,6 +334,7 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "y_pos": struct.unpack('>f', this_model2[0x4:0x8])[0], # Float
                     "z_pos": struct.unpack('>f', this_model2[0x8:0xC])[0], # Float
                     "scale": struct.unpack('>f', this_model2[0xC:0x10])[0], # Float
+                    "unk10": this_model2[0x10:0x28].hex(" ").upper(),
                     "behaviour": int.from_bytes(this_model2[0x28:0x2A], byteorder="big"),
                 }
                 model2_data["name"] = model2_names[model2_data["behaviour"]]
@@ -350,7 +351,6 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                 this_conveyor = byte_read[pointer:pointer+0x24]
                 model2_index = int.from_bytes(this_conveyor[0x0:0x4], byteorder="big")
                 conveyor_data = {
-                    # "model2_index": model2_index,
                     "unk4": struct.unpack('>f', this_conveyor[0x4:0x8])[0], # Float
                     "unk8": struct.unpack('>f', this_conveyor[0x8:0xC])[0], # Float
                     "unkC": struct.unpack('>f', this_conveyor[0xC:0x10])[0], # Float
@@ -377,7 +377,9 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "y_pos": struct.unpack('>f', this_actor[0x4:0x8])[0], # Float
                     "z_pos": struct.unpack('>f', this_actor[0x8:0xC])[0], # Float
                     "scale": struct.unpack('>f', this_actor[0xC:0x10])[0], # Float
+                    "unk10": this_actor[0x10:0x32].hex(" ").upper(),
                     "behaviour": int.from_bytes(this_actor[0x32:0x34], byteorder="big"),
+                    "unk34": this_actor[0x34:0x38].hex(" ").upper(),
                 }
                 actor_data["name"] = actor_names[actor_data["behaviour"] + 0x10]
                 actor_data["SETPOS"] = ScriptHawkSetPosition(actor_data["x_pos"], actor_data["y_pos"], actor_data["z_pos"])
