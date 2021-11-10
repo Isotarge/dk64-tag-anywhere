@@ -1,6 +1,7 @@
 import json
 import math
 import struct
+from model2_names import model2_names
 
 # Useful for detecting booleans, enums, indexes etc
 valueSamples = {}
@@ -334,6 +335,7 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "scale": struct.unpack('>f', this_model2[0xC:0x10])[0], # Float
                     "behaviour": int.from_bytes(this_model2[0x28:0x2A], byteorder="big"),
                 }
+                model2_data["name"] = model2_names[model2_data["behaviour"]]
 
                 setup["model2"].append(model2_data)
                 pointer += 0x30
