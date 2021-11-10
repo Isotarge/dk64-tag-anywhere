@@ -334,10 +334,19 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "y_pos": struct.unpack('>f', this_model2[0x4:0x8])[0], # Float
                     "z_pos": struct.unpack('>f', this_model2[0x8:0xC])[0], # Float
                     "scale": struct.unpack('>f', this_model2[0xC:0x10])[0], # Float
-                    "unk10": this_model2[0x10:0x28].hex(" ").upper(),
+                    "unk10": this_model2[0x10:0x1C].hex(" ").upper(),
+                    "angle1C": struct.unpack('>f', this_model2[0x1C:0x20])[0], # Float
+                    "angle20": struct.unpack('>f', this_model2[0x20:0x24])[0], # Float
+                    "unk24": struct.unpack('>f', this_model2[0x24:0x28])[0], # Float
                     "behaviour": int.from_bytes(this_model2[0x28:0x2A], byteorder="big"),
+                    "unk2A": this_model2[0x2A:0x30].hex(" ").upper(),
                 }
                 model2_data["name"] = model2_names[model2_data["behaviour"]]
+
+                # sampleValue("model2->name", model2_data["name"])
+                # sampleValue("model2->angle1C", model2_data["angle1C"])
+                # sampleValue("model2->angle20", model2_data["angle20"])
+                # sampleValue("model2->unk24", model2_data["unk24"])
 
                 setup["model2"].append(model2_data)
                 pointer += 0x30
@@ -377,12 +386,16 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "y_pos": struct.unpack('>f', this_actor[0x4:0x8])[0], # Float
                     "z_pos": struct.unpack('>f', this_actor[0x8:0xC])[0], # Float
                     "scale": struct.unpack('>f', this_actor[0xC:0x10])[0], # Float
-                    "unk10": this_actor[0x10:0x32].hex(" ").upper(),
+                    "unk10": struct.unpack('>f', this_actor[0x10:0x14])[0], # Float
+                    "unk14": this_actor[0x14:0x32].hex(" ").upper(),
                     "behaviour": int.from_bytes(this_actor[0x32:0x34], byteorder="big"),
                     "unk34": this_actor[0x34:0x38].hex(" ").upper(),
                 }
+
                 actor_data["name"] = actor_names[actor_data["behaviour"] + 0x10]
                 actor_data["SETPOS"] = ScriptHawkSetPosition(actor_data["x_pos"], actor_data["y_pos"], actor_data["z_pos"])
+
+                # sampleValue("actor_spawner->name", actor_data["name"])
 
                 setup["actors"].append(actor_data)
                 pointer += 0x38
