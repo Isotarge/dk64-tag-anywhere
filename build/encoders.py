@@ -24,6 +24,9 @@ def sampleValue(tag : str, value):
 def ScriptHawkSetPosition(x, y, z):
     return "Game.setPosition(" + str(x) + "," + str(y) + "," + str(z) + ");"
 
+def floatAt(data : bytes, offset : int):
+    return struct.unpack('>f', data[offset:offset+4])[0]
+
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
         exits = json.load(fjson)
@@ -143,11 +146,11 @@ def decodeCheckpoints(decoded_filename : str, encoded_filename : str):
                 "y_pos": int.from_bytes(this_checkpoint[0x2:0x4], byteorder="big", signed=True),
                 "z_pos": int.from_bytes(this_checkpoint[0x4:0x6], byteorder="big", signed=True),
                 "angle": int.from_bytes(this_checkpoint[0x6:0x8], byteorder="big", signed=True),
-                "unk8": struct.unpack('>f', this_checkpoint[0x8:0xC])[0], # Float
-                "unkC": struct.unpack('>f', this_checkpoint[0xC:0x10])[0], # Float
+                "unk8": floatAt(this_checkpoint, 0x8),
+                "unkC": floatAt(this_checkpoint, 0xC),
                 "unk10": int.from_bytes(this_checkpoint[0x10:0x12], byteorder="big"),
                 "unk12": int.from_bytes(this_checkpoint[0x12:0x14], byteorder="big"),
-                "unk14": struct.unpack('>f', this_checkpoint[0x14:0x18])[0], # Float
+                "unk14": floatAt(this_checkpoint, 0x14),
                 "unk18": int.from_bytes(this_checkpoint[0x18:0x1A], byteorder="big"),
                 "unk1A": int.from_bytes(this_checkpoint[0x1A:0x1C], byteorder="big"),
             }
@@ -330,15 +333,15 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
             for i in range(num_model2):
                 this_model2 = byte_read[pointer:pointer+0x30]
                 model2_data = {
-                    "x_pos": struct.unpack('>f', this_model2[0x0:0x4])[0], # Float
-                    "y_pos": struct.unpack('>f', this_model2[0x4:0x8])[0], # Float
-                    "z_pos": struct.unpack('>f', this_model2[0x8:0xC])[0], # Float
-                    "scale": struct.unpack('>f', this_model2[0xC:0x10])[0], # Float
+                    "x_pos": floatAt(this_model2, 0x0),
+                    "y_pos": floatAt(this_model2, 0x4),
+                    "z_pos": floatAt(this_model2, 0x8),
+                    "scale": floatAt(this_model2, 0xC),
                     "unk10": this_model2[0x10:0x18].hex(" ").upper(),
-                    "angle18": struct.unpack('>f', this_model2[0x18:0x1C])[0], # Float
-                    "angle1C": struct.unpack('>f', this_model2[0x1C:0x20])[0], # Float
-                    "angle20": struct.unpack('>f', this_model2[0x20:0x24])[0], # Float
-                    "unk24": struct.unpack('>f', this_model2[0x24:0x28])[0], # Float
+                    "angle18": floatAt(this_model2, 0x18),
+                    "angle1C": floatAt(this_model2, 0x1C),
+                    "angle20": floatAt(this_model2, 0x20),
+                    "unk24": floatAt(this_model2, 0x24),
                     "behaviour": int.from_bytes(this_model2[0x28:0x2A], byteorder="big"),
                     "unk2A": this_model2[0x2A:0x30].hex(" ").upper(),
                 }
@@ -364,14 +367,14 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                 this_conveyor = byte_read[pointer:pointer+0x24]
                 model2_index = int.from_bytes(this_conveyor[0x0:0x4], byteorder="big")
                 conveyor_data = {
-                    "unk4": struct.unpack('>f', this_conveyor[0x4:0x8])[0], # Float
-                    "unk8": struct.unpack('>f', this_conveyor[0x8:0xC])[0], # Float
-                    "unkC": struct.unpack('>f', this_conveyor[0xC:0x10])[0], # Float
-                    "unk10": struct.unpack('>f', this_conveyor[0x10:0x14])[0], # Float
-                    "unk14": struct.unpack('>f', this_conveyor[0x14:0x18])[0], # Float
-                    "unk18": struct.unpack('>f', this_conveyor[0x18:0x1C])[0], # Float
-                    "unk1C": struct.unpack('>f', this_conveyor[0x1C:0x20])[0], # Float
-                    "unk20": struct.unpack('>f', this_conveyor[0x20:0x24])[0], # Float
+                    "unk4": floatAt(this_conveyor, 0x4),
+                    "unk8": floatAt(this_conveyor, 0x8),
+                    "unkC": floatAt(this_conveyor, 0xC),
+                    "unk10": floatAt(this_conveyor, 0x10),
+                    "unk14": floatAt(this_conveyor, 0x14),
+                    "unk18": floatAt(this_conveyor, 0x18),
+                    "unk1C": floatAt(this_conveyor, 0x1C),
+                    "unk20": floatAt(this_conveyor, 0x20),
                 }
 
                 setup["model2"][model2_index]["conveyor_data"] = conveyor_data
@@ -386,11 +389,11 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
             for i in range(num_actor_spawners):
                 this_actor = byte_read[pointer:pointer+0x38]
                 actor_data = {
-                    "x_pos": struct.unpack('>f', this_actor[0x0:0x4])[0], # Float
-                    "y_pos": struct.unpack('>f', this_actor[0x4:0x8])[0], # Float
-                    "z_pos": struct.unpack('>f', this_actor[0x8:0xC])[0], # Float
-                    "scale": struct.unpack('>f', this_actor[0xC:0x10])[0], # Float
-                    "unk10": struct.unpack('>f', this_actor[0x10:0x14])[0], # Float
+                    "x_pos": floatAt(this_actor, 0x0),
+                    "y_pos": floatAt(this_actor, 0x4),
+                    "z_pos": floatAt(this_actor, 0x8),
+                    "scale": floatAt(this_actor, 0xC),
+                    "unk10": floatAt(this_actor, 0x10),
                     "unk14": this_actor[0x14:0x32].hex(" ").upper(),
                     "behaviour": int.from_bytes(this_actor[0x32:0x34], byteorder="big"),
                     "unk34": this_actor[0x34:0x38].hex(" ").upper(),
