@@ -334,7 +334,8 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "y_pos": struct.unpack('>f', this_model2[0x4:0x8])[0], # Float
                     "z_pos": struct.unpack('>f', this_model2[0x8:0xC])[0], # Float
                     "scale": struct.unpack('>f', this_model2[0xC:0x10])[0], # Float
-                    "unk10": this_model2[0x10:0x1C].hex(" ").upper(),
+                    "unk10": this_model2[0x10:0x18].hex(" ").upper(),
+                    "angle18": struct.unpack('>f', this_model2[0x18:0x1C])[0], # Float
                     "angle1C": struct.unpack('>f', this_model2[0x1C:0x20])[0], # Float
                     "angle20": struct.unpack('>f', this_model2[0x20:0x24])[0], # Float
                     "unk24": struct.unpack('>f', this_model2[0x24:0x28])[0], # Float
@@ -344,9 +345,12 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                 model2_data["name"] = model2_names[model2_data["behaviour"]]
 
                 # sampleValue("model2->name", model2_data["name"])
+                # sampleValue("model2->unk10", model2_data["unk10"])
+                # sampleValue("model2->angle18", model2_data["angle18"])
                 # sampleValue("model2->angle1C", model2_data["angle1C"])
                 # sampleValue("model2->angle20", model2_data["angle20"])
                 # sampleValue("model2->unk24", model2_data["unk24"])
+                # sampleValue("model2->unk2A", model2_data["unk2A"])
 
                 setup["model2"].append(model2_data)
                 pointer += 0x30
