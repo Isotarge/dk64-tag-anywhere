@@ -110,7 +110,7 @@ maps = [
 	"Creepy Castle: Crypt (Lanky, Tiny)",
 	"Kong Battle: Arena 1",
 	"Frantic Factory: Barrel Blast", # 110
-	"Gloomy Galleon: Pufftoss",
+	"Gloomy Galleon: Puftoss",
 	"Creepy Castle: Crypt (DK, Diddy, Chunky)",
 	"Creepy Castle: Museum",
 	"Creepy Castle: Library",

@@ -2,6 +2,7 @@ import json
 import math
 import struct
 from model2_names import model2_names
+from actor_names import actor_names
 
 # Useful for detecting booleans, enums, indexes etc
 valueSamples = {}
@@ -378,6 +379,8 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "scale": struct.unpack('>f', this_actor[0xC:0x10])[0], # Float
                     "behaviour": int.from_bytes(this_actor[0x32:0x34], byteorder="big"),
                 }
+                actor_data["name"] = actor_names[actor_data["behaviour"] + 0x10]
+                actor_data["SETPOS"] = ScriptHawkSetPosition(actor_data["x_pos"], actor_data["y_pos"], actor_data["z_pos"])
 
                 setup["actors"].append(actor_data)
                 pointer += 0x38

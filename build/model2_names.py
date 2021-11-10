@@ -632,7 +632,7 @@ model2_names = [
     "Boxing Ring Corner (Green)",
     "Boxing Ring Corner (Blue)",
     "Boxing Ring Corner (Yellow)",
-    "Lightning Rod", # Pufftoss Fight, DK Isles for some reason
+    "Lightning Rod", # Puftoss Fight, DK Isles for some reason
     "Green Electricity", # Helm? Chunky BoM stuff?
     "Blast-O-Matic",
     "Target", # K. Rool Fight (Diddy Phase)
