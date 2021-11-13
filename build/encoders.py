@@ -400,7 +400,7 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                 }
 
                 actor_data["name"] = actor_names[actor_data["behaviour"] + 0x10]
-                actor_data["SETPOS"] = ScriptHawkSetPosition(actor_data["x_pos"], actor_data["y_pos"], actor_data["z_pos"])
+                # actor_data["SETPOS"] = ScriptHawkSetPosition(actor_data["x_pos"], actor_data["y_pos"], actor_data["z_pos"])
 
                 # sampleValue("actor_spawner->name", actor_data["name"])
 
@@ -411,5 +411,61 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
             json.dump(setup, fjson, indent=4, default=str)
 
 def encodeSetup(decoded_filename : str, encoded_filename : str):
-    # TODO
-    return 0
+    with open(decoded_filename) as fjson:
+        setup = json.load(fjson)
+
+        with open(encoded_filename, "w+b") as fh:
+            num_conveyors = 0
+            num_model2 = len(setup["model2"]) if "model2" in setup else 0
+            num_actor_spawners = len(setup["actors"]) if "actors" in setup else 0
+
+            # Model 2            
+            fh.write(num_model2.to_bytes(4, byteorder="big", signed=False))
+
+            if num_model2 > 0:
+                for i, this_model2 in enumerate(setup["model2"]):
+                    fh.write(struct.pack('>f', this_model2["x_pos"])) # Float
+                    fh.write(struct.pack('>f', this_model2["y_pos"])) # Float
+                    fh.write(struct.pack('>f', this_model2["z_pos"])) # Float
+                    fh.write(struct.pack('>f', this_model2["scale"])) # Float
+                    fh.write(bytes.fromhex(this_model2["unk10"]))
+                    fh.write(struct.pack('>f', this_model2["angle18"])) # Float
+                    fh.write(struct.pack('>f', this_model2["angle1C"])) # Float
+                    fh.write(struct.pack('>f', this_model2["angle20"])) # Float
+                    fh.write(struct.pack('>f', this_model2["unk24"])) # Float
+                    fh.write(int(this_model2["behaviour"]).to_bytes(2, byteorder="big"))
+                    fh.write(bytes.fromhex(this_model2["unk2A"]))
+
+                    if "conveyor_data" in this_model2:
+                        num_conveyors += 1
+
+            # Conveyor Data
+            fh.write(num_conveyors.to_bytes(4, byteorder="big", signed=False))
+
+            if num_conveyors > 0:
+                for i, this_model2 in enumerate(setup["model2"]):
+                    if "conveyor_data" in this_model2:
+                        conveyor_data = this_model2["conveyor_data"]
+                        fh.write(i.to_bytes(4, byteorder="big", signed=False)) # Model 2 Index
+                        fh.write(struct.pack('>f', conveyor_data["unk4"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unk8"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unkC"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unk10"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unk14"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unk18"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unk1C"])) # Float
+                        fh.write(struct.pack('>f', conveyor_data["unk20"])) # Float
+
+            # Actor Spawners
+            fh.write(num_actor_spawners.to_bytes(4, byteorder="big", signed=False))
+
+            if num_actor_spawners > 0:
+                for i, this_actor in enumerate(setup["actors"]):
+                    fh.write(struct.pack('>f', this_actor["x_pos"])) # Float
+                    fh.write(struct.pack('>f', this_actor["y_pos"])) # Float
+                    fh.write(struct.pack('>f', this_actor["z_pos"])) # Float
+                    fh.write(struct.pack('>f', this_actor["scale"])) # Float
+                    fh.write(struct.pack('>f', this_actor["unk10"])) # Float
+                    fh.write(bytes.fromhex(this_actor["unk14"]))
+                    fh.write(int(this_actor["behaviour"]).to_bytes(2, byteorder="big"))
+                    fh.write(bytes.fromhex(this_actor["unk34"]))

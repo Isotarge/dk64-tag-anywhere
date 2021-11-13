@@ -58,7 +58,7 @@ pointer_tables = [
 		"name": "Map Object Setups",
 		"encoded_filename": "setup.bin",
 		"decoded_filename": "setup.json",
-		#"encoder": encoders.encodeSetup, # TODO
+		"encoder": encoders.encodeSetup,
 		"decoder": encoders.decodeSetup,
 	},
 	{
