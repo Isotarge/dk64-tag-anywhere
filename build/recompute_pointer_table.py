@@ -110,7 +110,9 @@ pointer_tables = [
 		"index": 18,
 		"name": "Map Loading Zones",
 		"encoded_filename": "loading_zones.bin",
-		"decoded_filename": "loading_zones.yaml",
+		"decoded_filename": "loading_zones.json",
+		"encoder": encoders.encodeLoadingZones,
+		"decoder": encoders.decodeLoadingZones,
 	},
 	{
 		"index": 19,

@@ -1,6 +1,7 @@
 import json
 import math
 import struct
+from map_names import maps
 from model2_names import model2_names
 from actor_names import actor_names
 
@@ -27,6 +28,138 @@ def ScriptHawkSetPosition(x, y, z):
 def floatAt(data : bytes, offset : int):
     return struct.unpack('>f', data[offset:offset+4])[0]
 
+def decodeLoadingZones(decoded_filename : str, encoded_filename :str):
+    lz_object_types = [
+        "Unknown 0x0", # In maps 6,14,30,43,55,106 (Minecarts, Aztec Beetle Race, Galleon, Shipwreck)
+        "Unused 0x1",
+        "Unknown 0x2", # In Castle Minecart / MJ / Fungi (Rabbit Race)
+        "Boss Door Trigger 0x3", # Also sets boss fadeout type as fade instead of spin. In toolshed too??
+        "Unknown 0x4", # In Fungi Minecart
+        "Cutscene Trigger 0x5",
+        "Unknown 0x6", # In Treehouse / MJ / Fungi. Not phase reset plane
+        "Unknown 0x7", # In Fungi / Fungi Minecart
+        "Unknown 0x8", # In Fungi / Fungi Minecart
+        "Loading Zone 0x9",
+        "Cutscene Trigger 0xA",
+        "Unknown 0xB", # In Minecart Mayhem
+        "Loading Zone + Objects 0xC", # Alows objects through
+        "Loading Zone 0xD",
+        "Unused 0xE",
+        "Warp Trigger 0xF", # Factory Poles
+        "Loading Zone 0x10",
+        "Loading Zone 0x11", # Snide's, Return to Parent Map?
+        "Unused 0x12",
+        "Unknown 0x13", # In maps 7,17,30,34,38,47,48,194 (Japes, Helm, Galleon, Isles, Aztec, Shipwreck, Fungi, Caves)
+        "Boss Loading Zone 0x14", # Takes you to the boss of that level
+        "Cutscene Trigger 0x15",
+        "Unknown 0x16", # In Aztec Beetle Race
+        "Cutscene Trigger 0x17",
+        "Unknown 0x18", # In Fungi Minecart
+        "Trigger 0x19", # Seal Race
+        "Unknown 0x1A", # In Caves Beetle Race
+        "Slide Trigger 0x1B", # Beetle Races
+        "Unknown 0x1C", # Beetle Races
+        "Unused 0x1D",
+        "Unused 0x1E",
+        "Unused 0x1F",
+        "Cutscene Trigger 0x20",
+        "Unused 0x21",
+        "Unused 0x22",
+        "Unused 0x23",
+        "Unknown 0x24", # Cannon Trigger? Also used Aztec Snake Road and maps 7,17,26,34,38,48,72,173
+        "Unknown 0x25", # In Factory
+        "Unknown 0x26", # In BFI & K. Lumsy. Seems to be centred around torches?
+    ]
+    with open(encoded_filename, "rb") as fh:
+        byte_read = fh.read()
+        num_loading_zones = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
+        
+        loading_zones = []
+        loading_zone_base = 2
+        for i in range(num_loading_zones):
+            this_loading_zone = byte_read[loading_zone_base:loading_zone_base+0x38]
+            object_type = int.from_bytes(this_loading_zone[0x10:0x12], byteorder="big")
+            destination_map = int.from_bytes(this_loading_zone[0x12:0x14], byteorder="big")
+            destination_map_name = maps[destination_map] if destination_map < len(maps) else "Unknown " + hex(destination_map)
+            lz_data = {
+                "x_pos": int.from_bytes(this_loading_zone[0x0:0x2], byteorder="big", signed=True),
+                "y_pos": int.from_bytes(this_loading_zone[0x2:0x4], byteorder="big", signed=True),
+                "z_pos": int.from_bytes(this_loading_zone[0x4:0x6], byteorder="big", signed=True),
+                "radius": int.from_bytes(this_loading_zone[0x6:0x8], byteorder="big", signed=True),
+                "height": int.from_bytes(this_loading_zone[0x8:0xA], byteorder="big", signed=True),
+                "unkA": int.from_bytes(this_loading_zone[0xA:0xC], byteorder="big", signed=True),
+                "activation_type": this_loading_zone[0xC],
+                "unkD": this_loading_zone[0xD],
+                "unkE": this_loading_zone[0xE],
+                "unkF": this_loading_zone[0xF],
+                "object_type": object_type,
+                "object_type_name": lz_object_types[object_type],
+                "destination_map": destination_map,
+                "destination_map_name": destination_map_name,
+                "destination_exit": int.from_bytes(this_loading_zone[0x14:0x16], byteorder="big"),
+                "transition_type": int.from_bytes(this_loading_zone[0x16:0x18], byteorder="big"),
+                "unk18": int.from_bytes(this_loading_zone[0x18:0x1A], byteorder="big"),
+                "cutscene_is_tied": int.from_bytes(this_loading_zone[0x1A:0x1C], byteorder="big"),
+                "cutscene_index": int.from_bytes(this_loading_zone[0x1C:0x1E], byteorder="big"),
+                "shift_camera_to_kong": int.from_bytes(this_loading_zone[0x1E:0x20], byteorder="big"),
+                "unk20": this_loading_zone[0x20:0x38].hex(" ").upper(),
+            }
+            lz_data["SETPOS"] = ScriptHawkSetPosition(lz_data["x_pos"], lz_data["y_pos"], lz_data["z_pos"])
+            if not "Loading Zone" in lz_data["object_type_name"]:
+                del lz_data["destination_map_name"]
+            loading_zones.append(lz_data)
+            loading_zone_base += 0x38
+
+        with open(decoded_filename, "w") as fjson:
+            json.dump(loading_zones, fjson, indent=4, default=str)
+
+def encodeLoadingZones(decoded_filename : str, encoded_filename :str):
+    with open(decoded_filename) as fjson:
+        loading_zones = json.load(fjson)
+        with open(encoded_filename, "w+b") as fh:
+            fh.write(len(loading_zones).to_bytes(2, byteorder="big"))
+            for loading_zone in loading_zones:
+                fh.write(int(loading_zone["x_pos"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["y_pos"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["z_pos"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["radius"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["height"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["unkA"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["activation_type"]).to_bytes(1, byteorder="big"))
+                fh.write(int(loading_zone["unkD"]).to_bytes(1, byteorder="big"))
+                fh.write(int(loading_zone["unkE"]).to_bytes(1, byteorder="big"))
+                fh.write(int(loading_zone["unkF"]).to_bytes(1, byteorder="big"))
+                fh.write(int(loading_zone["object_type"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["destination_map"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["destination_exit"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["transition_type"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["unk18"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["cutscene_is_tied"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["cutscene_index"]).to_bytes(2, byteorder="big"))
+                fh.write(int(loading_zone["shift_camera_to_kong"]).to_bytes(2, byteorder="big"))
+                fh.write(bytes.fromhex(loading_zone["unk20"]))
+
+def decodeExits(decoded_filename : str, encoded_filename : str):
+    with open(encoded_filename, "rb") as fh:
+        byte_read = fh.read()
+        num_exits = math.floor(len(byte_read) / 0xA)
+        exits = []
+        exit_base = 0
+        for i in range(num_exits):
+            this_exit = byte_read[exit_base:exit_base+0xA]
+            exits.append({
+                "x_pos": int.from_bytes(this_exit[0x0:0x2], byteorder="big", signed=True),
+                "y_pos": int.from_bytes(this_exit[0x2:0x4], byteorder="big", signed=True),
+                "z_pos": int.from_bytes(this_exit[0x4:0x6], byteorder="big", signed=True),
+                "angle": int.from_bytes(this_exit[0x6:0x8], byteorder="big", signed=True),
+                "has_autowalk": this_exit[0x8],
+                "size": this_exit[0x9],
+            })
+            exit_base += 0xA
+
+        with open(decoded_filename, "w") as fjson:
+            json.dump(exits, fjson, indent=4, default=str)
+
 def encodeExits(decoded_filename : str, encoded_filename :str):
     with open(decoded_filename) as fjson:
         exits = json.load(fjson)
@@ -39,32 +172,12 @@ def encodeExits(decoded_filename : str, encoded_filename :str):
                 fh.write(int(exit["has_autowalk"]).to_bytes(1, byteorder="big"))
                 fh.write(int(exit["size"]).to_bytes(1, byteorder="big"))
 
-def decodeExits(decoded_filename : str, encoded_filename : str):
-    with open(encoded_filename, "rb") as fh:
-        byte_read = fh.read()
-        num_exits = math.floor(len(byte_read) / 0xA)
-        exits = []
-        for i in range(num_exits):
-            exit_base = i * 0xA
-            this_exit = byte_read[exit_base:exit_base+0xA]
-            exits.append({
-                "x_pos": int.from_bytes(this_exit[0x0:0x2], byteorder="big", signed=True),
-                "y_pos": int.from_bytes(this_exit[0x2:0x4], byteorder="big", signed=True),
-                "z_pos": int.from_bytes(this_exit[0x4:0x6], byteorder="big", signed=True),
-                "angle": int.from_bytes(this_exit[0x6:0x8], byteorder="big", signed=True),
-                "has_autowalk": this_exit[0x8],
-                "size": this_exit[0x9],
-            })
-
-        with open(decoded_filename, "w") as fjson:
-            json.dump(exits, fjson, indent=4, default=str)
-
 def decodePaths(decoded_filename : str, encoded_filename : str):
     with open(encoded_filename, "rb") as fh:
         byte_read = fh.read()
 
         paths = []
-        num_paths = int.from_bytes(byte_read[0x0:0x2], byteorder="big", signed=False)
+        num_paths = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
         path_base = 2
         for i in range(num_paths):
             this_path = byte_read[path_base:path_base+0x6]
@@ -105,15 +218,15 @@ def encodePaths(decoded_filename : str, encoded_filename : str):
         paths = json.load(fjson)
         with open(encoded_filename, "w+b") as fh:
             # File header
-            fh.write(len(paths).to_bytes(2, byteorder="big", signed=False))
+            fh.write(len(paths).to_bytes(2, byteorder="big"))
 
             for path in paths:
                 num_points = len(path["points"]) if "points" in path else 0
 
                 # Path header
-                fh.write(int(path["id"]).to_bytes(2, byteorder="big", signed=False))
-                fh.write(num_points.to_bytes(2, byteorder="big", signed=False))
-                fh.write(int(path["unk4"]).to_bytes(2, byteorder="big", signed=False))
+                fh.write(int(path["id"]).to_bytes(2, byteorder="big"))
+                fh.write(num_points.to_bytes(2, byteorder="big"))
+                fh.write(int(path["unk4"]).to_bytes(2, byteorder="big"))
 
                 for p in range(num_points):
                     point = path["points"][p]
@@ -130,8 +243,8 @@ def decodeCheckpoints(decoded_filename : str, encoded_filename : str):
         byte_read = fh.read()
 
         checkpoints = []
-        num_checkpoints = int.from_bytes(byte_read[0x1:0x3], byteorder="big", signed=False)
-        num_checkpoint_mappings = int.from_bytes(byte_read[0x3:0x5], byteorder="big", signed=False)
+        num_checkpoints = int.from_bytes(byte_read[0x1:0x3], byteorder="big")
+        num_checkpoint_mappings = int.from_bytes(byte_read[0x3:0x5], byteorder="big")
 
         if num_checkpoints != num_checkpoint_mappings:
             print(" - Error: Number of checkpoints does not match number of checkpoint mappings.")
@@ -171,8 +284,8 @@ def encodeCheckpoints(decoded_filename : str, encoded_filename : str):
         with open(encoded_filename, "w+b") as fh:
             # File header
             fh.write(bytes([0x1]))
-            fh.write(len(checkpoints).to_bytes(2, byteorder="big", signed=False)) # Num Checkpoints
-            fh.write(len(checkpoints).to_bytes(2, byteorder="big", signed=False)) # Num Mappings
+            fh.write(len(checkpoints).to_bytes(2, byteorder="big")) # Num Checkpoints
+            fh.write(len(checkpoints).to_bytes(2, byteorder="big")) # Num Mappings
 
             # Checkpoint index mapping
             for checkpointIndex, checkpoint in enumerate(checkpoints):
@@ -202,7 +315,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
         extract = {}
         
         # Fences?
-        fence_count = int.from_bytes(byte_read[0x0:0x2], byteorder="big", signed=False)
+        fence_count = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
         read_header += 2
 
         if fence_count > 0:
@@ -325,7 +438,7 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
         setup = {}
 
         # Object Model 2
-        num_model2 = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big", signed=False)
+        num_model2 = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big")
         pointer += 4
 
         if num_model2 > 0:
@@ -359,7 +472,7 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                 pointer += 0x30
 
         # Conveyor Data
-        num_conveyor = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big", signed=False)
+        num_conveyor = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big")
         pointer += 4
 
         if num_conveyor > 0:
@@ -381,7 +494,7 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                 pointer += 0x24
 
         # Actor Spawners
-        num_actor_spawners = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big", signed=False)
+        num_actor_spawners = int.from_bytes(byte_read[pointer:pointer+0x4], byteorder="big")
         pointer += 4
 
         if num_actor_spawners > 0:
@@ -420,7 +533,7 @@ def encodeSetup(decoded_filename : str, encoded_filename : str):
             num_actor_spawners = len(setup["actors"]) if "actors" in setup else 0
 
             # Model 2            
-            fh.write(num_model2.to_bytes(4, byteorder="big", signed=False))
+            fh.write(num_model2.to_bytes(4, byteorder="big"))
 
             if num_model2 > 0:
                 for i, this_model2 in enumerate(setup["model2"]):
@@ -440,13 +553,13 @@ def encodeSetup(decoded_filename : str, encoded_filename : str):
                         num_conveyors += 1
 
             # Conveyor Data
-            fh.write(num_conveyors.to_bytes(4, byteorder="big", signed=False))
+            fh.write(num_conveyors.to_bytes(4, byteorder="big"))
 
             if num_conveyors > 0:
                 for i, this_model2 in enumerate(setup["model2"]):
                     if "conveyor_data" in this_model2:
                         conveyor_data = this_model2["conveyor_data"]
-                        fh.write(i.to_bytes(4, byteorder="big", signed=False)) # Model 2 Index
+                        fh.write(i.to_bytes(4, byteorder="big")) # Model 2 Index
                         fh.write(struct.pack('>f', conveyor_data["unk4"])) # Float
                         fh.write(struct.pack('>f', conveyor_data["unk8"])) # Float
                         fh.write(struct.pack('>f', conveyor_data["unkC"])) # Float
@@ -457,7 +570,7 @@ def encodeSetup(decoded_filename : str, encoded_filename : str):
                         fh.write(struct.pack('>f', conveyor_data["unk20"])) # Float
 
             # Actor Spawners
-            fh.write(num_actor_spawners.to_bytes(4, byteorder="big", signed=False))
+            fh.write(num_actor_spawners.to_bytes(4, byteorder="big"))
 
             if num_actor_spawners > 0:
                 for i, this_actor in enumerate(setup["actors"]):
