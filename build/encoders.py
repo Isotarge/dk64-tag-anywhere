@@ -87,11 +87,11 @@ def decodeLoadingZones(decoded_filename : str, encoded_filename :str):
                 "z_pos": int.from_bytes(this_loading_zone[0x4:0x6], byteorder="big", signed=True),
                 "radius": int.from_bytes(this_loading_zone[0x6:0x8], byteorder="big", signed=True),
                 "height": int.from_bytes(this_loading_zone[0x8:0xA], byteorder="big", signed=True),
-                "unkA": int.from_bytes(this_loading_zone[0xA:0xC], byteorder="big", signed=True),
+                "unkA": int.from_bytes(this_loading_zone[0xA:0xC], byteorder="big"), # Probably an index, values range from 0-50 except 38 is never seen
                 "activation_type": this_loading_zone[0xC],
-                "unkD": this_loading_zone[0xD],
-                "unkE": this_loading_zone[0xE],
-                "unkF": this_loading_zone[0xF],
+                "boolD": True if this_loading_zone[0xD] == 1 else False, # If set, enter K. Rool LZ is active without all keys
+                "unkE": this_loading_zone[0xE], # Usually 1, but values range from 0-4
+                "unkF": this_loading_zone[0xF], # Usually 0, but other known values are 2,4,5,32,48,50,64,75,80,96,128,144,209,228,255
                 "object_type": object_type,
                 "object_type_name": lz_object_types[object_type],
                 "destination_map": destination_map,
@@ -102,11 +102,19 @@ def decodeLoadingZones(decoded_filename : str, encoded_filename :str):
                 "cutscene_is_tied": int.from_bytes(this_loading_zone[0x1A:0x1C], byteorder="big"),
                 "cutscene_index": int.from_bytes(this_loading_zone[0x1C:0x1E], byteorder="big"),
                 "shift_camera_to_kong": int.from_bytes(this_loading_zone[0x1E:0x20], byteorder="big"),
-                "unk20": this_loading_zone[0x20:0x38].hex(" ").upper(),
+                "unk20": this_loading_zone[0x20:0x38].hex(" ").upper(), # TODO: Break this down into smaller fields
             }
-            lz_data["SETPOS"] = ScriptHawkSetPosition(lz_data["x_pos"], lz_data["y_pos"], lz_data["z_pos"])
+
+            # sampleValue("loading_zone->unkA", lz_data["unkA"])
+            # sampleValue("loading_zone->boolD", lz_data["boolD"])
+            # sampleValue("loading_zone->unkE", lz_data["unkE"])
+            # sampleValue("loading_zone->unkF", lz_data["unkF"])
+            # sampleValue("loading_zone->unkF", lz_data["unk20"])
+            # lz_data["SETPOS"] = ScriptHawkSetPosition(lz_data["x_pos"], lz_data["y_pos"], lz_data["z_pos"])
+
             if not "Loading Zone" in lz_data["object_type_name"]:
                 del lz_data["destination_map_name"]
+
             loading_zones.append(lz_data)
             loading_zone_base += 0x38
 
@@ -124,9 +132,9 @@ def encodeLoadingZones(decoded_filename : str, encoded_filename :str):
                 fh.write(int(loading_zone["z_pos"]).to_bytes(2, byteorder="big", signed=True))
                 fh.write(int(loading_zone["radius"]).to_bytes(2, byteorder="big", signed=True))
                 fh.write(int(loading_zone["height"]).to_bytes(2, byteorder="big", signed=True))
-                fh.write(int(loading_zone["unkA"]).to_bytes(2, byteorder="big", signed=True))
+                fh.write(int(loading_zone["unkA"]).to_bytes(2, byteorder="big"))
                 fh.write(int(loading_zone["activation_type"]).to_bytes(1, byteorder="big"))
-                fh.write(int(loading_zone["unkD"]).to_bytes(1, byteorder="big"))
+                fh.write(int(1 if loading_zone["boolD"] else 0).to_bytes(1, byteorder="big"))
                 fh.write(int(loading_zone["unkE"]).to_bytes(1, byteorder="big"))
                 fh.write(int(loading_zone["unkF"]).to_bytes(1, byteorder="big"))
                 fh.write(int(loading_zone["object_type"]).to_bytes(2, byteorder="big"))
