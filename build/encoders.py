@@ -180,6 +180,39 @@ def encodeExits(decoded_filename : str, encoded_filename :str):
                 fh.write(int(exit["has_autowalk"]).to_bytes(1, byteorder="big"))
                 fh.write(int(exit["size"]).to_bytes(1, byteorder="big"))
 
+def decodeAutowalk(decoded_filename : str, encoded_filename :str):
+    with open(encoded_filename, "rb") as fh:
+        byte_read = fh.read()
+        path_base = 0
+        autowalk_paths = []
+
+        num_paths = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
+        path_base += 2
+        for i in range(num_paths):
+            num_points = int.from_bytes(byte_read[path_base+0:path_base+2], byteorder="big")
+            path_base += 2
+            path = []
+
+            if num_points > 0:
+                for p in range(num_points):
+                    this_point = byte_read[path_base:path_base+0x12]
+                    path.append({
+                        "x_pos": int.from_bytes(this_point[0x0:0x2], byteorder="big", signed=True),
+                        "y_pos": int.from_bytes(this_point[0x2:0x4], byteorder="big", signed=True),
+                        "z_pos": int.from_bytes(this_point[0x4:0x6], byteorder="big", signed=True),
+                        "unk6": this_point[0x6:0x12].hex(" ").upper(), # TODO: Break this down into smaller fields
+                    })
+                    # sampleValue("autowalk->point->unk6", path[p]["unk6"])
+                    path_base += 0x12
+
+            autowalk_paths.append(path)
+
+        with open(decoded_filename, "w") as fjson:
+            json.dump(autowalk_paths, fjson, indent=4, default=str)
+
+def encodeAutowalk(decoded_filename : str, encoded_filename :str):
+    print("encodeAutowalk() is not yet implemented") # TODO: Implement this
+
 def decodePaths(decoded_filename : str, encoded_filename : str):
     with open(encoded_filename, "rb") as fh:
         byte_read = fh.read()
@@ -236,9 +269,8 @@ def encodePaths(decoded_filename : str, encoded_filename : str):
                 fh.write(num_points.to_bytes(2, byteorder="big"))
                 fh.write(int(path["unk4"]).to_bytes(2, byteorder="big"))
 
-                for p in range(num_points):
-                    point = path["points"][p]
-                    # Path points
+                # Path points
+                for p, point in enumerate(path["points"]):    
                     fh.write(int(point["unk0"]).to_bytes(2, byteorder="big", signed=True))
                     fh.write(int(point["x_pos"]).to_bytes(2, byteorder="big", signed=True))
                     fh.write(int(point["y_pos"]).to_bytes(2, byteorder="big", signed=True))
@@ -291,14 +323,14 @@ def encodeCheckpoints(decoded_filename : str, encoded_filename : str):
         checkpoints = json.load(fjson)
         with open(encoded_filename, "w+b") as fh:
             # File header
-            fh.write(bytes([0x1]))
+            fh.write(bytes([0x1])) # Seems to always be 1
             fh.write(len(checkpoints).to_bytes(2, byteorder="big")) # Num Checkpoints
             fh.write(len(checkpoints).to_bytes(2, byteorder="big")) # Num Mappings
 
             # Checkpoint index mapping
             for checkpointIndex, checkpoint in enumerate(checkpoints):
                 if "mapping" in checkpoint:
-                    fh.write(checkpoint["mapping"].to_bytes(2, byteorder="big"))
+                    fh.write(int(checkpoint["mapping"]).to_bytes(2, byteorder="big"))
                 else:
                     fh.write(checkpointIndex.to_bytes(2, byteorder="big"))
 
@@ -358,14 +390,14 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                             "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
                             "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
                             "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                            "unk6": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(),
+                            "unk6": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(), # TODO: Break this down into smaller fields
                         }
                         # this_point["SETPOS"] = ScriptHawkSetPosition(this_point["x_pos"], this_point["y_pos"], this_point["z_pos"])
                         unknown_data["points_0xA"].append(this_point)
                         read_header += 0xA
 
                 # unknown_data["unkFooterAddress"] = hex(read_header)
-                unknown_data["unkFooter"] = byte_read[read_header+0x0:read_header+0x4].hex(" ").upper()
+                unknown_data["unkFooter"] = byte_read[read_header+0x0:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
                 read_header += 4
 
                 extract["fences"].append(unknown_data)
@@ -458,13 +490,13 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "y_pos": floatAt(this_model2, 0x4),
                     "z_pos": floatAt(this_model2, 0x8),
                     "scale": floatAt(this_model2, 0xC),
-                    "unk10": this_model2[0x10:0x18].hex(" ").upper(),
+                    "unk10": this_model2[0x10:0x18].hex(" ").upper(), # TODO: Break this down into smaller fields
                     "angle18": floatAt(this_model2, 0x18),
                     "angle1C": floatAt(this_model2, 0x1C),
                     "angle20": floatAt(this_model2, 0x20),
                     "unk24": floatAt(this_model2, 0x24),
                     "behaviour": int.from_bytes(this_model2[0x28:0x2A], byteorder="big"),
-                    "unk2A": this_model2[0x2A:0x30].hex(" ").upper(),
+                    "unk2A": this_model2[0x2A:0x30].hex(" ").upper(), # TODO: Break this down into smaller fields
                 }
                 model2_data["name"] = model2_names[model2_data["behaviour"]]
 
@@ -515,9 +547,9 @@ def decodeSetup(decoded_filename : str, encoded_filename : str):
                     "z_pos": floatAt(this_actor, 0x8),
                     "scale": floatAt(this_actor, 0xC),
                     "unk10": floatAt(this_actor, 0x10),
-                    "unk14": this_actor[0x14:0x32].hex(" ").upper(),
+                    "unk14": this_actor[0x14:0x32].hex(" ").upper(), # TODO: Break this down into smaller fields
                     "behaviour": int.from_bytes(this_actor[0x32:0x34], byteorder="big"),
-                    "unk34": this_actor[0x34:0x38].hex(" ").upper(),
+                    "unk34": this_actor[0x34:0x38].hex(" ").upper(), # TODO: Break this down into smaller fields
                 }
 
                 actor_data["name"] = actor_names[actor_data["behaviour"] + 0x10]
