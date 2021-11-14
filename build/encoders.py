@@ -211,7 +211,17 @@ def decodeAutowalk(decoded_filename : str, encoded_filename :str):
             json.dump(autowalk_paths, fjson, indent=4, default=str)
 
 def encodeAutowalk(decoded_filename : str, encoded_filename :str):
-    print("encodeAutowalk() is not yet implemented") # TODO: Implement this
+    with open(decoded_filename) as fjson:
+        autowalk_paths = json.load(fjson)
+        with open(encoded_filename, "w+b") as fh:
+            fh.write(len(autowalk_paths).to_bytes(2, byteorder="big"))
+            for path in autowalk_paths:
+                fh.write(len(path).to_bytes(2, byteorder="big"))
+                for point in path:
+                    fh.write(int(point["x_pos"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(int(point["y_pos"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(int(point["z_pos"]).to_bytes(2, byteorder="big", signed=True))
+                    fh.write(bytes.fromhex(point["unk6"]))
 
 def decodePaths(decoded_filename : str, encoded_filename : str):
     with open(encoded_filename, "rb") as fh:
@@ -244,9 +254,9 @@ def decodePaths(decoded_filename : str, encoded_filename : str):
                         "speed": this_point[0x8], # 1 - 3 in vanilla
                         "unk9": this_point[0x9],
                     })
-                    # sampleValue("path->point->unk0", int.from_bytes(this_point[0x0:0x2], byteorder="big", signed=True))
-                    # sampleValue("path->point->speed", this_point[0x8])
-                    # sampleValue("path->point->unk9", this_point[0x9])
+                    # sampleValue("path->point->unk0", path["points"][p]["unk0"])
+                    # sampleValue("path->point->speed", path["points"][p]["speed"])
+                    # sampleValue("path->point->unk9", path["points"][p]["unk9"])
                     path_base += 0xA
 
             paths.append(path)
@@ -270,13 +280,14 @@ def encodePaths(decoded_filename : str, encoded_filename : str):
                 fh.write(int(path["unk4"]).to_bytes(2, byteorder="big"))
 
                 # Path points
-                for p, point in enumerate(path["points"]):    
-                    fh.write(int(point["unk0"]).to_bytes(2, byteorder="big", signed=True))
-                    fh.write(int(point["x_pos"]).to_bytes(2, byteorder="big", signed=True))
-                    fh.write(int(point["y_pos"]).to_bytes(2, byteorder="big", signed=True))
-                    fh.write(int(point["z_pos"]).to_bytes(2, byteorder="big", signed=True))
-                    fh.write(int(point["speed"]).to_bytes(1, byteorder="big"))
-                    fh.write(int(point["unk9"]).to_bytes(1, byteorder="big"))
+                if num_points > 0:
+                    for p, point in enumerate(path["points"]):    
+                        fh.write(int(point["unk0"]).to_bytes(2, byteorder="big", signed=True))
+                        fh.write(int(point["x_pos"]).to_bytes(2, byteorder="big", signed=True))
+                        fh.write(int(point["y_pos"]).to_bytes(2, byteorder="big", signed=True))
+                        fh.write(int(point["z_pos"]).to_bytes(2, byteorder="big", signed=True))
+                        fh.write(int(point["speed"]).to_bytes(1, byteorder="big"))
+                        fh.write(int(point["unk9"]).to_bytes(1, byteorder="big"))
 
 def decodeCheckpoints(decoded_filename : str, encoded_filename : str):
     with open(encoded_filename, "rb") as fh:

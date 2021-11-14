@@ -128,7 +128,7 @@ pointer_tables = [
 		"name": "Map Autowalk Data",
 		"encoded_filename": "autowalk.bin",
 		"decoded_filename": "autowalk.json",
-		# "encoder": encoders.encodeAutowalk, # TODO
+		"encoder": encoders.encodeAutowalk,
 		"decoder": encoders.decodeAutowalk,
 		"do_not_compress": True,
 		"dont_overwrite_uncompressed_sizes": True,
