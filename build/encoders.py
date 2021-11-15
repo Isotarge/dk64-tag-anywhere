@@ -229,8 +229,8 @@ exit_struct = [
     {"name": "y_pos",        "type": "short"},
     {"name": "z_pos",        "type": "short"},
     {"name": "angle",        "type": "short"},
-    {"name": "has_autowalk", "type": "byte"},
-    {"name": "size",         "type": "byte"},
+    {"name": "has_autowalk", "type": "byte"}, # Vanilla uses values 0, 1, and 2
+    {"name": "size",         "type": "byte"}, # Vanilla uses values 0 and 1 (TODO: boolean?)
 ]
 
 def decodeExits(decoded_filename : str, encoded_filename : str):
@@ -286,7 +286,7 @@ path_point_struct = [
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
     {"name": "speed", "type": "byte"}, # 1 - 3 in vanilla
-    {"name": "unk9",  "type": "byte"},
+    {"name": "unk9",  "type": "byte"}, # Ranges from 0-255
 ]
 
 def decodePaths(decoded_filename : str, encoded_filename : str):
@@ -339,13 +339,13 @@ checkpoint_struct = [
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
     {"name": "angle", "type": "short"},
-    {"name": "unk8", "type": float},
-    {"name": "unkC", "type": float},
-    {"name": "unk10", "type": "ushort"},
-    {"name": "unk12", "type": "ushort"},
-    {"name": "unk14", "type": float},
-    {"name": "unk18", "type": "ushort"},
-    {"name": "unk1A", "type": "ushort"},
+    {"name": "unk8", "type": float}, # Range -1.0 to 1.0
+    {"name": "unkC", "type": float}, # Range -1.0 to 1.0
+    {"name": "unk10", "type": "ushort"}, # Seen values 0,256,512
+    {"name": "unk12", "type": "ushort"}, # Always 0
+    {"name": "unk14", "type": float}, # Seen values of 0.5-1.0 +/- epsilon
+    {"name": "unk18", "type": "ushort"}, # Always 512
+    {"name": "unk1A", "type": "ushort"}, # Seen values of 26,39,42,43,44,47,48,49,50,53,55,65,89,90,110,124
 ]
 
 def decodeCheckpoints(decoded_filename : str, encoded_filename : str):
@@ -399,11 +399,12 @@ character_spawner_point_0x6_struct = [
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
 ]
+# TODO: This is sus, there might be another set of points because unk6 is sometimes 2 bytes...
 character_spawner_point_0xA_struct = [
     {"name": "x_pos", "type": "short"},
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
-    {"name": "unk6",  "type": bytes, "size": 0xA - 0x6}, # TODO: Break this down into smaller fields
+    {"name": "unk6",  "type": bytes, "size": 0xA - 0x6, "sample": "cspa->unk6"}, # TODO: Break this down into smaller fields
 ]
 character_spawner_struct = [
     {"name": "enemy_val",             "type": "byte"},
@@ -439,14 +440,14 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
         if fence_count > 0:
             extract["fences"] = []
             for i in range(fence_count):
-                unknown_data = {}
+                fence_data = {}
 
                 # Points_0x6
                 num_points = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
                 read_header += 2
 
                 if num_points > 0:
-                    unknown_data["points_0x6"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0x6_struct)
+                    fence_data["points_0x6"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0x6_struct)
                     read_header += num_points * 0x6
 
                 # Points_0xA
@@ -454,14 +455,14 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 read_header += 2
 
                 if num_points_0xA > 0:
-                    unknown_data["points_0xA"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0xA_struct)
+                    fence_data["points_0xA"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0xA_struct)
                     read_header += num_points_0xA * 0xA
 
-                # unknown_data["unkFooterAddress"] = hex(read_header)
-                unknown_data["unkFooter"] = byte_read[read_header:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
+                # fence_data["unkFooterAddress"] = hex(read_header)
+                fence_data["unkFooter"] = byte_read[read_header:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
                 read_header += 4
 
-                extract["fences"].append(unknown_data)
+                extract["fences"].append(fence_data)
 
         # Spawners
         spawn_count = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
