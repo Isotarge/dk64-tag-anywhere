@@ -23,7 +23,7 @@ def sampleValue(tag : str, value):
     valueSamples[tag]["all"][value] += 1
     return value
 
-dump_scripthawk_positions = False
+dump_struct_debug_info = False
 def ScriptHawkSetPosition(x, y, z):
     return "Game.setPosition(" + str(x) + "," + str(y) + "," + str(z) + ");"
 
@@ -99,8 +99,10 @@ def readStruct(byte_read : bytes, offset : int, struct_fields : list):
 
         read_head += field["size"]
     
-    if dump_scripthawk_positions and "x_pos" in decoded_struct and "y_pos" in decoded_struct and "z_pos" in decoded_struct:
-        decoded_struct["SetPosition"] = ScriptHawkSetPosition(decoded_struct["x_pos"], decoded_struct["y_pos"], decoded_struct["z_pos"])
+    if dump_struct_debug_info:
+        decoded_struct["DEBUG_File_Address"] = hex(offset)
+        if "x_pos" in decoded_struct and "y_pos" in decoded_struct and "z_pos" in decoded_struct:
+            decoded_struct["DEBUG_Set_Position"] = ScriptHawkSetPosition(decoded_struct["x_pos"], decoded_struct["y_pos"], decoded_struct["z_pos"])
 
     return decoded_struct
 
@@ -249,7 +251,7 @@ autowalk_point_struct = [
     {"name": "x_pos", "type": "short"},
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
-    {"name": "unk6",  "type": bytes, "size": 0x12 - 0x6}
+    {"name": "unk6",  "type": bytes, "size": 0x12 - 0x6}, # TODO: Break this down into smaller fields
 ]
 
 def decodeAutowalk(decoded_filename : str, encoded_filename :str):
@@ -392,6 +394,18 @@ def encodeCheckpoints(decoded_filename : str, encoded_filename : str):
             # Checkpoint data
             writeStructArray(fh, checkpoints, checkpoint_struct)
 
+character_spawner_point_0x6_struct = [
+    {"name": "x_pos", "type": "short"},
+    {"name": "y_pos", "type": "short"},
+    {"name": "z_pos", "type": "short"},
+]
+character_spawner_point_0xA_struct = [
+    {"name": "x_pos", "type": "short"},
+    {"name": "y_pos", "type": "short"},
+    {"name": "z_pos", "type": "short"},
+    {"name": "unk6", "type": bytes, "size": 0xA - 0x6}, # TODO: Break this down into smaller fields
+]
+
 def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
     with open(encoded_filename, "rb") as fh:
         byte_read = fh.read()
@@ -412,31 +426,16 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 read_header += 2
 
                 if num_points > 0:
-                    unknown_data["points_0x6"] = []
-                    for i in range(num_points):
-                        this_point = {
-                            "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
-                            "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
-                            "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                        }
-                        unknown_data["points_0x6"].append(this_point)
-                        read_header += 0x6
+                    unknown_data["points_0x6"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0x6_struct)
+                    read_header += num_points * 0x6
 
                 # Points_0xA
                 num_points_0xA = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
                 read_header += 2
 
                 if num_points_0xA > 0:
-                    unknown_data["points_0xA"] = []
-                    for i in range(num_points_0xA):
-                        this_point = {
-                            "x_pos": int.from_bytes(byte_read[read_header+0x0:read_header+0x2], byteorder="big", signed=True),
-                            "y_pos": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big", signed=True),
-                            "z_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                            "unk6": byte_read[read_header+0x6:read_header+0xA].hex(" ").upper(), # TODO: Break this down into smaller fields
-                        }
-                        unknown_data["points_0xA"].append(this_point)
-                        read_header += 0xA
+                    unknown_data["points_0xA"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0xA_struct)
+                    read_header += num_points_0xA * 0xA
 
                 # unknown_data["unkFooterAddress"] = hex(read_header)
                 unknown_data["unkFooter"] = byte_read[read_header+0x0:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
@@ -452,7 +451,6 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
             extract["character_spawners"] = []
             for i in range (spawn_count):
                 spawner_data = {
-                    # "spawner_address": hex(read_header),
                     "enemy_val": byte_read[read_header+0x0],
                     "unk1": byte_read[read_header+0x1],
                     "y_rot": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big"),
@@ -472,7 +470,6 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                     "initial_respawn_timer": byte_read[read_header+0x14],
                     "unk15": byte_read[read_header+0x15],
                 }
-                # spawner_data["SETPOS"] = ScriptHawkSetPosition(spawner_data["x_pos"], spawner_data["y_pos"], spawner_data["z_pos"])
                 # sampleValue("character_spawner->unk1", spawner_data["unk1"])
                 # sampleValue("character_spawner->unkB", spawner_data["unkB"])
                 # sampleValue("character_spawner->unkE", spawner_data["unkE"])
