@@ -53,9 +53,15 @@ def extractMap(mapIndex : int, mapPath : str):
                     pointer_table["decoder"](decoded_filename, encoded_filename)
 
 if __name__ == '__main__':
+    # Measure how long this takes
+    import time
+    start = time.time()
     with open(ROMName, "rb") as fh:
         print("[1 / 2] - Parsing pointer tables")
         parsePointerTables(fh)
         print("[2 / 2] - Extracting maps")
         extractMaps()
         print(json.dumps(valueSamples, indent=4, default=str, sort_keys=True))
+
+    end = time.time()
+    print("Completed in " + str(round(end - start, 3)) + " seconds")
