@@ -263,7 +263,7 @@ def decodeAutowalk(decoded_filename : str, encoded_filename :str):
         num_paths = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
         path_base += 2
         for i in range(num_paths):
-            num_points = int.from_bytes(byte_read[path_base+0:path_base+2], byteorder="big")
+            num_points = int.from_bytes(byte_read[path_base:path_base+2], byteorder="big")
             path_base += 2
             path = readStructArray(byte_read, path_base, num_points, autowalk_point_struct)
             path_base += num_points * 0x12
@@ -403,7 +403,27 @@ character_spawner_point_0xA_struct = [
     {"name": "x_pos", "type": "short"},
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
-    {"name": "unk6", "type": bytes, "size": 0xA - 0x6}, # TODO: Break this down into smaller fields
+    {"name": "unk6",  "type": bytes, "size": 0xA - 0x6}, # TODO: Break this down into smaller fields
+]
+character_spawner_struct = [
+    {"name": "enemy_val",             "type": "byte"},
+    {"name": "unk1",                  "type": "byte"},
+    {"name": "y_rot",                 "type": "ushort"},
+    {"name": "x_pos",                 "type": "short"},
+    {"name": "y_pos",                 "type": "short"},
+    {"name": "z_pos",                 "type": "short"},
+    {"name": "cutscene_model",        "type": "byte"},
+    {"name": "unkB",                  "type": "byte"},
+    {"name": "max_idle_speed",        "type": "byte"},
+    {"name": "max_aggro_speed",       "type": "byte"},
+    {"name": "unkE",                  "type": "byte"},
+    {"name": "scale",                 "type": "byte"},
+    {"name": "aggro",                 "type": "byte"},
+    {"name": "extra_data_count",      "type": "byte"},
+    {"name": "initial_spawn_state",   "type": "byte"},
+    {"name": "spawn_trigger",         "type": "byte"},
+    {"name": "initial_respawn_timer", "type": "byte"},
+    {"name": "unk15",                 "type": "byte"},
 ]
 
 def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
@@ -438,7 +458,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                     read_header += num_points_0xA * 0xA
 
                 # unknown_data["unkFooterAddress"] = hex(read_header)
-                unknown_data["unkFooter"] = byte_read[read_header+0x0:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
+                unknown_data["unkFooter"] = byte_read[read_header:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
                 read_header += 4
 
                 extract["fences"].append(unknown_data)
@@ -450,49 +470,17 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
         if spawn_count > 0:
             extract["character_spawners"] = []
             for i in range (spawn_count):
-                spawner_data = {
-                    "enemy_val": byte_read[read_header+0x0],
-                    "unk1": byte_read[read_header+0x1],
-                    "y_rot": int.from_bytes(byte_read[read_header+0x2:read_header+0x4], byteorder="big"),
-                    "x_pos": int.from_bytes(byte_read[read_header+0x4:read_header+0x6], byteorder="big", signed=True),
-                    "y_pos": int.from_bytes(byte_read[read_header+0x6:read_header+0x8], byteorder="big", signed=True),
-                    "z_pos": int.from_bytes(byte_read[read_header+0x8:read_header+0xA], byteorder="big", signed=True),
-                    # 0xA is cutscene model, which is read further down
-                    "unkB": byte_read[read_header+0xB],
-                    "max_idle_speed": byte_read[read_header+0xC],
-                    "max_aggro_speed": byte_read[read_header+0xD],
-                    "unkE": byte_read[read_header+0xE],
-                    "scale": byte_read[read_header+0xF],
-                    "aggro": byte_read[read_header+0x10],
-                    "unk11": byte_read[read_header+0x11],
-                    "initial_spawn_state": byte_read[read_header+0x12],
-                    "spawn_trigger": byte_read[read_header+0x13],
-                    "initial_respawn_timer": byte_read[read_header+0x14],
-                    "unk15": byte_read[read_header+0x15],
-                }
-                # sampleValue("character_spawner->unk1", spawner_data["unk1"])
-                # sampleValue("character_spawner->unkB", spawner_data["unkB"])
-                # sampleValue("character_spawner->unkE", spawner_data["unkE"])
-                # sampleValue("character_spawner->unk11", spawner_data["unk11"])
-                # sampleValue("character_spawner->initial_spawn_state", spawner_data["initial_spawn_state"])
-                # sampleValue("character_spawner->initial_respawn_timer", spawner_data["initial_respawn_timer"])
-                # sampleValue("character_spawner->unk15", spawner_data["unk15"])
+                spawner_data = readStruct(byte_read, read_header, character_spawner_struct)
 
-                # TODO: This is true for several spawners, figure out why
-                # if spawner_data["enemy_val"] != 0x50 and byte_read[read_header+0xA] != 0:
-                    # print("NON CUTSCENE OBJECT HAS CUTSCENE MODEL BYTE SET " + hex(spawner_data["enemy_val"]) + " " + hex(byte_read[read_header+0xA]) + " " + decoded_filename)
-
-                if spawner_data["enemy_val"] == 0x50 or byte_read[read_header+0xA] != 0:
-                    spawner_data["cutscene_model"] = byte_read[read_header+0xA]
-
-                extra_count = int(byte_read[read_header+0x11])
+                extra_count = spawner_data["extra_data_count"]
+                del spawner_data["extra_data_count"]
                 read_header += 0x16
 
                 # TODO: Figure what it does
-                if (extra_count > 0):
+                if extra_count > 0:
                     spawner_data["extra_data"] = []
                     for j in range(extra_count):
-                        spawner_data["extra_data"].append(int.from_bytes(byte_read[read_header+0:read_header+2], byteorder="big"))
+                        spawner_data["extra_data"].append(int.from_bytes(byte_read[read_header:read_header+2], byteorder="big"))
                         read_header += 2
 
                 extract["character_spawners"].append(spawner_data)
