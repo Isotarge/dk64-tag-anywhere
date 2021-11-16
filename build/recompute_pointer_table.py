@@ -21,6 +21,7 @@ pointer_tables = [
 		"encoded_filename": "walls.bin",
 		"decoded_filename": "walls.obj",
 		"dont_overwrite_uncompressed_sizes": True,
+		# "use_external_gzip": True,
 	},
 	{
 		"index": 3,
@@ -28,6 +29,7 @@ pointer_tables = [
 		"encoded_filename": "floors.bin",
 		"decoded_filename": "floors.obj",
 		"dont_overwrite_uncompressed_sizes": True,
+		# "use_external_gzip": True,
 	},
 	{
 		"index": 4,

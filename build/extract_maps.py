@@ -1,4 +1,3 @@
-from typing import BinaryIO
 import os
 import zlib
 import json
