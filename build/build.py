@@ -24,7 +24,7 @@ from recompute_overlays import isROMAddressOverlay, readOverlayOriginalData, rep
 
 # Patcher functions for the extracted files
 from staticcode import patchStaticCode
-from mainmenu import patchMainMenu
+from mainmenu import patchMainMenu, patchDolbyText
 
 ROMName = "./rom/dk64.z64"
 newROMName = "./rom/dk64-tag-anywhere.z64"
@@ -57,6 +57,13 @@ file_dict = [
 		"file_index": 176,
 		"source_file": "bin/Dolby.png",
 		"texture_format": "i4",
+	},
+	{
+		"name": "Dolby Text",
+		"pointer_table_index": 12,
+		"file_index": 13,
+		"source_file": "bin/DolbyText.bin",
+		"patcher": patchDolbyText,
 	},
 	{
 		"name": "Title Screen",
@@ -221,7 +228,8 @@ with open(ROMName, "rb") as fh:
 					os.remove(x["source_file"])
 
 				with open(x["source_file"], "wb") as fg:
-					dec = gzip.decompress(byte_read)
+					print(byte_read.hex())
+					dec = zlib.decompress(byte_read, 15 + 32)
 					fg.write(dec)
 
 print("[3 / 7] - Patching Extracted Files")
