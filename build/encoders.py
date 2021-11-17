@@ -457,7 +457,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 read_header += 2
 
                 if num_points_0xA > 0:
-                    fence_data["points_0xA"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0xA_struct)
+                    fence_data["points_0xA"] = readStructArray(byte_read, read_header, num_points_0xA, character_spawner_point_0xA_struct)
                     read_header += num_points_0xA * 0xA
                     # TODO: Remove once debugging is finished
                     # for point in fence_data["points_0xA"]:
