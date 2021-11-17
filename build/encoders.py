@@ -341,7 +341,8 @@ checkpoint_struct = [
     {"name": "angle", "type": "short"},
     {"name": "unk8", "type": float}, # Range -1.0 to 1.0
     {"name": "unkC", "type": float}, # Range -1.0 to 1.0
-    {"name": "unk10", "type": "ushort"}, # Seen values 0,256,512
+    {"name": "visibility", "type": "byte"}, # 0 is goal, seal race is 1 (buoy?), invisible is 2
+    {"name": "unk11", "type": "byte"}, # Always 0
     {"name": "unk12", "type": "ushort"}, # Always 0
     {"name": "unk14", "type": float}, # Seen values of 0.5-1.0 +/- epsilon
     {"name": "unk18", "type": "ushort"}, # Always 512
