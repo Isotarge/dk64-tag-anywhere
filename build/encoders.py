@@ -401,7 +401,6 @@ character_spawner_point_0x6_struct = [
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
 ]
-# TODO: This is sus, there might be another set of points because unk6 is sometimes 2 bytes...
 character_spawner_point_0xA_struct = [
     {"name": "x_pos", "type": "short"},
     {"name": "y_pos", "type": "short"},
@@ -436,12 +435,12 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
         extract = {}
         
         # Fences?
-        fence_count = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
+        num_fences = int.from_bytes(byte_read[0x0:0x2], byteorder="big")
         read_header += 2
 
-        if fence_count > 0:
+        if num_fences > 0:
             extract["fences"] = []
-            for i in range(fence_count):
+            for i in range(num_fences):
                 fence_data = {}
 
                 # Points_0x6
@@ -459,11 +458,6 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 if num_points_0xA > 0:
                     fence_data["points_0xA"] = readStructArray(byte_read, read_header, num_points_0xA, character_spawner_point_0xA_struct)
                     read_header += num_points_0xA * 0xA
-                    # TODO: Remove once debugging is finished
-                    # for point in fence_data["points_0xA"]:
-                    #     if len(point["unk6"]) != 11:
-                    #         print(decoded_filename)
-                    #     sampleValue("len(unk6)", len(point["unk6"]))
 
                 # fence_data["unkFooterAddress"] = hex(read_header)
                 fence_data["unkFooter"] = byte_read[read_header:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
@@ -472,12 +466,12 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 extract["fences"].append(fence_data)
 
         # Spawners
-        spawn_count = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
+        num_character_spawners = int.from_bytes(byte_read[read_header:read_header + 2], byteorder="big")
         read_header += 2
 
-        if spawn_count > 0:
+        if num_character_spawners > 0:
             extract["character_spawners"] = []
-            for i in range (spawn_count):
+            for i in range (num_character_spawners):
                 spawner_data = readStruct(byte_read, read_header, character_spawner_struct)
 
                 extra_count = spawner_data["extra_data_count"]
@@ -495,15 +489,44 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
 
         # Note: This is the case for several maps
         # TODO: Figure out why, and if/how they map fences onto spawners
-        # if spawn_count != fence_count:
-            # print("FENCE COUNT (" + str(fence_count) + ") != SPAWN COUNT (" + str(spawn_count) + ") IN " + decoded_filename)
+        # if num_character_spawners != num_fences:
+            # print("FENCE COUNT (" + str(num_fences) + ") != SPAWN COUNT (" + str(num_character_spawners) + ") IN " + decoded_filename)
 
         with open(decoded_filename, "w") as fjson:
             json.dump(extract, fjson, indent=4, default=str)
 
 def encodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
-    # TODO
-    return 0
+    with open(decoded_filename) as fjson:
+        spawners = json.load(fjson)
+
+        with open(encoded_filename, "w+b") as fh:
+            # Fences
+            num_fences = len(spawners["fences"]) if "fences" in spawners else 0
+            fh.write(num_fences.to_bytes(2, byteorder="big"))
+            if num_fences > 0:
+                for fence in spawners["fences"]:
+                    num_points = len(fence["points_0x6"]) if "points_0x6" in fence else 0
+                    fh.write(num_points.to_bytes(2, byteorder="big"))
+                    if "points_0x6" in fence:
+                        writeStructArray(fh, fence["points_0x6"], character_spawner_point_0x6_struct)
+
+                    num_points_0xA = len(fence["points_0xA"]) if "points_0xA" in fence else 0
+                    fh.write(num_points_0xA.to_bytes(2, byteorder="big"))
+                    if "points_0xA" in fence:
+                        writeStructArray(fh, fence["points_0xA"], character_spawner_point_0xA_struct)
+
+                    fh.write(bytes.fromhex(fence["unkFooter"]))
+
+            # Spawners
+            num_character_spawners = len(spawners["character_spawners"]) if "character_spawners" in spawners else 0
+            fh.write(num_character_spawners.to_bytes(2, byteorder="big"))
+            if num_character_spawners > 0:
+                for spawner in spawners["character_spawners"]:
+                    spawner["extra_data_count"] = len(spawner["extra_data"]) if "extra_data" in spawner else 0
+                    writeStruct(fh, spawner, character_spawner_struct)
+                    if "extra_data" in spawner:
+                        for extra_data in spawner["extra_data"]:
+                            fh.write(int(extra_data).to_bytes(2, byteorder="big"))
 
 setup_model2_struct = [
     {"name": "x_pos",     "type": float},
