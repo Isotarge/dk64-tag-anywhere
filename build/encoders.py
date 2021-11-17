@@ -479,6 +479,9 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 del spawner_data["extra_data_count"]
                 read_header += 0x16
 
+                if spawner_data["enemy_val_name"] != "Cutscene Object":
+                    del spawner_data["cutscene_model_name"]
+
                 # TODO: Figure what it does
                 if extra_count > 0:
                     spawner_data["extra_data"] = []
