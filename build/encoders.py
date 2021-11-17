@@ -404,7 +404,7 @@ character_spawner_point_0xA_struct = [
     {"name": "x_pos", "type": "short"},
     {"name": "y_pos", "type": "short"},
     {"name": "z_pos", "type": "short"},
-    {"name": "unk6",  "type": bytes, "size": 0xA - 0x6, "sample": "cspa->unk6"}, # TODO: Break this down into smaller fields
+    {"name": "unk6",  "type": bytes, "size": 0xA - 0x6}, # TODO: Break this down into smaller fields
 ]
 character_spawner_struct = [
     {"name": "enemy_val",             "type": "byte"},

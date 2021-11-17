@@ -124,19 +124,58 @@ with open(ROMName, "rb") as fh:
 	for x in map_replacements:
 		print(" - Processing map replacement " + x["name"])
 		if os.path.exists(x["map_folder"]):
+			found_geometry = False
+			found_floors = False
+			found_walls = False
+			should_compress_walls = True
+			should_compress_floors = True
 			for y in pointer_tables:
-				if "do_not_reimport" in y and y["do_not_reimport"]:
-					continue
 				if not "encoded_filename" in y:
 					continue
-
+				
 				# Convert decoded_filename to encoded_filename using the encoder function
 				# Eg. exits.json to exits.bin
 				if "encoder" in y and callable(y["encoder"]):
 					if "decoded_filename" in y and os.path.exists(x["map_folder"] + y["decoded_filename"]):
 						y["encoder"](x["map_folder"] + y["decoded_filename"], x["map_folder"] + y["encoded_filename"])
+				
+				if os.path.exists(x["map_folder"] + y["encoded_filename"]):
+					if y["index"] == 1:
+						with open(x["map_folder"] + y["encoded_filename"], "rb") as fg:
+							byte_read = fg.read(10)
+							should_compress_walls = (byte_read[9] & 0x1) != 0
+							should_compress_floors = (byte_read[9] & 0x2) != 0
+						found_geometry = True
+					elif y["index"] == 2:
+						found_walls = True
+					elif y["index"] == 3:
+						found_floors = True
+
+			# Check that all walls|floors|geometry files exist on disk, or that none of them do
+			walls_floors_geometry_valid = (found_geometry == found_walls) and (found_geometry == found_floors)
+
+			if not walls_floors_geometry_valid:
+				print("  - WARNING: In map replacement: " + x["name"])
+				print("    - Need all 3 files present to replace walls, floors, and geometry.")
+				print("    - Only found 1 or 2 of them out of 3. Make sure all 3 exist on disk.")
+				print("    - Will skip replacing walls, floors, and geometry to prevent crashes.")
+
+			for y in pointer_tables:
+				if not "encoded_filename" in y:
+					continue
 
 				if os.path.exists(x["map_folder"] + y["encoded_filename"]):
+					# Special case to prevent crashes with custom level geometry, walls, and floors
+					# Some of the files are compressed in ROM, some are not
+					if y["index"] in [1, 2, 3] and not walls_floors_geometry_valid:
+						continue
+
+					do_not_compress = "do_not_compress" in y and y["do_not_compress"]
+					if y["index"] == 2:
+						do_not_compress = not should_compress_walls
+					elif y["index"] == 3:
+						do_not_compress = not should_compress_floors
+
 					print("  - Found " + x["map_folder"] + y["encoded_filename"])
 					file_dict.append({
 						"name": x["name"] + y["name"],
@@ -144,7 +183,7 @@ with open(ROMName, "rb") as fh:
 						"file_index": x["map_index"],
 						"source_file": x["map_folder"] + y["encoded_filename"],
 						"do_not_extract": True,
-						"do_not_compress": "do_not_compress" in y and y["do_not_compress"],
+						"do_not_compress": do_not_compress,
 						"use_external_gzip": "use_external_gzip" in y and y["use_external_gzip"],
 					})
 

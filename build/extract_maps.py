@@ -42,11 +42,10 @@ def extractMap(mapIndex : int, mapPath : str):
                 encoded_filename = mapPath + pointer_table["encoded_filename"]
                 data = file_info["data"]
                 if len(data) > 3 and data[0] == 0x1F and data[1] == 0x8B and data[2] == 0x08:
-                    with open(encoded_filename, "wb") as fh:
-                        fh.write(zlib.decompress(data, 15 + 32))
-                else:
-                    with open(encoded_filename, "wb") as fh:
-                        fh.write(data)
+                    data = zlib.decompress(data, 15 + 32)
+
+                with open(encoded_filename, "wb") as fh:
+                    fh.write(data)
 
                 if "decoder" in pointer_table and callable(pointer_table["decoder"]):
                     pointer_table["decoder"](decoded_filename, encoded_filename)
