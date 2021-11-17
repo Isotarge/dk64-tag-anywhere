@@ -228,7 +228,6 @@ with open(ROMName, "rb") as fh:
 					os.remove(x["source_file"])
 
 				with open(x["source_file"], "wb") as fg:
-					print(byte_read.hex())
 					dec = zlib.decompress(byte_read, 15 + 32)
 					fg.write(dec)
 
