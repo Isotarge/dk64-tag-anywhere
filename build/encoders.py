@@ -6,6 +6,7 @@ from map_names import maps
 from model2_names import model2_names
 from actor_names import actor_names
 from character_spawner_names import character_spawner_names
+from model_names import cutscene_model_names
 
 # Useful for detecting booleans, enums, indexes etc
 valueSamples = {}
@@ -414,18 +415,18 @@ character_spawner_struct = [
     {"name": "x_pos",                 "type": "short"},
     {"name": "y_pos",                 "type": "short"},
     {"name": "z_pos",                 "type": "short"},
-    {"name": "cutscene_model",        "type": "byte"},
-    {"name": "unkB",                  "type": "byte"},
+    {"name": "cutscene_model",        "type": "byte", "index_of": cutscene_model_names},
+    {"name": "unkB",                  "type": "byte"}, # "sample": "chsp->unkB"
     {"name": "max_idle_speed",        "type": "byte"},
     {"name": "max_aggro_speed",       "type": "byte"},
-    {"name": "unkE",                  "type": "byte"},
+    {"name": "unkE",                  "type": "byte"}, # "sample": "chsp->unkE"
     {"name": "scale",                 "type": "byte"},
     {"name": "aggro",                 "type": "byte"},
     {"name": "extra_data_count",      "type": "byte"},
     {"name": "initial_spawn_state",   "type": "byte"},
     {"name": "spawn_trigger",         "type": "byte"},
     {"name": "initial_respawn_timer", "type": "byte"},
-    {"name": "unk15",                 "type": "byte"},
+    {"name": "unk15",                 "type": "byte"}, # "sample": "chsp->unk15"
 ]
 
 def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
