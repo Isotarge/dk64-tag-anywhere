@@ -5,6 +5,7 @@ from typing import BinaryIO
 from map_names import maps
 from model2_names import model2_names
 from actor_names import actor_names
+from character_spawner_names import character_spawner_names
 
 # Useful for detecting booleans, enums, indexes etc
 valueSamples = {}
@@ -408,8 +409,8 @@ character_spawner_point_0xA_struct = [
     {"name": "unk6",  "type": bytes, "size": 0xA - 0x6}, # TODO: Break this down into smaller fields
 ]
 character_spawner_struct = [
-    {"name": "enemy_val",             "type": "byte"},
-    {"name": "unk1",                  "type": "byte"},
+    {"name": "enemy_val",             "type": "byte", "index_of": character_spawner_names},
+    {"name": "unk1",                  "type": "byte"}, # Seen values 0-248 with some gaps (most commonly 0,124,125)
     {"name": "y_rot",                 "type": "ushort"},
     {"name": "x_pos",                 "type": "short"},
     {"name": "y_pos",                 "type": "short"},
@@ -458,6 +459,11 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
                 if num_points_0xA > 0:
                     fence_data["points_0xA"] = readStructArray(byte_read, read_header, num_points, character_spawner_point_0xA_struct)
                     read_header += num_points_0xA * 0xA
+                    # TODO: Remove once debugging is finished
+                    # for point in fence_data["points_0xA"]:
+                    #     if len(point["unk6"]) != 11:
+                    #         print(decoded_filename)
+                    #     sampleValue("len(unk6)", len(point["unk6"]))
 
                 # fence_data["unkFooterAddress"] = hex(read_header)
                 fence_data["unkFooter"] = byte_read[read_header:read_header+0x4].hex(" ").upper() # TODO: Break this down into smaller fields
