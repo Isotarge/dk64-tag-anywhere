@@ -416,17 +416,17 @@ character_spawner_struct = [
     {"name": "y_pos",                 "type": "short"},
     {"name": "z_pos",                 "type": "short"},
     {"name": "cutscene_model",        "type": "byte", "index_of": cutscene_model_names},
-    {"name": "unkB",                  "type": "byte"}, # "sample": "chsp->unkB"
+    {"name": "unkB",                  "type": "byte"}, # Seen values 0-215 with some gaps, 0 and 40 are most common
     {"name": "max_idle_speed",        "type": "byte"},
     {"name": "max_aggro_speed",       "type": "byte"},
-    {"name": "unkE",                  "type": "byte"}, # "sample": "chsp->unkE"
+    {"name": "unkE",                  "type": "byte"}, # Seen values 1-47 with decreasing frequency as the value increases, possibly an index?
     {"name": "scale",                 "type": "byte"},
     {"name": "aggro",                 "type": "byte"},
     {"name": "extra_data_count",      "type": "byte"},
     {"name": "initial_spawn_state",   "type": "byte"},
     {"name": "spawn_trigger",         "type": "byte"},
     {"name": "initial_respawn_timer", "type": "byte"},
-    {"name": "unk15",                 "type": "byte"}, # "sample": "chsp->unk15"
+    {"name": "unk15",                 "type": "byte", "sample": "chsp->unk15"}, 
 ]
 
 def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
@@ -472,7 +472,7 @@ def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
 
         if num_character_spawners > 0:
             extract["character_spawners"] = []
-            for i in range (num_character_spawners):
+            for i in range(num_character_spawners):
                 spawner_data = readStruct(byte_read, read_header, character_spawner_struct)
 
                 extra_count = spawner_data["extra_data_count"]
@@ -561,8 +561,8 @@ setup_actor_spawner_struct = [
     {"name": "y_pos",     "type": float},
     {"name": "z_pos",     "type": float},
     {"name": "scale",     "type": float},
-    {"name": "unk10",     "type": float},
-    {"name": "unk14",     "type": bytes,    "size": 0x32 - 0x14}, # TODO: Break this down into smaller fields
+    {"name": "unk10",     "type": bytes,    "size": 0x32 - 0x10}, # TODO: 0x10 is sometimes a float, how do we integrate this?
+    # {"name": "destination_map", "type": "byte"}, # TODO: At 0x13, Only for bonus battles, how do we integrate this?
     {"name": "behaviour", "type": "ushort", "index_of": actor_names, "index_offset": 0x10},
     {"name": "unk34",     "type": bytes,    "size": 0x38 - 0x34}, # TODO: Break this down into smaller fields
 ]
