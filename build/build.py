@@ -105,7 +105,6 @@ map_replacements = [
 ]
 
 # Test all map replacements at once
-# TODO: Why does this crash with any combination of floors||walls||geometry
 # for mapIndex, mapName in enumerate(maps):
 # 	mapPath = "maps/" + str(mapIndex) + " - " + make_safe_filename(mapName) + "/"
 # 	map_replacements.append({
@@ -132,7 +131,7 @@ with open(ROMName, "rb") as fh:
 			for y in pointer_tables:
 				if not "encoded_filename" in y:
 					continue
-				
+
 				# Convert decoded_filename to encoded_filename using the encoder function
 				# Eg. exits.json to exits.bin
 				if "encoder" in y and callable(y["encoder"]):
