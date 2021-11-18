@@ -426,7 +426,7 @@ character_spawner_struct = [
     {"name": "initial_spawn_state",   "type": "byte"},
     {"name": "spawn_trigger",         "type": "byte"},
     {"name": "initial_respawn_timer", "type": "byte"},
-    {"name": "unk15",                 "type": "byte", "sample": "chsp->unk15"}, 
+    {"name": "unk15",                 "type": "byte"}, # Seen values 0-254 with some gaps, 0 is most common
 ]
 
 def decodeCharacterSpawners(decoded_filename : str, encoded_filename : str):
@@ -562,7 +562,7 @@ setup_actor_spawner_struct = [
     {"name": "z_pos",     "type": float},
     {"name": "scale",     "type": float},
     {"name": "unk10",     "type": bytes,    "size": 0x32 - 0x10}, # TODO: 0x10 is sometimes a float, how do we integrate this?
-    # {"name": "destination_map", "type": "byte"}, # TODO: At 0x13, Only for bonus battles, how do we integrate this?
+    # {"name": "destination_map", "type": "byte"}, # TODO: At 0x13, Only for bonus barrels, how do we integrate this?
     {"name": "behaviour", "type": "ushort", "index_of": actor_names, "index_offset": 0x10},
     {"name": "unk34",     "type": bytes,    "size": 0x38 - 0x34}, # TODO: Break this down into smaller fields
 ]

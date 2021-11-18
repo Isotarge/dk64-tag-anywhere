@@ -89,6 +89,30 @@ file_dict = [
 	# 	"source_file": "bin/ChunkyVest.bin",
 	# 	# "texture_format": "rgba5551",
 	# },
+	# {
+	# 	"name": "Helm and Rap Font 1",
+	# 	"pointer_table_index": 14,
+	# 	"file_index": 3,
+	# 	"source_file": "bin/Font1/font_1120F28.png",
+	# 	"texture_format": "ia8",
+	# 	"use_zlib": True,
+	# },
+	# {
+	# 	"name": "Helm and Rap Font 2",
+	# 	"pointer_table_index": 14,
+	# 	"file_index": 4,
+	# 	"source_file": "bin/Font1/font_112122A.png",
+	# 	"texture_format": "ia8",
+	# 	"use_zlib": True,
+	# },
+	# {
+	# 	"name": "Helm and Rap Font 3",
+	# 	"pointer_table_index": 14,
+	# 	"file_index": 5,
+	# 	"source_file": "bin/Font1/font_1121448.png",
+	# 	"texture_format": "ia8",
+	# 	"use_zlib": True,
+	# },
 ]
 
 map_replacements = [
@@ -241,7 +265,7 @@ with open(newROMName, "r+b") as fh:
 	print("[4 / 7] - Writing patched files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
-			if x["texture_format"] in ["rgba5551", "i4"]:
+			if x["texture_format"] in ["rgba5551", "i4", "ia4", "i8", "ia8"]:
 				result = subprocess.check_output(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
 			else:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
