@@ -1,6 +1,6 @@
 // Functions
 extern void setFlag(s32 flagIndex, s32 value, s8 flagType);
-extern int checkFlag(s32 flagIndex, s8 flagType);
+extern s32 checkFlag(s32 flagIndex, s8 flagType);
 extern void* dk_malloc(s32 size);
 extern void dk_free(void* mallocPtr);
 extern void playSound(s16 soundIndex, s32 volume, f32 unk1, f32 pitch, s32 unk3, s32 unk4);
@@ -10,7 +10,7 @@ extern s32 isAddressActor(void* address);
 extern s32 getTimestamp();
 extern void dmaFileTransfer(s32 romStart, s32 romEnd, s32 ramStart);
 extern void deleteActor(void* actor);
-extern int spawnActor(s32 actorID, s32 actorBehaviour);
+extern s32 spawnActor(s32 actorID, s32 actorBehaviour);
 extern void spawnTextOverlay(s32 style, s32 x, s32 y, s8* string, s32 timer1, s32 timer2, u8 effect, u8 speed);
 extern f32 dk_sqrt(f32 __x);
 extern void dk_strFormat(s8* destination, s8* source, ...);
@@ -18,7 +18,7 @@ extern void dk_multiply(f64 val1, f64 val2, s32 unk1, s32 unk2);
 extern f64 convertTimestamp(f64 unk0, f64 unk1, u32 unk2, u32 unk3);
 extern void resetMap();
 extern void prepKongColoring();
-extern void* dk_memcpy(void* _dest, void* _src, int size);
+extern void* dk_memcpy(void* _dest, void* _src, s32 size);
 extern void SaveToGlobal();
 extern s32 DetectGameOver();
 extern s32 DetectAdventure();
