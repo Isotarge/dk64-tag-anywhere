@@ -1,6 +1,6 @@
 #include "../include/common.h"
 
-static const unsigned char bad_maps[] = {
+static const u8 bad_maps[] = {
 	1, // Funky's Store
 	2, // DK Arcade
 	3, // K. Rool Barrel: Lanky's Maze
@@ -94,7 +94,7 @@ static const unsigned char bad_maps[] = {
 	215, // K. Rool's Arena // Note: Handled by cutscene check?
 };
 
-static const unsigned char bad_movement_states[] = {
+static const u8 bad_movement_states[] = {
 	//0x02, // First Person Camera
 	//0x03, // First Person Camera (Water)
 	0x04, // Fairy Camera
@@ -157,7 +157,7 @@ static const unsigned char bad_movement_states[] = {
 	0x88, // Exiting Portal
 };
 
-static const unsigned short speedrun_mode_permanent_flags[] = {
+static const u16 speedrun_mode_permanent_flags[] = {
 	367, // Diddy FTT
 	368, // Lanky FTT
 	385, // Kong Unlocked: DK
@@ -206,7 +206,7 @@ static const unsigned short speedrun_mode_permanent_flags[] = {
 	391, // Training Grounds: All Training Barrels Complete CS
 };
 
-static const unsigned short speedrun_mode_temporary_flags[] = {
+static const u16 speedrun_mode_temporary_flags[] = {
 	104, // Japes: Army Dillo Long Intro
 	103, // Aztec: Dogadon Long Intro
 	106, // Factory: Mad Jack Long Intro
@@ -218,7 +218,7 @@ static const unsigned short speedrun_mode_temporary_flags[] = {
 	102, // Aztec: Beetle FT Long Intro
 };
 
-static const unsigned short kong_unlocked_flags[] = {
+static const u16 kong_unlocked_flags[] = {
 	385, // Kong Unlocked: DK
 	6, // Kong Unlocked: Diddy
 	70, // Kong Unlocked: Lanky
@@ -226,18 +226,18 @@ static const unsigned short kong_unlocked_flags[] = {
 	117, // Kong Unlocked: Chunky
 };
 
-static int inBadMapIndex = 0;
-static int inBadMapCache = 0;
-static unsigned short parentMapCache = 0;
-static int storySkipLoaded = 0;
+static s32 inBadMapIndex = 0;
+static s32 inBadMapCache = 0;
+static u16 parentMapCache = 0;
+static s32 storySkipLoaded = 0;
 
-int inBadMap(void) {
+s32 inBadMap(void) {
 	if (inBadMapIndex == CurrentMap) {
 		return inBadMapCache;
 	}
 	inBadMapCache = 0;
 	inBadMapIndex = CurrentMap;
-	for (int i = 0; i < sizeof(bad_maps) / sizeof(bad_maps[0]); i++) {
+	for (s32 i = 0; i < sizeof(bad_maps) / sizeof(bad_maps[0]); i++) {
 		if (CurrentMap == bad_maps[i]) {
 			inBadMapCache = 1;
 			break;
@@ -246,9 +246,9 @@ int inBadMap(void) {
 	return inBadMapCache;
 }
 
-int inBadMovementState(void) {
+s32 inBadMovementState(void) {
 	if (Player) {
-		for (int i = 0; i < sizeof(bad_movement_states) / sizeof(bad_movement_states[0]); i++) {
+		for (s32 i = 0; i < sizeof(bad_movement_states) / sizeof(bad_movement_states[0]); i++) {
 			if (Player->control_state == bad_movement_states[i]) {
 				return 1;
 			}
@@ -262,17 +262,17 @@ int inBadMovementState(void) {
 }
 
 void tagDenied() {
-	if (NewlyPressedControllerInput.Buttons & D_Right || NewlyPressedControllerInput.Buttons & L_Button) {
+	if (NewlyPressedControllerInput.Buttons & R_JPAD || NewlyPressedControllerInput.Buttons & L_TRIG) {
 		playSound(152, 0x2FFF, 63.0f, 1.0f, 0, 0);
-	} else if (NewlyPressedControllerInput.Buttons & D_Left) {
+	} else if (NewlyPressedControllerInput.Buttons & L_JPAD) {
 		playSound(152, 0x2FFF, 63.0f, 1.0f, 0, 0);
 	}
 }
 
 void tagAnywhere(void) {
-	int _dest_character;
-	int tagDirection;
-	char* Snide;
+	s32 _dest_character;
+	s32 tagDirection;
+	s8* Snide;
 
 	// Main Menu
 	if (CurrentMap == 80) {
@@ -286,33 +286,33 @@ void tagAnywhere(void) {
 
 		if (StorySkip) {
 			// Start the player in DK Isles instead of Training Grounds
-			*(char *)(0x80714547) = 34;
-			*(char *)(0x8071455B) = 0;
+			*(s8 *)(0x80714547) = 34;
+			*(s8 *)(0x8071455B) = 0;
 
 			// Skip GB dances
-			*(unsigned int *)(0x806EFB9C) = 0; // Cancel Movement Write
-			*(unsigned int *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
-			*(unsigned int *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
-			*(unsigned int *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
-			*(unsigned int *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
+			*(u32 *)(0x806EFB9C) = 0; // Cancel Movement Write
+			*(u32 *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
+			*(u32 *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
+			*(u32 *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
+			*(u32 *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
 
 			// Make T&S feeding faster
-			*(unsigned int *)(0x806BE3E0) = 0;
+			*(u32 *)(0x806BE3E0) = 0;
 
 			// Enable K. Lumsy cutscene compression
-			*(unsigned int *)(0x806BDC98) = 0;
+			*(u32 *)(0x806BDC98) = 0;
 
 			// Set temporary flags
-			for (int i = 0; i < sizeof(speedrun_mode_temporary_flags) / sizeof(speedrun_mode_temporary_flags[0]); i++) {
+			for (s32 i = 0; i < sizeof(speedrun_mode_temporary_flags) / sizeof(speedrun_mode_temporary_flags[0]); i++) {
 				setFlag(speedrun_mode_temporary_flags[i], 1 , 2);
 			}
 			// Set permanent flags
-			for (int i = 0; i < sizeof(speedrun_mode_permanent_flags) / sizeof(speedrun_mode_permanent_flags[0]); i++) {
+			for (s32 i = 0; i < sizeof(speedrun_mode_permanent_flags) / sizeof(speedrun_mode_permanent_flags[0]); i++) {
 				setFlag(speedrun_mode_permanent_flags[i], 1, 0);
 			}
 
 			// Unlock moves
-			for (int i = 0; i < 5; i++) {
+			for (s32 i = 0; i < 5; i++) {
 				MovesBase[i].special_moves = 3;
 				MovesBase[i].simian_slam = 3;
 				MovesBase[i].ammo_belt = 2;
@@ -330,21 +330,21 @@ void tagAnywhere(void) {
 			CollectableBase.Crystals = 20 * 150; // 150 ticks per crystal
 		} else {
 			// Start the player in Training Grounds
-			*(char *)(0x80714547) = 176;
-			*(char *)(0x8071455B) = 1;
+			*(s8 *)(0x80714547) = 176;
+			*(s8 *)(0x8071455B) = 1;
 
 			// Don't skip GB dances
-			*(unsigned int *)(0x806EFB9C) = 0xA1EE0154; // Enable Movement Write
-			*(unsigned int *)(0x806EFC1C) = 0x0C189E52; // Enable CS Play Function Call
-			*(unsigned int *)(0x806EFB88) = 0x0C18539E; // Enable Animation Write Function Call
-			*(unsigned int *)(0x806EFC0C) = 0xA58200E6; // Enable Change Rotation Write
-			*(unsigned int *)(0x806EFBA8) = 0xA3000155; // Enable Control State Progress Zeroing
+			*(u32 *)(0x806EFB9C) = 0xA1EE0154; // Enable Movement Write
+			*(u32 *)(0x806EFC1C) = 0x0C189E52; // Enable CS Play Function Call
+			*(u32 *)(0x806EFB88) = 0x0C18539E; // Enable Animation Write Function Call
+			*(u32 *)(0x806EFC0C) = 0xA58200E6; // Enable Change Rotation Write
+			*(u32 *)(0x806EFBA8) = 0xA3000155; // Enable Control State Progress Zeroing
 
 			// Don't make T&S feeding faster
-			*(unsigned int *)(0x806BE3E0) = 0x15600099;
+			*(u32 *)(0x806BE3E0) = 0x15600099;
 
 			// Disable K. Lumsy cutscene compression
-			*(unsigned int *)(0x806BDC98) = 0x14610012;
+			*(u32 *)(0x806BDC98) = 0x14610012;
 		}
 	}
 
@@ -454,9 +454,9 @@ void tagAnywhere(void) {
 		return;
 	}
 
-	if (NewlyPressedControllerInput.Buttons & D_Right || NewlyPressedControllerInput.Buttons & L_Button) {
+	if (NewlyPressedControllerInput.Buttons & R_JPAD || NewlyPressedControllerInput.Buttons & L_TRIG) {
 		tagDirection = 1;
-	} else if (NewlyPressedControllerInput.Buttons & D_Left) {
+	} else if (NewlyPressedControllerInput.Buttons & L_JPAD) {
 		tagDirection = -1;
 	} else {
 		return;

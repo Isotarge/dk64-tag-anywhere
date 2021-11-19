@@ -1,19 +1,19 @@
 #include "../include/common.h"
 
-void setPermanentFlag(short flagIndex) {
+void setPermanentFlag(s16 flagIndex) {
 	setFlag(flagIndex, 1, 0);
 }
 
-void setGlobalFlag(short flagIndex) {
+void setGlobalFlag(s16 flagIndex) {
 	setFlag(flagIndex, 1, 1);
 }
 
-void setTemporaryFlag(short flagIndex) {
+void setTemporaryFlag(s16 flagIndex) {
 	setFlag(flagIndex, 1, 2);
 }
 
-void* findActorWithType(int search_actor_type) {
-	for (int i = 0; i < ActorCount; i++) {
+void* findActorWithType(s32 search_actor_type) {
+	for (s32 i = 0; i < ActorCount; i++) {
 		actorData* _actor_ = (actorData*)ActorArray[i];
 		if (_actor_->actorType == search_actor_type) {
 			return _actor_;

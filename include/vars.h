@@ -1,21 +1,5 @@
 #define NULL 0
 
-// N64 Buttons
-#define L_Button 0x0020
-#define D_Up 0x0800
-#define D_Down 0x0400
-#define D_Left 0x0200
-#define D_Right 0x0100
-#define B_Button 0x4000
-#define A_Button 0x8000
-#define Z_Button 0x2000
-#define R_Button 0x0010
-#define Start_Button 0x1000
-#define C_Up 0x0008
-#define C_Down 0x0004
-#define C_Left 0x0002
-#define C_Right 0x0001
-
 // SFX Index
 #define SFX_Banana 0x2A0
 #define SFX_Okay 0x23C
