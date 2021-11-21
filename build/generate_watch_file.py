@@ -35,9 +35,6 @@ def read_h_file(symbols_data):
 	return addr_set
 
 def create_wch_file(_data,watch_file_name):
-	os.chdir("rom/")
-	if (os.path.exists(watch_file_name)):
-		os.remove(watch_file_name)
 	wch_info = [
 		["*","d","h"], # Pointer
 		["float","d","f"],
@@ -65,4 +62,4 @@ def create_wch_file(_data,watch_file_name):
 
 a = read_symbols()
 b = read_h_file(a)
-create_wch_file(b,"dk64-tag-anywhere-dev.wch")
+create_wch_file(b,"rom/dk64-tag-anywhere-dev.wch")

@@ -4,4 +4,4 @@ ROMName = "./rom/dk64-tag-anywhere-dev.z64"
 
 with open(ROMName, "rb") as fh:
     parsePointerTables(fh)
-    dumpPointerTableDetails("pointer_tables_modified.log", fh)
+    dumpPointerTableDetails("rom/pointer_tables_modified.log", fh)

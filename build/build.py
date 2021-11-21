@@ -40,7 +40,7 @@ file_dict = [
 		"compressed_size": 0xB15E4,
 		"source_file": "bin/StaticCode.bin",
 		"use_external_gzip": True,
-		"patcher": patchStaticCode
+		"patcher": patchStaticCode,
 	},
 	{
 		"name": "Nintendo Logo",
@@ -78,7 +78,7 @@ file_dict = [
 		"pointer_table_index": 12,
 		"file_index": 37,
 		"source_file": "bin/Menu.bin",
-		"patcher": patchMainMenu
+		"patcher": patchMainMenu,
 	},
 	# {
 	# 	"name": "Chunky's Vest Back (Green & Yellow)",
@@ -336,8 +336,8 @@ with open(newROMName, "r+b") as fh:
 	writeModifiedPointerTablesToROM(fh)
 	writeModifiedOverlaysToROM(fh)
 
-	print("[6 / 7] - Dumping details of all pointer tables to build.log")
-	dumpPointerTableDetails("build.log", fh)
+	print("[6 / 7] - Dumping details of all pointer tables to rom/build.log")
+	dumpPointerTableDetails("rom/build.log", fh)
 
 print("[7 / 7] - Generating BizHawk RAM watch")
 import generate_watch_file

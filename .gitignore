@@ -7,5 +7,8 @@
 *.sym
 *.rgba5551
 *.i4
+*.i8
+*.ia4
+*.ia8
 *.log
 maps/*
