@@ -339,6 +339,14 @@ with open(newROMName, "r+b") as fh:
 	print("[6 / 7] - Dumping details of all pointer tables to rom/build.log")
 	dumpPointerTableDetails("rom/build.log", fh)
 
+# For compatibilty with real hardware, the ROM size needs to be aligned to 0x10 bytes
+with open(newROMName, "r+b") as fh:
+    to_add = len(fh.read()) % 0x10
+    if to_add > 0:
+        to_add = 0x10 - to_add
+        for x in range(to_add):
+            fh.write(bytes([0]))
+
 print("[7 / 7] - Generating BizHawk RAM watch")
 import generate_watch_file
 
