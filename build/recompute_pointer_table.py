@@ -250,6 +250,10 @@ def writeUncompressedSize(fh: BinaryIO, pointer_table_index : int, file_index : 
 
 	ROMAddress = pointer_tables[26]["entries"][pointer_table_index]["absolute_address"] + file_index * 4
 
+	# Game seems to align these mod 2
+	if uncompressed_size % 2 == 1:
+		uncompressed_size += 1
+
 	print(" - Writing new uncompressed size " + hex(uncompressed_size) + " for file " + str(pointer_table_index) + "->" + str(file_index) + " to ROM address " + hex(ROMAddress))
 
 	fh.seek(ROMAddress)
@@ -430,25 +434,28 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 
 		# Reserve free space for the pointer table in ROM
 		space_required = x["num_entries"] * 4 + 4
-		should_relocate = shouldWritePointerTable(x["index"])
-		earliest_file_address = 0
+		should_relocate = shouldRelocatePointerTable(x["index"])
 		if should_relocate:
 			x["new_absolute_address"] = next_available_free_space
-			next_available_free_space += space_required
-			earliest_file_address = next_available_free_space
 
-		# Append all files referenced by the pointer table to ROM
+		write_pointer = x["new_absolute_address"] + space_required
+		earliest_file_address = write_pointer
+
+		# Write all files to ROM
 		for y in x["entries"]:
 			file_info = getFileInfo(x["index"], y["index"])
+			y["new_absolute_address"] = write_pointer
 			if file_info:
-				if len(file_info["data"]) > 0:
-					if should_relocate:
-						# Append the file to the ROM at the address of the next available free space
-						y["new_absolute_address"] = next_available_free_space
-						# Move the free space pointer along
-						next_available_free_space += len(file_info["data"])
+				if len(file_info["data"]) > 0:		
+					write_pointer += len(file_info["data"])
 					fh.seek(y["new_absolute_address"])
 					fh.write(file_info["data"])
+
+		# If the files have been appended to ROM, we need to move the free space pointer along by the number of bytes written
+		if should_relocate:
+			next_available_free_space += space_required # For the pointer table itself
+			print(str(x["index"]) + " has size " + hex(write_pointer - earliest_file_address))
+			next_available_free_space += write_pointer - earliest_file_address # For all of the files
 
 	# Recompute the pointer tables using the new file addresses and write them in the reserved space
 	for x in pointer_tables:

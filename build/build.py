@@ -307,6 +307,8 @@ with open(newROMName, "r+b") as fh:
 				compress[5] = 0
 				compress[6] = 0
 				compress[7] = 0
+				# They used "Unix" as their Operating System ID, let's do the same
+				compress[9] = 3
 			else:
 				compress = bytearray(gzip.compress(byte_read, compresslevel=9))
 				# Zero out timestamp in gzip header to make builds deterministic
@@ -314,6 +316,8 @@ with open(newROMName, "r+b") as fh:
 				compress[5] = 0
 				compress[6] = 0
 				compress[7] = 0
+				# They used "Unix" as their Operating System ID, let's do the same
+				compress[9] = 3
 
 			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
 			if "pointer_table_index" in x and "file_index" in x:
