@@ -454,7 +454,6 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		# If the files have been appended to ROM, we need to move the free space pointer along by the number of bytes written
 		if should_relocate:
 			next_available_free_space += space_required # For the pointer table itself
-			print(str(x["index"]) + " has size " + hex(write_pointer - earliest_file_address))
 			next_available_free_space += write_pointer - earliest_file_address # For all of the files
 
 	# Recompute the pointer tables using the new file addresses and write them in the reserved space
