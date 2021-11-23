@@ -1,5 +1,6 @@
 .n64
-.open "rom/dk64-tag-anywhere.z64", "rom/dk64-tag-anywhere-dev.z64", 0
+.open "rom/dk64-tag-anywhere-dev.z64", 0
+
 .include "asm/symbols.asm" ; Tell armips' linker where to find the game's function(s)
 
 ; Patch boot routine to DMA our code from ROM to RAM and run it

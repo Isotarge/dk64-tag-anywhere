@@ -21,7 +21,7 @@
 .definelabel osViSetMode, 0x80004FA0
 .definelabel bzero, 0x800051C0
 .definelabel osInvalICache, 0x80005260
-.definelabel osWriteBackDCacheAll, 0x800052E0
+.definelabel osWritebackDCacheAll, 0x800052E0
 .definelabel osInitialize, 0x80005310
 .definelabel osWritebackDCache, 0x80005670
 .definelabel osViSwapBuffer, 0x80005760

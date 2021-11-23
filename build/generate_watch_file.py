@@ -1,8 +1,6 @@
-import os
-
 def read_symbols():
 	addr_set = []
-	with open("asm/symbols.asm","r") as fh:
+	with open("asm/symbols.asm", "r") as fh:
 		lines = fh.readlines()
 		for x in lines:
 			if ".definelabel" in x:
@@ -14,7 +12,7 @@ def read_symbols():
 def read_h_file(symbols_data):
 	addr_set = []
 	type_set = []
-	with open("include/dk64.h","r") as fh:
+	with open("include/dk64.h", "r") as fh:
 		c = fh.readlines()
 		for x in symbols_data:
 			for y in c:
@@ -34,18 +32,25 @@ def read_h_file(symbols_data):
 							addr_set.append([list(x)[0],list(x)[1],s])
 	return addr_set
 
-def create_wch_file(_data,watch_file_name):
+def create_wch_file(_data, watch_file_name):
 	wch_info = [
-		["*","d","h"], # Pointer
-		["float","d","f"],
-		["unsigned int","d","h"],
-		["int","d","h"],
-		["unsigned short","w","h"],
-		["short","w","h"],
-		["unsigned char","b","h"],
-		["char","b","h"],
+		["*", "d", "h"], # Pointer
+		["float", "d", "f"],
+		["unsigned int", "d", "h"],
+		["unsigned short", "w", "h"],
+		["short", "w", "h"],
+		["unsigned char", "b", "h"],
+		["char", "b", "h"],
+		["f32", "d", "f"],
+		["u32", "d", "h"],
+		["s32", "d", "h"],
+		["int", "d", "h"],
+		["u16", "w", "h"],
+		["s16", "w", "h"],
+		["u8", "b", "h"],
+		["s8", "b", "h"],
 	]
-	with open(watch_file_name,"w") as fh:
+	with open(watch_file_name, "w") as fh:
 		lines = ["SystemID N64"]
 		for x in _data:
 			found = False
@@ -56,10 +61,8 @@ def create_wch_file(_data,watch_file_name):
 					found = True
 					break
 			if found:
-				lines.append(str(x[0][2:]) + "	" + str(_size) + "	" + str(_type) + "	1	RDRAM	"+ str(x[1]))
+				lines.append(str(x[0][2:]) + "	" + str(_size) + "	" + str(_type) + "	1	RDRAM	" + str(x[1]))
 		for x in lines:
-			fh.write(x+"\n")
+			fh.write(x + "\n")
 
-a = read_symbols()
-b = read_h_file(a)
-create_wch_file(b,"rom/dk64-tag-anywhere-dev.wch")
+create_wch_file(read_h_file(read_symbols()), "rom/dk64-tag-anywhere-dev.wch")

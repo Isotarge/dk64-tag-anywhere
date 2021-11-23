@@ -3,22 +3,31 @@ import shutil
 import gzip
 import zlib
 import subprocess
+import hashlib
 
-print("Compiling C Code")
+# Measure how long this takes
+import time
+start_time = time.time()
+
+print("Cranky's Lab Build System")
+print()
+
+print("[1 / 8] - Compiling C Code")
+if os.path.exists("obj"):
+	shutil.rmtree('obj')
+os.mkdir("obj")
 with open('./asm/objects.asm', 'w') as obj_asm:
 	for root, dirs, files in os.walk(r'src'):
 		for file in files:
 			if file.endswith('.c'):
-				_o = os.path.join(root, file).replace("/","_").replace("\\","_").replace(".c", ".o")
+				_o = os.path.join(root, file).replace("/", "_").replace("\\", "_").replace(".c", ".o")
 				print(os.path.join(root, file))
 				obj_asm.write(".importobj \"obj/" + _o + "\"\n")
-				cmd = ["mips64-elf-gcc", "-Wall", "-O1", "-mtune=vr4300", "-march=vr4300", "-mabi=32", "-fomit-frame-pointer", "-G0", "-c", os.path.join(root, file)]
-				subprocess.Popen(cmd).wait()
-				shutil.move("./" + file.replace(".c",".o"), "obj/" + _o)
+				subprocess.run(["mips64-elf-gcc", "-Wall", "-O1", "-mtune=vr4300", "-march=vr4300", "-mabi=32", "-fomit-frame-pointer", "-G0", "-c", os.path.join(root, file)])
+				shutil.move("./" + file.replace(".c", ".o"), "obj/" + _o)
 print()
 
 # Infrastructure for recomputing DK64 global pointer tables
-from map_names import maps
 from recompute_pointer_table import pointer_tables, dumpPointerTableDetails, replaceROMFile, writeModifiedPointerTablesToROM, parsePointerTables, getFileInfo, make_safe_filename
 from recompute_overlays import isROMAddressOverlay, readOverlayOriginalData, replaceOverlayData, writeModifiedOverlaysToROM
 
@@ -27,7 +36,7 @@ from staticcode import patchStaticCode
 from mainmenu import patchMainMenu, patchDolbyText
 
 ROMName = "./rom/dk64.z64"
-newROMName = "./rom/dk64-tag-anywhere.z64"
+newROMName = "./rom/dk64-tag-anywhere-dev.z64"
 
 if os.path.exists(newROMName):
 	os.remove(newROMName)
@@ -136,6 +145,7 @@ map_replacements = [
 ]
 
 # Test all map replacements at once
+# from map_names import maps
 # for mapIndex, mapName in enumerate(maps):
 # 	mapPath = "maps/" + str(mapIndex) + " - " + make_safe_filename(mapName) + "/"
 # 	map_replacements.append({
@@ -144,10 +154,8 @@ map_replacements = [
 # 		"map_folder": mapPath,
 # 	})
 
-print("DK64 Extractor")
-
 with open(ROMName, "rb") as fh:
-	print("[1 / 7] - Parsing pointer tables")
+	print("[2 / 8] - Parsing pointer tables")
 	parsePointerTables(fh)
 	readOverlayOriginalData(fh)
 
@@ -217,7 +225,7 @@ with open(ROMName, "rb") as fh:
 						"use_external_gzip": "use_external_gzip" in y and y["use_external_gzip"],
 					})
 
-	print("[2 / 7] - Extracting files from ROM")
+	print("[3 / 8] - Extracting files from ROM")
 	for x in file_dict:
 		# N64Tex conversions do not need to be extracted to disk from ROM
 		if "texture_format" in x:
@@ -255,24 +263,24 @@ with open(ROMName, "rb") as fh:
 					dec = zlib.decompress(byte_read, 15 + 32)
 					fg.write(dec)
 
-print("[3 / 7] - Patching Extracted Files")
+print("[4 / 8] - Patching Extracted Files")
 for x in file_dict:
 	if "patcher" in x and callable(x["patcher"]):
 		print(" - Running patcher for " + x["source_file"])
 		x["patcher"](x["source_file"])
 
 with open(newROMName, "r+b") as fh:
-	print("[4 / 7] - Writing patched files to ROM")
+	print("[5 / 8] - Writing patched files to ROM")
 	for x in file_dict:
 		if "texture_format" in x:
 			if x["texture_format"] in ["rgba5551", "i4", "ia4", "i8", "ia8"]:
-				result = subprocess.check_output(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
+				subprocess.run(["./build/n64tex.exe", x["texture_format"], x["source_file"]])
 			else:
 				print(" - ERROR: Unsupported texture format " + x["texture_format"])
 
 		if "use_external_gzip" in x and x["use_external_gzip"]:
 			if os.path.exists(x["source_file"]):
-				result = subprocess.check_output(["./build/gzip.exe", "-f", "-n", "-k", "-q", "-9", x["output_file"].replace(".gz", "")])
+				subprocess.run(["./build/gzip.exe", "-f", "-n", "-k", "-q", "-9", x["output_file"].replace(".gz", "")])
 				if os.path.exists(x["output_file"]):
 					with open(x["output_file"], "r+b") as outputFile:
 						# Chop off gzip footer
@@ -310,7 +318,7 @@ with open(newROMName, "r+b") as fh:
 			print(" - Writing " + x["output_file"] + " (" + hex(len(compress)) + ") to ROM")
 			if "pointer_table_index" in x and "file_index" in x:
 				# More complicated write, update the pointer tables to point to the new data
-				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size)
+				replaceROMFile(x["pointer_table_index"], x["file_index"], compress, uncompressed_size, x["output_file"])
 			elif "start" in x:
 				if isROMAddressOverlay(x["start"]):
 					replaceOverlayData(x["start"], compress)
@@ -332,14 +340,14 @@ with open(newROMName, "r+b") as fh:
 				if os.path.exists(x["source_file"]):
 					os.remove(x["source_file"])
 
-	print("[5 / 7] - Writing recomputed pointer tables to ROM")
+	print("[6 / 8] - Writing recomputed pointer tables to ROM")
 	writeModifiedPointerTablesToROM(fh)
 	writeModifiedOverlaysToROM(fh)
 
-	print("[6 / 7] - Dumping details of all pointer tables to rom/build.log")
-	dumpPointerTableDetails("rom/build.log", fh)
+	print("[7 / 8] - Dumping details of all pointer tables to rom/pointer_tables_modified.log")
+	dumpPointerTableDetails("rom/pointer_tables_modified.log", fh)
 
-# For compatibilty with real hardware, the ROM size needs to be aligned to 0x10 bytes
+# For compatibility with real hardware, the ROM size needs to be aligned to 0x10 bytes
 with open(newROMName, "r+b") as fh:
     to_add = len(fh.read()) % 0x10
     if to_add > 0:
@@ -347,7 +355,21 @@ with open(newROMName, "r+b") as fh:
         for x in range(to_add):
             fh.write(bytes([0]))
 
-print("[7 / 7] - Generating BizHawk RAM watch")
+print("[8 / 8] - Generating BizHawk RAM watch")
 import generate_watch_file
 
-exit()
+# Write custom ASM code to ROM
+subprocess.run(["build/armips.exe", "asm\main.asm", "-sym", "rom\dk64-tag-anywhere-dev.sym"])
+
+# Fix CRC
+print()
+subprocess.run(["build/n64crc.exe", newROMName])
+
+# Remove temporary .o files
+shutil.rmtree('obj')
+
+end_time = time.time()
+with open(newROMName, "rb") as fh:
+	print()
+	print("Built " + newROMName + " in " + str(round(end_time - start_time, 3)) + " seconds")
+	print("SHA1: " + hashlib.sha1(fh.read()).hexdigest().upper())

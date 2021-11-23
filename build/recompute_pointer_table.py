@@ -233,8 +233,6 @@ def make_safe_filename(s : str):
     return "".join(safe_char(c) for c in s).rstrip("_")
 
 def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_index : int):
-	global pointer_tables
-
 	if "dont_overwrite_uncompressed_sizes" in pointer_tables[pointer_table_index]:
 		return 0
 
@@ -247,8 +245,6 @@ def getOriginalUncompressedSize(fh : BinaryIO, pointer_table_index : int, file_i
 
 # Write the new uncompressed size back to ROM to prevent malloc buffer overruns when decompressing
 def writeUncompressedSize(fh: BinaryIO, pointer_table_index : int, file_index : int, uncompressed_size : int):
-	global pointer_tables
-
 	if "dont_overwrite_uncompressed_sizes" in pointer_tables[pointer_table_index]:
 		return 0
 
@@ -259,12 +255,17 @@ def writeUncompressedSize(fh: BinaryIO, pointer_table_index : int, file_index : 
 	fh.seek(ROMAddress)
 	fh.write(int.to_bytes(uncompressed_size, 4, "big"))
 
-def parsePointerTables(fh : BinaryIO):
-	global pointer_tables
-	global main_pointer_table_offset
-	global maps
-	global num_tables
+def getPointerTableCompressedSize(pointer_table_index : int):
+	total_compressed_size = 0
+	if pointer_table_index < len(pointer_tables):
+		pointer_table = pointer_tables[pointer_table_index]
+		for entry in pointer_table["entries"]:
+			file_info = getFileInfo(pointer_table_index, entry["index"])
+			if file_info:
+				total_compressed_size += len(file_info["data"])
+	return total_compressed_size
 
+def parsePointerTables(fh : BinaryIO):
 	# Read pointer table addresses
 	fh.seek(main_pointer_table_offset)
 	for x in pointer_tables:
@@ -276,6 +277,7 @@ def parsePointerTables(fh : BinaryIO):
 	fh.seek(main_pointer_table_offset + num_tables * 4)
 	for x in pointer_tables:
 		x["num_entries"] = int.from_bytes(fh.read(4), "big")
+		x["original_compressed_size"] = 0
 		x["entries"] = []
 
 	# Read pointer table entries
@@ -307,6 +309,7 @@ def parsePointerTables(fh : BinaryIO):
 					absolute_size = y["next_absolute_address"] - y["absolute_address"]
 					if absolute_size > 0:
 						file_info = addFileToDatabase(fh, y["absolute_address"], absolute_size, x["index"], y["index"])
+						x["original_compressed_size"] += absolute_size
 
 	# Go back over and look up SHA1s for the bit_set entries
 	# Note: Needs to be last because it's possible earlier entries point to later entries that might not have data yet
@@ -323,9 +326,6 @@ def parsePointerTables(fh : BinaryIO):
 						#y["bit_set"] = False # We'll turn this back on later when recomputing pointer tables
 
 def addFileToDatabase(fh : BinaryIO, absolute_address : int, absolute_size: int, pointer_table_index : int, file_index : int):
-	global pointer_tables
-	global pointer_table_files
-
 	# TODO: Get rid of this check
 	for x in pointer_tables:
 		if x["absolute_address"] == absolute_address:
@@ -362,17 +362,14 @@ def getFileInfo(pointer_table_index : int, file_index : int):
 
 	return pointer_table_files[pointer_table_index][pointer_tables[pointer_table_index]["entries"][file_index]["new_sha1"]]
 
-def replaceROMFile(pointer_table_index : int, file_index : int, data: bytes, uncompressed_size : int):
-	global pointer_tables
-	global pointer_table_files
-
+def replaceROMFile(pointer_table_index : int, file_index : int, data: bytes, uncompressed_size : int, filename : str = ""):
 	# TODO: Get this working
 	if pointer_table_index == 8 and file_index == 0:
 		print(" - WARNING: Tried to replace Test Map cutscenes. This will replace global cutscenes, so it has been disabled for now to prevent crashes.")
 		return
 
 	# Align data to 2 byte boundary for DMA
-	if (len(data) % 2 == 1):
+	if len(data) % 2 == 1:
 		data_array = bytearray(data)
 		data_array.append(0)
 		data = bytes(data_array)
@@ -388,9 +385,10 @@ def replaceROMFile(pointer_table_index : int, file_index : int, data: bytes, unc
 	# Update the entry in the pointer table to point to the new data
 	pointer_tables[pointer_table_index]["entries"][file_index]["new_sha1"] = dataSHA1Hash
 
-def shouldWritePointerTable(index : int):
-	global pointer_tables
+	if len(filename) > 0:
+		pointer_tables[pointer_table_index]["entries"][file_index]["filename"] = filename
 
+def shouldWritePointerTable(index : int):
 	# Table 6 is nonsense.
 	# Table 26 is a special case, it should never be manually overwritten
 	# Instead, it should be recomputed based on the new uncompressed file sizes of the replaced files
@@ -413,10 +411,17 @@ def shouldWritePointerTable(index : int):
 
 	return False
 
+def shouldRelocatePointerTable(index : int):
+	# TODO: Remove this once deduplication is implemented
+	# Note: Always relocate map walls, floors, geometry, and model 2 behaviour scripts
+	# These tables contain bit_set entries so cannot be rewritten in place until deduplication works properly
+	if index in [1, 2, 3, 10]:
+		return True
+
+	return getPointerTableCompressedSize(index) > pointer_tables[index]["original_compressed_size"]
+
 def writeModifiedPointerTablesToROM(fh : BinaryIO):
 	global next_available_free_space
-	global pointer_tables
-	global main_pointer_table_offset
 
 	# Reserve pointer table space and write new data
 	for x in pointer_tables:
@@ -480,12 +485,9 @@ def writeModifiedPointerTablesToROM(fh : BinaryIO):
 		fh.write((x["new_absolute_address"] - main_pointer_table_offset).to_bytes(4, "big"))
 
 def dumpPointerTableDetails(filename : str, fr : BinaryIO):
-	global pointer_tables
-	global main_pointer_table_offset
-
 	with open(filename, "w") as fh:
 		for x in pointer_tables:
-			fh.write(str(x["index"]) + ": " + x["name"] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries)")
+			fh.write(str(x["index"]) + ": " + x["name"] + ": " + hex(x["new_absolute_address"]) + " (" + str(x["num_entries"]) + " entries, " + hex(x["original_compressed_size"]) + " -> " + hex(getPointerTableCompressedSize(x["index"])) + " bytes)")
 			fh.write("\n")
 			for y in x["entries"]:
 				fh.write(" - " + str(y["index"]) + ": ")
@@ -495,7 +497,7 @@ def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 				fh.write(hex(pointing_to))
 
 				file_info = getFileInfo(x["index"], y["index"])
-				if file_info and "new_absolute_address" in file_info:
+				if file_info:
 					fh.write(" (" + hex(len(file_info["data"])) + ")")
 				else:
 					fh.write(" WARNING: File info not found")
@@ -509,4 +511,8 @@ def dumpPointerTableDetails(filename : str, fr : BinaryIO):
 					fh.write(" (" + maps[y["index"]] + ")")
 
 				fh.write(" (" + str(y["new_sha1"]) + ")")
+
+				if "filename" in y:
+					fh.write(" (" + str(y["filename"]) + ")")
+
 				fh.write("\n")

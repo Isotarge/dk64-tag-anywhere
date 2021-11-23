@@ -29,7 +29,6 @@ extern void spawnRocketbarrel(void* object, s32 unk);
 extern void playSong(s32 songIndex);
 extern void playCutscene(void* actor, s32 cutscene_index, s32 cutscene_type);
 extern void setHUDItemAsInfinite(s32 item_index, s32 player_index, s8 isInfinite);
-extern void osWritebackDCacheAll();
 extern void copyFromROM(s32 rom_start, void* write_Location, void* file_size_location, s32 unk1, s32 unk2, s32 unk3, s32 unk4);
 extern s32 getActorSpawnerID(void* actor);
 extern void textOverlayCode(void);
@@ -58,7 +57,7 @@ extern s32 RNG;
 extern s8 LogosDestMap;
 extern s8 LogosDestMode;
 extern s8 Gamemode;
-extern s32* ObjectModel2Pointer; // TODO: Object model 2 struct array
+extern void* ObjectModel2Pointer; // TODO: Object model 2 struct array
 extern s32 ObjectModel2Timer;
 extern s32 ObjectModel2Count;
 extern s32 ObjectModel2Count_Dupe;
@@ -97,10 +96,10 @@ extern SwapObjectData* SwapObject;
 extern s8 Character;
 extern cameraData* Camera;
 extern s8 ISGActive;
-extern u32 ISGTimestampMajor; // TODO: Does our compiler support unsigned long?
+extern u32 ISGTimestampMajor; // TODO: libultra type (OSTime)
 extern u32 ISGTimestampMinor;
 extern s8 ISGPreviousFadeout;
-extern u32 CurrentTimestampMajor; // TODO: Does our compiler support unsigned long?
+extern u32 CurrentTimestampMajor; // TODO: libultra type (OSTime)
 extern u32 CurrentTimestampMinor;
 extern ISGFadeoutData ISGFadeoutArray[];
 extern InventoryBase CollectableBase;
