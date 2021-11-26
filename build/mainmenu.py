@@ -8,6 +8,6 @@ def patchDolbyText(filename):
 		fh.seek(0x30)
 		fh.write("            ".encode("ascii")) # Originally: PRESENTED IN
 		fh.seek(0x3C)
-		fh.write("  WITH HELP FROM THE DK64 KREW   ".encode("ascii")) # Originally: DOLBY AND THE DOUBLE-D SYMBOL ARE
+		fh.write("  WITH HELP FROM THE DK64 CREW   ".encode("ascii")) # Originally: DOLBY AND THE DOUBLE-D SYMBOL ARE
 		fh.seek(0x5D)
 		fh.write("IT TAKES A VILLAGE TO FREE A KONG".encode("ascii")) # Originally: TRADEMARKS OF DOLBY LABORATORIES.

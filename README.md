@@ -4,6 +4,7 @@ Made with ❤️ by Isotarge
 
 With help from:
 - Tom Ballaam
+- Murdyll
 - 2dos
 - Mittenz
 - retroben
@@ -79,7 +80,7 @@ We have put significant time and effort into ensuring that you can not tag in si
   - Probably only needs to be done once
 
 ## A note on emulation
-This patch will work on both real N64 hardware and modern emulators. For the bext experience, it is recommended that you play on real N64 hardware with an EverDrive64 v3 or later.
+This patch will work on both real N64 hardware and modern emulators. For the best experience, it is recommended that you play on real N64 hardware with an EverDrive64 v3 or later.
 
 If you do not have access to real N64 hardware, modern emulators like [m64p](https://github.com/loganmc10/m64p), [Project64](https://www.pj64-emu.com/) (v3 or later), or [mupen64plus-next](https://github.com/libretro/mupen64plus-libretro-nx) will provide a reasonable experience.
 
