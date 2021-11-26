@@ -289,13 +289,6 @@ void tagAnywhere(void) {
 			*(s8 *)(0x80714547) = 34;
 			*(s8 *)(0x8071455B) = 0;
 
-			// Skip GB dances
-			*(u32 *)(0x806EFB9C) = 0; // Cancel Movement Write
-			*(u32 *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
-			*(u32 *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
-			*(u32 *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
-			*(u32 *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
-
 			// Make T&S feeding faster
 			*(u32 *)(0x806BE3E0) = 0;
 
@@ -332,13 +325,6 @@ void tagAnywhere(void) {
 			// Start the player in Training Grounds
 			*(s8 *)(0x80714547) = 176;
 			*(s8 *)(0x8071455B) = 1;
-
-			// Don't skip GB dances
-			*(u32 *)(0x806EFB9C) = 0xA1EE0154; // Enable Movement Write
-			*(u32 *)(0x806EFC1C) = 0x0C189E52; // Enable CS Play Function Call
-			*(u32 *)(0x806EFB88) = 0x0C18539E; // Enable Animation Write Function Call
-			*(u32 *)(0x806EFC0C) = 0xA58200E6; // Enable Change Rotation Write
-			*(u32 *)(0x806EFBA8) = 0xA3000155; // Enable Control State Progress Zeroing
 
 			// Don't make T&S feeding faster
 			*(u32 *)(0x806BE3E0) = 0x15600099;
@@ -377,6 +363,40 @@ void tagAnywhere(void) {
 				}
 			}
 		}
+	}
+
+	// Skip GB/Key dances
+	if (StorySkip) {
+		switch (CurrentMap) {
+			// Disable dance skips on the following maps
+			// If these are enabled, pause + exit is required to leave the map after collecting the GB
+			case 14: // Aztec Beetle Race
+			case 27: // Factory Car Race
+			case 39: // Galleon Seal Race
+			case 82: // Caves Beetle Race
+			case 185: // Castle Car Race
+				// Don't skip GB dances
+				*(u32 *)(0x806EFB9C) = 0xA1EE0154; // Enable Movement Write
+				*(u32 *)(0x806EFC1C) = 0x0C189E52; // Enable CS Play Function Call
+				*(u32 *)(0x806EFB88) = 0x0C18539E; // Enable Animation Write Function Call
+				*(u32 *)(0x806EFC0C) = 0xA58200E6; // Enable Change Rotation Write
+				*(u32 *)(0x806EFBA8) = 0xA3000155; // Enable Control State Progress Zeroing
+				break;
+			default:
+				// Skip GB dances
+				*(u32 *)(0x806EFB9C) = 0; // Cancel Movement Write
+				*(u32 *)(0x806EFC1C) = 0; // Cancel CS Play Function Call
+				*(u32 *)(0x806EFB88) = 0; // Cancel Animation Write Function Call
+				*(u32 *)(0x806EFC0C) = 0; // Cancel Change Rotation Write
+				*(u32 *)(0x806EFBA8) = 0; // Cancel Control State Progress Zeroing
+		}
+	} else {
+		// Don't skip GB dances
+		*(u32 *)(0x806EFB9C) = 0xA1EE0154; // Enable Movement Write
+		*(u32 *)(0x806EFC1C) = 0x0C189E52; // Enable CS Play Function Call
+		*(u32 *)(0x806EFB88) = 0x0C18539E; // Enable Animation Write Function Call
+		*(u32 *)(0x806EFC0C) = 0xA58200E6; // Enable Change Rotation Write
+		*(u32 *)(0x806EFBA8) = 0xA3000155; // Enable Control State Progress Zeroing
 	}
 
 	// Map is loading
