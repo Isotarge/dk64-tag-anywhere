@@ -8,7 +8,7 @@
 
 .orga 0x3154 ; ROM
 .org 0x80002554 ; RDRAM
-NOP ; CRC Patch
+NOP ; CRC Patch ; TODO: Can this be removed if correct gzip footers are written to all compressed files?
 
 .orga 0x1364 ; ROM
 .org 0x80000764 ; RDRAM

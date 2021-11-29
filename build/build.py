@@ -366,8 +366,8 @@ import generate_watch_file
 subprocess.run(["build/armips.exe", "asm\main.asm", "-sym", "rom\dk64-tag-anywhere-dev.sym"])
 
 # Fix CRC
-print()
-subprocess.run(["build/n64crc.exe", newROMName])
+from n64crc import fixCRC
+fixCRC(newROMName)
 
 # Remove temporary .o files
 shutil.rmtree('obj')
