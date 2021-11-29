@@ -12,3 +12,4 @@
 *.ia8
 *.log
 maps/*
+codec_test/*
