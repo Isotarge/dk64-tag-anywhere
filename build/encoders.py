@@ -226,6 +226,9 @@ def encodeLoadingZones(decoded_filename : str, encoded_filename :str):
         with open(encoded_filename, "w+b") as fh:
             writeStructArray(fh, loading_zones, lz_struct, include_count=True, count_bytes=2)
 
+# TODO: Hook up new exit info
+# [1:29 PM] Isotarge: The exit angle is the u8 at exit + 0x6 multiplied by 16.0627460479736328125f
+# [1:31 PM] Isotarge: Worth noting that 255 * 16.0627460479736328125 = 4,096.0002422332763671875 (a full circle)
 exit_struct = [
     {"name": "x_pos",        "type": "short"},
     {"name": "y_pos",        "type": "short"},

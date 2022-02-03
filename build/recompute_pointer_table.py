@@ -106,7 +106,13 @@ pointer_tables = [
 	},
 	{
 		"index": 17,
-		"name": "Unknown 17",
+		"name": "DK TV Inputs",
+		# 0 - Diddy
+		# 1 - Lanky
+		# 2 - Chunky
+		# 3 - Tiny
+		# 4 - DK (Japes)
+		# 5 - DK (Seal Race, Unused)
 	},
 	{
 		"index": 18,

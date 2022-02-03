@@ -29,6 +29,14 @@ resumeVanillaBootCode:
 displacedVanillaBootCode:
 	LUI v0, 0x8001
 	ADDIU v0, v0, 0xDCC4
+	; Bypass Setup Checks
+	; This speeds up boot time dramatically
+	; Thanks to Tom Ballaam for this discovery
+	LUI t3, 0x8075
+	ADDIU t4, r0, 1
+	SB t4, 0x00B0 (t3)
+	LUI t3, 0x8074
+	SB t4, 0x7D78 (t3)
 	; Write per frame hook
 	LUI t3, hi(mainASMFunctionJump)
 	LW t3, lo(mainASMFunctionJump) (t3)
