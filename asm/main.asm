@@ -32,11 +32,13 @@ displacedVanillaBootCode:
 	; Bypass Setup Checks
 	; This speeds up boot time dramatically
 	; Thanks to Tom Ballaam for this discovery
-	LUI t3, 0x8075
-	ADDIU t4, r0, 1
-	SB t4, 0x00B0 (t3)
-	LUI t3, 0x8074
-	SB t4, 0x7D78 (t3)
+	; Disabled for now while we investigate some issues caused by it
+	; See https://github.com/theballaam96/dk64-practice-rom/issues/166
+	; LUI t3, 0x8075
+	; ADDIU t4, r0, 1
+	; SB t4, 0x00B0 (t3)
+	; LUI t3, 0x8074
+	; SB t4, 0x7D78 (t3)
 	; Write per frame hook
 	LUI t3, hi(mainASMFunctionJump)
 	LW t3, lo(mainASMFunctionJump) (t3)
