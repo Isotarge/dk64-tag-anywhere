@@ -195,6 +195,9 @@ pointer_tables = [
 ]
 
 num_tables = len(pointer_tables)
+# TODO: Other versions have different offsets
+# public static int version = -1; // 0 = USA, 1 Europe, 2 Japan, 3 Kiosk
+# public static int[] PointerTableOffsets = new int[4] { 0x101C50, 0x1038D0, 0x1039C0, 0x1A7C20 };
 main_pointer_table_offset = 0x101C50
 
 # The address of the next available byte of free space in ROM
